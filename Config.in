@@ -1,0 +1,361 @@
+##
+## Copyright (C) 2008 coresystems GmbH
+##
+
+mainmenu "FILO Configuration"
+
+# When (if) we support multiple architectures, this will become an option.
+config TARGET_I386
+	bool
+	default y
+
+config REVIEW
+	bool
+	default n
+
+menu "Interface Options"
+
+config USE_GRUB
+	bool "Use GRUB like interface"
+	default y
+	help
+	  Use GRUB legacy like interface instead of autoboot?
+
+config PROMPT
+	string "Command line prompt"
+	default "filo"
+	depends on USE_GRUB
+	help
+	  Per default, the FILO shell comes up with the prompt
+	    filo>
+	  If you want better GRUB compatibility (ie to pass through
+	  your automated test system, specify 'grub' here instead of
+	  'filo' to get a prompt of
+	    grub>
+
+config MENULST_FILE
+	string "GRUB menu.lst filename"
+	default "hda3:/boot/filo/menu.lst"
+	depends on USE_GRUB
+	help
+	  For VIA Epia-MII CF use:
+	    hde1:/boot/filo/menu.lst
+	
+config MENULST_TIMEOUT
+	int "Timeout for loading menu.lst"
+	default 0
+	depends on USE_GRUB
+	help
+	  Set to 0 to ignore
+
+config USE_MD5_PASSWORDS
+	bool "Use MD5 passwords in menu.lst?"
+	default y
+	depends on USE_GRUB
+	help
+	  Enable this option if your menu.lst passwords are MD5 encrypted.
+
+config USE_AUTOBOOT
+	bool "Autoboot a command line after timeout?"
+	depends on !USE_GRUB
+	default y
+
+config AUTOBOOT_FILE
+	string "Kernel filename and parameters"
+	default "hda1:/vmlinuz root=/dev/hda1 console=tty0 console=ttyS0,115200"
+	depends on !USE_GRUB
+	depends on USE_AUTOBOOT
+	help
+	  #AUTOBOOT_FILE = "mem@0xfff80000"
+	  #AUTOBOOT_FILE = "hde1@0"
+	  #AUTOBOOT_FILE = "uda1:/vmlinuz.elf"
+	  #AUTOBOOT_FILE = "flashb@0x00400000,0x154a00 console=tty0 console=ttyS0,115200"
+
+config AUTOBOOT_DELAY
+	int "Time in seconds before booting"
+	default 2
+	depends on !USE_GRUB
+	depends on USE_AUTOBOOT
+	help
+	  Time in second before booting AUTOBOOT_FILE
+
+endmenu
+
+menu "Drivers"
+
+config IDE_DISK
+	bool "IDE DISK support"
+	default y
+	help
+	  Driver for hard disk, CompactFlash, and CD-ROM on IDE bus
+
+config IDE_DISK_POLL_DELAY
+	int "IDE disk poll delay"
+	default 0
+	depends on IDE_DISK
+	help
+	  Add a short delay when polling status registers 
+	  (required on some broken SATA controllers)
+	  NOTE: Slows down access significantly, so disable 
+	  whenever possible. Set to 1 if you require this.
+
+config SLOW_SATA
+	bool "Extra delay for SATA"
+	default n
+	depends on IDE_DISK
+	help
+	  SATA drives seem to have problems reporting their spinup.
+	  This will delay FILO start by 5s so the disks have some time to settle.
+	  (required on some broken SATA controllers)
+	  NOTE: Slows down access significantly, so disable 
+	  whenever possible.
+
+config PCMCIA_CF
+	bool "PCMCIA CF (Epia) support"
+	default n
+	depends on IDE_DISK
+	help
+	  Use PCMCIA compact flash on Via Epia MII10000 and MII6000E
+	  This device is referred to as hde.
+
+config USB_NEW_DISK
+	bool "new USB Stack"
+	default y
+	help
+	  Driver for USB Storage
+
+config USB_DISK
+	bool "USB Stack (obsolete?)"
+	default n
+	help
+	  Driver for USB Storage
+
+config FLASH_DISK
+	bool "NAND Flash support"
+	default n
+	help
+	  Driver for Geode NAND flash storage
+
+config SUPPORT_PCI
+	bool "PCI support"
+	default y
+
+config PCI_BRUTE_SCAN
+	bool "Scan all PCI busses"
+	default n
+	depends on SUPPORT_PCI
+	help
+	  Enable this to scan PCI busses above bus 0
+	  AMD64 based boards do need this.
+
+config SUPPORT_SOUND
+	bool "Sound Support"
+	default n
+	depends on SUPPORT_PCI
+
+config VIA_SOUND
+	bool "VIA sound"
+	default n
+	depends on SUPPORT_SOUND
+
+endmenu
+
+menu "Console"
+
+config VGA_CONSOLE
+	bool "VGA Text Console"
+	default y
+
+config PC_KEYBOARD
+	bool "PC Keyboard Support"
+	default y
+
+config SERIAL_CONSOLE
+	bool "Serial Console"
+	default y
+
+config SERIAL_IOBASE
+	hex "Serial Console IO base"
+	depends on SERIAL_CONSOLE
+	default 0x3f8
+
+config SERIAL_SPEED_DEFAULT
+	bool "Use default serial speed"
+	depends on SERIAL_CONSOLE
+	default y
+
+config SERIAL_SPEED
+	int "Serial Speed"
+	depends on SERIAL_CONSOLE
+	depends on !SERIAL_SPEED_DEFAULT
+	default 115200
+
+endmenu
+
+menu "Filesystems"
+
+config FSYS_EXT2FS
+	bool "EXT2 filesystem"
+	default y
+
+config FSYS_FAT
+	bool "FAT (MSDOS) filesystem"
+	default y
+
+config FSYS_JFS
+	bool "JFS"
+	default n
+
+config FSYS_MINIX
+	bool "Minix filesystem"
+	default n
+
+config FSYS_REISERFS
+	bool "ReiserFS"
+	default y
+
+config FSYS_XFS
+	bool "XFS"
+	default n
+
+config FSYS_ISO9660
+	bool "ISO9660 filesystem"
+	default y
+
+config ELTORITO
+	bool "El Torito bootable CDROMs"
+	default y
+	depends on FSYS_ISO9660
+	help
+	  Support for boot disk image in bootable CD-ROM (El Torito)
+
+config FSYS_CRAMFS
+	bool "Compressed RAM filesystem (CRAMFS)"
+	default n
+
+config FSYS_SQUASHFS
+	bool "Squash filesystem"
+	default n
+
+endmenu
+
+menu "Loaders"
+
+config LINUX_LOADER
+	bool "Standard Linux Loader"
+	default y
+	depends on TARGET_I386
+	help
+	  Loader for standard Linux kernel image, a.k.a. /vmlinuz
+
+config WINCE_LOADER
+	bool "Windows CE Loader"
+	default n
+	depends on TARGET_I386
+	help
+	  Loader for Windows CE image
+
+config ARTEC_BOOT
+	bool "Artec Loader"
+	default n
+	depends on TARGET_I386
+	help
+	  Artecboot Loader Support
+
+endmenu
+
+menu "Debugging & Experimental"
+
+config EXPERIMENTAL
+	bool "Enable experimental features"
+	default n
+	help
+	  Select this option to enable experimental code. This may
+	  cause FILO to stop compiling. Enable if you wish to develop
+	  for FILO.
+
+config DEBUG_ALL
+	bool "DEBUG_ALL"
+	select DEBUG_ELFBOOT
+	select DEBUG_ELFNOTE
+	select DEBUG_SEGMENT
+	select DEBUG_SYS_INFO
+	select DEBUG_BLOCKDEV
+	select DEBUG_FSYS_EXT2FS
+	select DEBUG_PCI
+	select DEBUG_VIA_SOUND
+	select DEBUG_LINUXLOAD
+	select DEBUG_IDE
+	select DEBUG_USB
+	select DEBUG_ELTORITO
+	select DEBUG_FLASH
+	select DEBUG_ARTECBOOT
+	default n
+
+config DEBUG_ELFBOOT
+	bool "DEBUG_ELFBOOT"
+	default n
+
+config DEBUG_ELFNOTE
+	bool "DEBUG_ELFNOTE"
+	default n
+
+config DEBUG_SEGMENT
+	bool "DEBUG_SEGMENT"
+	default n
+
+config DEBUG_SYS_INFO
+	bool "DEBUG_SYS_INFO"
+	default n
+
+config DEBUG_BLOCKDEV
+	bool "DEBUG_BLOCKDEV"
+	default n
+
+config DEBUG_FSYS_EXT2FS
+	bool "DEBUG_FSYS_EXT2FS"
+	depends on FSYS_EXT2FS
+	default n
+
+config DEBUG_PCI
+	bool "DEBUG_PCI"
+	depends on SUPPORT_PCI
+	default n
+
+config DEBUG_VIA_SOUND
+	bool "DEBUG_VIA_SOUND"
+	depends on VIA_SOUND
+	default n
+
+config DEBUG_LINUXLOAD
+	bool "DEBUG_LINUXLOAD"
+	depends on LINUX_LOADER
+	default n
+
+config DEBUG_IDE
+	bool "DEBUG_IDE"
+	depends on IDE_DISK
+	default n
+
+config DEBUG_USB
+	bool "DEBUG_USB"
+	depends on USB_DISK
+	default n
+
+config DEBUG_ELTORITO
+	bool "DEBUG_ELTORITO"
+	depends on ELTORITO
+	default n
+
+config DEBUG_FLASH
+	bool "DEBUG_FLASH"
+	depends on FLASH_DISK
+	default n
+
+config DEBUG_ARTECBOOT
+	bool "DEBUG_ARTECBOOT"
+	depends on ARTEC_BOOT
+	default n
+
+endmenu
+

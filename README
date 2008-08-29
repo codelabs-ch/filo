@@ -1,0 +1,165 @@
+This is FILO, a bootloader which loads boot images from local filesystem,
+without help from legacy BIOS services.
+
+Expected usage is to flash it into the BIOS ROM together with coreboot.
+
+Find the latest version and more information on FILO
+at http://www.coreboot.org/FILO
+
+FEATURES
+
+    - Supported boot devices: IDE hard disk and CD-ROM, and system memory (ROM)
+      S-ATA and USB memory devices
+    - Supported filesystems: ext2, fat, jfs, minix, reiserfs, xfs, and iso9660
+    - Supported image formats: ELF and [b]zImage (a.k.a. /vmlinuz)
+    - Supports boot disk image of El Torito bootable CD-ROM
+    - Supports loading image from raw device with user-specified offset
+    - Console on VGA + keyboard, serial port, or both
+    - Line editing with ^H, ^W and ^U keys to type arbitrary filename to boot
+    - GRUB like user interface
+    - Full support for the ELF Boot Proposal (where is it btw, Eric?)
+    - Auxiliary tool to compute checksum of ELF boot images
+    - Full 32-bit code, no BIOS calls
+
+REQUIREMENTS
+
+    Only i386 PC architecture is currently supported.
+
+    x86-64 (AMD 64) machines in 32-bit mode do also work.
+    (coreboot uses 32-bit mode and the Linux kernel does the 
+    transition to 64-bit mode)
+
+    I'm using an AMD64 based mainboard with IDE hard disk
+    and a DVD drive for testing, and QEmu, Bochs or VMware 
+    for development.
+
+    Recent version of GNU toolchain is required to build.
+    I have tested with the toolchains from SUSE 10.0 and SUSE 10.1, 
+    but slightly older versions might also work.
+
+INSTALL
+
+    First invocation of make creates the default Config file.
+	$ make
+    Edit this file as you like. It's fairly straightforward (I hope).
+	$ vi Config
+
+    If you are using the GRUB like frontend:
+
+    - make sure you adapt your menu.lst path 
+    - if you want to use FILO over a serial connection, make sure you have 
+      something like this in your menu.lst file:
+
+        serial --unit=0 --speed=115200
+        terminal serial console
+	
+    Then running make again will build filo.elf, the ELF boot image of FILO.
+	$ make
+
+    Use filo.elf as your payload of coreboot, or a boot image for
+    Etherboot.
+
+USING
+
+    When FILO starts, it displays "boot:" prompt or the GRUB menu interface.
+    
+    At "boot:" prompt, type the name of your boot image, and optionally
+    the kernel parameter, in the form:
+	DEVICE:FILENAME[ PARAM]
+    for example:
+	boot: hda1:/vmlinuz root=/dev/hda1
+
+    Notation of DEVICE for IDE disk and CD-ROM is same as in Linux
+    (eg. hda1 means the first partition of master device on primary 
+    IDE channel). Support for El Torito bootable CD-ROM, "hdc1" means
+    the boot disk image of the CD-ROM at hdc.
+
+    FILENAME can be standard bzImage/zImage (vmlinuz) Linux kernels,
+    Linux-compatible images such as memtest.bin of Memtest86,
+    and any bootable ELF images, which include Linux kernel converted
+    by mkelfImage, Etherboot .elf and .zelf, Memtest86, FILO itself, etc.
+
+    If USE_GRUB is disabled:
+
+      If AUTOBOOT_FILE is set in Config, FILO tries to boot this file
+      first, and falls back to boot: prompt if it fails.
+
+      If AUTOBOOT_DELAY is also set, FILO waits for specified time in
+      seconds before booting AUTOBOOT_FILE. If <Esc> key is pressed
+      during this time period, automatic boot is canceled.
+      Pressing <Enter> key also cancels the delay, but in this case
+      AUTOBOOT_FILE is booted immediately.
+
+      Even if AUTOBOOT_DELAY is not set, automatic boot can be disabled
+      by pressing <Esc> key beforehand.
+
+    FILO can also load separate initrd images along with vmlinuz
+    kernels. (For ELF kernel, initrd images are embedded into the
+    ELF file and cannot be altered).
+    To do so, add "initrd=NAME" parameter to the kernel command line.
+    NAME uses the same notation as kernel image name.
+    (eg. boot: hda1:/vmlinuz initrd=hda1:/root.gz root=/dev/ram)
+
+    To boot an image in the BIOS flash (or whatever is mapped in the system
+    memory space), use the notation "mem@OFFSET[,LENGTH]", like:
+	boot: mem@0xfffe0000
+    In this example, it loads the boot image from the last 128KB of BIOS
+    flash.
+
+    The same notation can be used with IDE devices, eg:
+	boot: hda@512,697344 initrd=hda@1M,4M
+    In this case the 697344 bytes starting from second sector of IDE drive
+    is loaded as kernel, and 4M bytes of offset 1M bytes of the same disk
+    is loaded as initrd.
+    Note that when you load vmlinuz kernel or initrd this way,
+    you must specify the LENGTH parameter. You can omit it for ELF
+    images since they have segment length internally.
+    OFFSET and LENGTH parameters must be multiple of 512.
+
+USB
+
+    USB support is originally taken from Steven James's baremetal in
+    coreboot-v1 util.
+    
+    Yinghai Lu seperated common functions from uhci.c to usb.c and 
+    created ohci.c to support ohci.
+    ohci.c is heavily inspired by Linux Kernel 2.4.22 drivers/usb/host/usb-ohci.c.
+    
+    Stefan Reinauer integrated USB back into the main filo version.
+    
+    USB support includes several parts
+     1. UHCI+OHCI--->USB: provides usb init, usb_control_msg and usb_bulk_msg interface
+     2. USB_SCSI: bulk only device 
+     3. USB_X interface to FILO
+    
+    todo:
+     - EHCI support
+
+BUG REPORTING
+
+    If you have problem with FILO, set DEBUG_ALL in Config and send its 
+    console output to the coreboot mailinglist at <coreboot@coreboot.org>.
+
+ACKNOWLEDGEMENTS
+
+    Filesystem and menu code taken from GNU GRUB and patches for it.
+    IDE driver is originally taken from Etherboot.
+    Steve Gehlbach wrote the original bzImage loader for FILO.
+
+    Besides, I have taken pieces of code and/or learned concepts
+    from various standalone programs, including GNU GRUB, Etherboot,
+    polled IDE patch by Adam Agnew, Memtest86, LinuxBIOS, and Linux.
+    I must say thanks to all the developers of these wonderful software,
+    especially to Eric Biederman for his great development work in this area.
+
+    Stefan Reinauer is now maintaining FILO officially and added new features
+    such as the grub menu interface and merged S-ATA and USB support from
+    etherboot.
+
+LICENSE
+
+    Copyright (C) 2003 by SONE Takeshi <ts1@tsn.or.jp> and others.
+    Copyright (C) 2005-2008 by coresystems GmbH <info@coresystems.de>.
+
+    This program is licensed under the terms of GNU General Public License.
+    See the COPYING file for details.

@@ -1,0 +1,11 @@
+Q. My GRUB menu.lst does not work. 
+A. The disks are numbered differently in FILO, following the linux scheme.
+   hd2,0 is hdc1, not necessarily the third disk (there might be no hdb)
+
+Q. FILO loads my ELF kernel fine, but complains "Verify FAILED".
+A. Try the newer version of mkelfImage instead of the one from the
+   freebios tree. It's available at ftp://ftp.lnxi.com/pub/mkelfImage/ .
+
+Q. LinuxBIOS (v1 tree) crashes or fails to verify checksum when booting FILO.
+A. Make sure you are using the latest source of LinuxBIOS. It had a bug
+   that interferes with checksum calculation, until recently.

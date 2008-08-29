@@ -1,0 +1,99 @@
+Version 0.6.0b1 stepan 2008-08-11
+    * Use Kconfig for configuration
+    * Drop recursive Makefiles
+    * Link against libpayload
+    * Proper cross compilation
+    * Support for cramfs, squashfs
+    * Geode LX flash support
+    * Support for Epia-M CF
+    * Tweaks for S-ATA
+    * IDE fixes
+    * Artec Loader
+
+Version 0.5.0 stepan 2006-09-15
+    * gcc 4.x fix
+    * final release
+
+Version 0.5b5 stepan 2006-06-09
+    * fix initial double keyboard press bug
+    * fix compilation without serial console
+    * allow terminal --dumb serial as well as terminal serial --dumb
+    * add MENULST_TIMEOUT. If nonzero it waits a given number of seconds
+      for the user to interact and change the path to menu.lst
+    * if no menu.lst is given, go straight into console
+    * fix pre-grub vga output.
+    * if vga is disabled, enable serial output no matter what menu.lst says.
+    * fix make process so it compiles out of the box on amd64 machines
+      (32bit binary)
+
+Version 0.5b4 stepan, san 2006-05-05
+    * add S-ATA delay option (san)
+    * add initial find and tab completion code (stepan)
+
+Version 0.5b3 stepan 2006-04-29
+    * add S-ATA support for serial driver.
+    * enable USB stack
+    * Documentation updates
+
+Version 0.5b2 stepan 2006-04-28
+    * make grub user interface more Redhatish
+    * add menu.lst password support
+    * drop serial initialization if no speed specified
+    * add USB stack (not used yet but compiling)
+
+Version 0.5b1 stepan 2005-10-01
+    * Integrate grub user interface
+    
+Version 0.4.2 ts1 2003-10-31
+    * Added brute force method of PCI scan (turned off by default.)
+    * Workaround for CD drives that report unusual sector size.
+
+Version 0.4.1 ts1 2003-10-30
+    * Fixed IDE driver for older hard disks (such as WD Caviar 1.2G)
+    * Fixed wrong sector number in the disk read error message
+    * Fixed inaccurate display of hard disk capacity
+    * Fixed behavior of word erase (^W) for one character
+    * Updated README and FAQ
+
+Version 0.4 ts1 2003-10-15
+    * Support for ATAPI CD-ROM.
+    * ISO-9660 filesystem is taken from a GRUB patch by
+      Leonid Lisovskiy <lly@pisem.net>. The filesystem code was originally
+      written by Kousuke Takai <tak@kmc.gr.jp> for GRUB/98 project.
+    * Support for mounting boot disk image of El Torito bootable CD-ROM.
+      ("hdc1" means the boot disk image of the CD-ROM at hdc.)
+    * Support for memory as device, raw device as image, and
+      user-specifiable device offset and length.
+      (eg. boot: mem@0xfffd0000,0x10000)
+    * PCI support in IDE driver. Now it by default uses PCI enumeration
+      to find the PCI IDE controller, and can use native PCI mode
+      if the controller is configured to this mode by BIOS.
+      To disable this, turn off SUPPORT_PCI.
+    * Fixed Linux loader to boot RedHat 9 kernel properly.
+
+Version 0.3 ts1 2003-10-07
+    * Added loader for Linux bzImage/zImage/Image (a.k.a. /vmlinuz).
+      Many thanks to Steve Gehlbach <steve@nexpath.com> for early
+      work on this.
+    * New "context switch" routine to unify the assembly starters
+      for ELF and Linux, and even the C startup.
+      This reduced the amount of assembly code.
+    * Debug prints are now automatically prefixed with function names.
+    * Lots of internal tweaks.
+
+Version 0.2 ts1 2003-09-19
+    * Added code to pass kernel command line parameter from console.
+    * Changed not to disable automatic boot by ANY key. Now you have to
+      press <Esc> to cancel autoboot. This fixes the problem that FILO
+      gets stuck at boot prompt when a phantom byte is read from
+      a fickle serial or keyboard hardware.
+      Additionaly, now <Enter> key does autoboot immediately.
+    * Fixed build problem with new coreutils.
+      Thanks to Stefan Reinauer <stepan@suse.de>.
+    * Updated fsys_fat.c and fsys_reiserfs.c from GRUB CVS.
+    * Lots of minor tweaks.
+    * Beginning of PCI layer and a sound driver (what??). Don't worry,
+      it doesn't even get compiled with default configuration.
+
+Version 0.1 ts1 2003-08
+    * First public release.

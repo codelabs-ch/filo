@@ -1,0 +1,42 @@
+Please report suggestions for this file to stepan@coresystems.de
+
+Features
+    - finish "find" implementation in main/grub/builtins.c
+    - finish print_completions implementation in main/grub/completions.c
+    - enter grub command line interface if no menu.lst is found, instead
+      of hanging forever.
+
+Cleanup
+    - Cleanup addresses specified in include/grub/shared.h. That looks
+      dangerous to plain wrong.
+
+Devices/Drivers
+    - create a list of all available devices (and search this on for menu.lst 
+      or "find" or tab completion)
+    - USB keyboard/Serial support
+    - Full & tested USB support
+    
+CD/DVD Boot support
+    - gather syslinux config files from CDs/DVDs and add their entries
+      to the menu. (Create a menu if syslinux config files are found 
+      but no menu.lst)
+
+SCSI
+    - yeah, scsi support, good point. This is an open issue in LinuxBIOS
+      for now. Int13 support somehow?
+      http://cvs.sourceforge.net/viewcvs.py/u-boot/u-boot/board/MAI/bios_emulator/
+     
+Config File Support
+
+    - search for a menu.lst rather than hardcoding it?!?
+
+      Maybe store this information (device type, drive number, partition number)
+      to the CMOS, so finally we won't have to have it hardcoded in the flash?
+
+    - we're parsing a grub menu.lst right now, but we should also be able to
+      read syslinux.cfg
+
+    - We can have an entry in hard disk's filo.cfg to boot from CD-ROM.
+      If this entry is selected, filo.cfg from CD-ROM is read.
+ 
+      
