@@ -57,7 +57,10 @@ static void init(void)
     printf("%s version %s\n", program_name, program_version);
     collect_sys_info(&sys_info);
     relocate();
+
+#if defined(CONFIG_USB_DISK) || defined(CONFIG_USB_NEW_DISK)
     usb_initialize();
+#endif
 
 #ifdef CONFIG_SUPPORT_SOUND
     sound_init();
