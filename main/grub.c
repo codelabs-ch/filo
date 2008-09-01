@@ -38,7 +38,7 @@ extern char config_file[];
 #if CONFIG_MENULST_TIMEOUT
 static inline int menulst_delay(void)
 {
-    unsigned int timeout;
+    u64 timeout;
     int sec, tmp;
     char key;
     

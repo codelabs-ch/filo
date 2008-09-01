@@ -28,9 +28,6 @@ int getline(char *buf, int max);
 unsigned long long simple_strtoull(const char *cp,char **endp,unsigned int base);
 unsigned long long strtoull_with_suffix(const char *cp,char **endp,unsigned int base);
 
-u32 get_le32(const unsigned char *);
-u16 get_le16(const unsigned char *);
-
 void hexdump(const void *p, unsigned int len);
 
 long long simple_strtoll(const char *cp,char **endp,unsigned int base);

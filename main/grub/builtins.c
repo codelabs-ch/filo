@@ -1,6 +1,9 @@
 /*
  * This file is part of FILO.
  *
+ *  Copyright (C) 1999,2000,2001,2002,2004  Free Software Foundation, Inc.
+ *  Copyright (C) 2005-2008 coresystems GmbH
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
@@ -18,7 +21,6 @@
 
 #include <libpayload.h>
 #include <config.h>
-#define printf grub_printf
 #include <grub/shared.h>
 #include <grub/term.h>
 #include <grub/terminfo.h>
@@ -58,7 +60,8 @@ password_t password_type;
 int auth = 0;
 
 /* -------- FILO logic -------- */
-char boot_line[1024]={0};
+#define BOOT_LINE_LENGTH 1024
+char boot_line[BOOT_LINE_LENGTH]={0};
 char root_device[16]={0};
 /* ---------------------------- */
 
@@ -494,23 +497,109 @@ static struct builtin builtin_hiddenmenu =
 #endif
 };
 
+/**
+ * @param arg  source pointer with grub device names
+ * @param path destination pointer (will be filled with filo device names)
+ * @param use_rootdev values other than zero mean the root device set by the "root"
+ * command is taken into regard here. This has to be zero when calling from root_func.
+ */
+
+static void copy_path_to_filo_bootline(char *arg, char *path, int use_rootdev)
+{
+	char devicename[16];
+	char drivername[16];
+	int disk, part;
+	int i, len;
+
+
+	/* Clean up */
+	memset(devicename, 0, 16);
+	memset(drivername, 0, 16);
+
+	/* Copy over the driver name: "hd", "ud", "sd" ... */
+	if (arg[0] == '(') {
+		i = 1;
+		/* Read until we encounter a number, a comma or a closing
+		 * bracket
+		 */
+		while ((i <= 16) && (arg[i]) &&
+			(!isdigit(arg[i])) && (arg[i] != ',') && (arg[i] != ')')) {
+			drivername[i-1] = arg[i];
+			i++;
+		}
+	}
+
+	disk = -1;
+	part = -1;
+
+	len = strlen(drivername);
+	if (len) { /* We have a driver. No idea if it exists though */
+		// The driver should decide this:
+		len++; // skip driver name + opening bracket
+
+		// XXX put @ handling in here, too for flash@addr and mem@addr
+
+		if (isdigit(arg[len])) {
+			disk = arg[len] - '0';
+			len++;
+			if (isdigit(arg[len])) { /* More than 9 drives? */
+				/* ok, get one more number. No more than 99 drives */
+				disk *= 10;
+				disk += arg[len] - '0';
+				len++;
+			}
+		}
+		if (arg[len] == ',') {
+			len++;
+			part = arg[len] - '0';
+			len++;
+			if (isdigit(arg[len])) { /* More than 9 partitions? */
+				/* ok, get one more number. No more than 99
+				 * partitions */
+				part *= 10;
+				part += arg[len] - '0';
+				len++;
+			}
+		}
+		if (arg[len] != ')') {
+			grub_printf("Drive Error.\n");
+			// set len = 0 --> just copy the drive name 
+			len = 0;
+		} else {
+			len++; // skip closing bracket
+		}
+	}
+
+	if (disk == -1) {
+		grub_printf("No drive.\n");
+		len = 0; // just copy the drive name
+	} else {
+		if(part == -1) { // No partition
+			sprintf(devicename, "%s%c:", drivername, disk + 'a');
+		} else { // both disk and partition
+			sprintf(devicename, "%s%c%d:", drivername, disk + 'a', part + 1);
+		}
+		strncat(path, devicename, BOOT_LINE_LENGTH);
+		arg += len; // skip original drive name
+	}
+
+	if (use_rootdev && !len) { // No drive was explicitly specified
+		if (strlen(root_device)) { // But someone set a root device
+			strncat(path, root_device, BOOT_LINE_LENGTH);
+		}
+	}
+
+	/* Copy the rest over */
+	strncat(path, arg, BOOT_LINE_LENGTH);
+}
 
 /* initrd */
 static int
 initrd_func (char *arg, int flags)
 {
-	char dummy[16]={0};
-	int disk, part;
-	if(arg[0]=='(' && arg[1]=='h' && arg[2]=='d') {
-		disk=arg[3]-'0';
-		part=arg[5]-'0';
-		arg+=7; // FIXME only 9 disks with 9 partitions for booting
-		sprintf(dummy, "hd%c%c:", disk+'a', part+'1');
-	}
-	strncat(boot_line," initrd=", 1000);
-	if(dummy[0]) strncat(boot_line,dummy, 1000);
-	grub_strncat(boot_line,arg, 1000);
-	
+	strncat(boot_line, " initrd=", BOOT_LINE_LENGTH);
+	copy_path_to_filo_bootline(arg, boot_line, 1);
+
 	return 0;
 }
 
@@ -531,20 +620,14 @@ static struct builtin builtin_initrd =
 static int
 kernel_func (char *arg, int flags)
 {
-	int disk,part;
 	/* Needed to pass grub checks */
 	kernel_type=KERNEL_TYPE_LINUX;
-	if(arg[0]=='(' && arg[1]=='h' && arg[2]=='d') {
-		disk=arg[3]-'0';
-		part=arg[5]-'0';
-		arg+=7; // FIXME only 9 disks with 9 partitions for booting
-		sprintf(boot_line, "hd%c%c:", disk+'a', part+'1');
-	} else if (root_device[0]=='h' && root_device[1]=='d') {
-		strcpy(boot_line, root_device);
-	}
-	
-	strncat(boot_line, arg, 1000);
-	
+
+	/* clear out boot_line. Kernel is the first thing */
+	memset(boot_line, 0, BOOT_LINE_LENGTH);
+
+	copy_path_to_filo_bootline(arg, boot_line, 1);
+
 	return 0;
 }
 
@@ -720,7 +803,7 @@ static struct builtin builtin_password =
 static int
 pause_func (char *arg, int flags)
 {
-  printf("%s\n", arg);
+  grub_printf("%s\n", arg);
 
   /* If ESC is returned, then abort this entry.  */
   if (ASCII_CHAR (getkey ()) == 27)
@@ -742,15 +825,10 @@ static struct builtin builtin_pause =
 static int
 root_func (char *arg, int flags)
 {
-  int disk, part;
+	memset(root_device, 0, 16);
+	copy_path_to_filo_bootline(arg, root_device, 0);
 
-  if(arg[0]!='(') return 1;
-  if(arg[1]!='h') return 1;
-  if(arg[2]!='d') return 1;
-  disk=arg[3]-'0';
-  part=arg[5]-'0';
-  sprintf(root_device, "hd%c%c:", disk+'a', part+'1');
-  return 0;
+  	return 0;
 }
 
 static struct builtin builtin_root =

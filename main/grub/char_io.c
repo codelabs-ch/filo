@@ -85,10 +85,15 @@ struct term_entry term_table[] =
       console_setcursor
     },
 #endif
+#ifdef CONFIG_SERIAL_CONSOLE
     {
       "serial",
       /* A serial device must be initialized.  */
+#if 0
       TERM_NEED_INIT,
+#else
+      0, // Not with FILO..
+#endif
       grub_serial_putchar,
       serial_checkkey,
       serial_getkey,
@@ -99,6 +104,7 @@ struct term_entry term_table[] =
       0,
       0
     },
+#endif
     /* This must be the last entry.  */
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
   };
@@ -116,10 +122,10 @@ print_error (void)
 {
   if (errnum > ERR_NONE && errnum < MAX_ERR_NUM)
 #ifndef STAGE1_5
-    /* printf("\7\n %s\n", err_list[errnum]); */
-    printf ("\nError %u: %s\n", errnum, err_list[errnum]);
+    /* grub_printf("\7\n %s\n", err_list[errnum]); */
+    grub_printf ("\nError %u: %s\n", errnum, err_list[errnum]);
 #else /* STAGE1_5 */
-    printf ("Error %u\n", errnum);
+    grub_printf ("Error %u\n", errnum);
 #endif /* STAGE1_5 */
 }
 

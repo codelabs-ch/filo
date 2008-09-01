@@ -42,20 +42,23 @@ skip_to (int after_equal, char *cmdline)
 }
 
 /* Print a helpful message for the command-line interface.  */
-void
-print_cmdline_message (int type)
+void print_cmdline_message (int type)
 {
-  printf (" [ Minimal BASH-like line editing is supported.  For the first word, TAB\n"
-	  "   lists possible command completions.  Anywhere else TAB lists the possible\n"
-	  "   completions of a device/filename.");
-  if (type == CMDLINE_NORMAL_MODE)
-    printf("  ESC at any time exits.");
-  if (type == CMDLINE_EDIT_MODE)
-    printf("  ESC at any time cancels.  ENTER \n"
-           "   at any time accepts your changes.");
-  printf("]\n");
+	grub_printf(" [ Minimal BASH-like line editing is supported.  For the first word, TAB\n"
+		    "   lists possible command completions.  Anywhere else TAB lists the possible\n"
+		    "   completions of a device/filename.");
+
+	if (type == CMDLINE_NORMAL_MODE)
+		grub_printf("  ESC at any time exits.");
+
+	if (type == CMDLINE_EDIT_MODE)
+		grub_printf("  ESC at any time cancels.  ENTER \n"
+			    "   at any time accepts your changes.");
+
+	grub_printf("]\n");
+
 #ifndef CONFIG_NEWLINE_BEFORE_EACH_PROMPT
-  printf("\n");
+	grub_printf("\n");
 #endif
 }
 

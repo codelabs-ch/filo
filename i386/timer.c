@@ -19,20 +19,19 @@
 
 #include <libpayload.h>
 #include <arch/rdtsc.h>
-
-extern unsigned int cpu_khz;
+#include <arch/timer.h>
 
 u64 currticks(void)
 {
 	/* Read the Time Stamp Counter */
-	return  rdtsc() / cpu_khz;
+	return  rdtsc();
 }
 
 int getrtsecs (void)
 {
 	u64 t;
 	t=currticks();
-	t=t/1000;
+	t=t/(TICKS_PER_SEC);
 	return (int)t;
 }
 

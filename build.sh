@@ -12,22 +12,22 @@ if [ "$OS" == "Darwin" -o "${OS:0:6}" == "CYGWIN" ]; then
 	STRIP=i386-elf-strip	\
 	NM=i386-elf-nm		\
 	HOSTCC=gcc		\
-	-j
+	-j			\
 	"
 fi
 if [ "$OS" == "Linux" ]; then
-MAKEFLAGS='CC="gcc -m32" LD="ld -b elf32-i386" HOSTCC="gcc"'
+MAKEFLAGS='CC="gcc -m32" LD="ld -b elf32-i386" HOSTCC="gcc" AS="as --32"'
 fi
 
 if [ "$ALLCLEAN" != "" -o ! -r libpayload/build/lib/libpayload.a ]; then
   cd libpayload
   make clean
-  make defconfig
-  make $MAKEFLAGS
+  make oldconfig
+  eval make $MAKEFLAGS
   cd ..
 fi
 
 make distclean
 make defconfig
-make $MAKEFLAGS
+eval make $MAKEFLAGS
 

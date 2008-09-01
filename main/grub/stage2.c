@@ -318,19 +318,19 @@ restart:
       
       if (! auth && password)
 	{
-	  printf ("\
+	  grub_printf ("\
       Press enter to boot the selected OS or \'p\' to enter a\n\
       password to unlock the next set of features.");
 	}
       else
 	{
 	  if (config_entries)
-	    printf ("\
+	    grub_printf ("\
       Press enter to boot the selected OS, \'e\' to edit the\n\
       commands before booting, \'a\' to modify the kernel arguments\n\
       before booting, or \'c\' for a command-line.");
 	  else
-	    printf ("\
+	    grub_printf ("\
       Press \'b\' to boot, \'e\' to edit the selected command in the\n\
       boot sequence, \'c\' for a command-line, \'o\' to open a new line\n\
       after (\'O\' for before) the selected line, \'d\' to remove the\n\
@@ -397,7 +397,7 @@ restart:
 		grub_putchar ('\r');
 	      else
 		gotoxy (3, 22);
-	      printf ("                                                                    ");
+	      grub_printf ("                                                                    ");
 	      grub_timeout = -1;
 	      fallback_entryno = -1;
 	      if (! (current_term->flags & TERM_DUMB))
@@ -819,10 +819,10 @@ restart:
   while (1)
     {
       if (config_entries)
-	printf ("  Booting \'%s\'\n\n",
+	grub_printf ("  Booting \'%s\'\n\n",
 		get_entry (menu_entries, first_entry + entryno, 0));
       else
-	printf ("  Booting command-list\n\n");
+	grub_printf ("  Booting command-list\n\n");
 
       if (! cur_entry)
 	cur_entry = get_entry (config_entries, first_entry + entryno, 1);

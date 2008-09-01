@@ -32,29 +32,4 @@ void sound_start(void);
 void sound_stop(void);
 int sound_is_active(void);
 
-/*
- * Driver interface
- */
-
-struct sound_ops {
-    int (*init)(pcidev_t);
-    void (*set_rate)(int rate);
-    void (*set_volume)(int volume);
-    int (*write)(const void *buf, int size);
-    int (*is_active)(void);
-    void (*stop)(void);
-};
-
-struct sound_driver {
-    u16 vendor;
-    u16 device;
-    struct sound_ops *ops;
-};
-
-#define __sound_driver __attribute__((unused, section(".rodata.sound_drivers")))
-
-/* defined by the linker */
-extern struct sound_driver sound_drivers_start[];
-extern struct sound_driver sound_drivers_end[];
-
 #endif /* SOUND_H */

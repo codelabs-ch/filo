@@ -17,6 +17,7 @@
 
 #include <libpayload.h>
 #include <config.h>
+#include <drivers.h>
 #include <sound.h>
 #define DEBUG_THIS CONFIG_DEBUG_VIA_SOUND
 #include <debug.h>
@@ -91,11 +92,17 @@ static int viasnd_init(pcidev_t dev)
 	return 0;
 }
 
-static struct sound_ops viasnd_ops = {
+static const struct sound_ops viasnd_ops = {
 	.init = viasnd_init,
 	.stop = viasnd_stop,
 };
 
-const struct sound_driver viasnd_driver[] __sound_driver = {
-	{0x1106, 0x3058, &viasnd_ops},	/* VT82C686 AC97 Audio Controller */
+/* VT82C686 AC97 Audio Controller */
+static const struct driver viasnd_driver __driver = {
+	.type=DRIVER_SOUND,
+	.vendor=0x1106,
+	.device=0x3058,
+	{
+		.sound_ops=&viasnd_ops
+	}
 };

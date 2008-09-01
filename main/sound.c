@@ -15,21 +15,23 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-
+#include <drivers.h>
 #include <sound.h>
 #include <pci.h>
 
-static struct sound_ops *ops;
+static const struct sound_ops *ops;
 
 int sound_init(void)
 {
-    struct sound_driver *drv;
+    struct driver *drv;
     pcidev_t dev = 0;
 
-    for (drv = sound_drivers_start; drv < sound_drivers_end; drv++) {
+    for (drv = drivers_start; drv < drivers_end; drv++) {
+	if (drv->type != DRIVER_SOUND)
+		continue;
 	if (pci_find_device(drv->vendor, drv->device, &dev)) {
-	    if (drv->ops->init(dev) == 0) {
-		ops = drv->ops;
+	    if (drv->sound_ops->init(dev) == 0) {
+		ops = drv->sound_ops;
 		return 0;
 	    }
 	}

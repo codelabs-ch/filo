@@ -246,7 +246,7 @@ static struct harddisk_info harddisk_info[IDE_MAX_DRIVES];
 static unsigned char ide_buffer[IDE_SECTOR_SIZE];
 
 static int await_ide(int (*done)(struct controller *ctrl), 
-	struct controller *ctrl, unsigned long timeout)
+	struct controller *ctrl, u64 timeout)
 {
 	int result;
 	for(;;) {
@@ -839,7 +839,7 @@ static int init_drive(struct harddisk_info *info, struct controller *ctrl,
  * This is based on a paper on Phoenix website. --ts1 */
 static int ide_bus_floating(struct controller *ctrl)
 {
-	unsigned long timeout;
+	u64 timeout;
 	unsigned char status;
 
 	/* Test 1: if status reads 0xff, probably no device is present
@@ -1007,7 +1007,7 @@ static int atapi_detect_medium(struct harddisk_info *info)
 	uint8_t packet[12];
 	uint8_t buf[8];
 	uint32_t block_len, sectors;
-	unsigned long timeout;
+	u64 timeout;
 	uint8_t asc, ascq;
 	int in_progress;
 
@@ -1307,5 +1307,31 @@ int ide_probe(int drive)
 
 	return 0;
 }
+
+#if 0
+
+static char my_name="hd";
+static char ide_name(void);
+{
+	return my_name;
+}
+
+static const struct storage_ops ide_ops = {
+	.init = NULL,
+	.open = ide_probe,
+	.close = NULL,
+	.read_sector = NULL // FIXME
+	// This should probably contain drive, too: Should it?
+	// void (*read_sector)(u64 sector, const void *buf, int size);
+	.name = ide_name,
+};
+
+static const struct driver ide_driver __driver = {
+	.type=DRIVER_STORAGE,
+	{
+		.storage_ops=&ide_ops
+	}
+};
+#endif
 
 /* vim:set sts=8 sw=8: */

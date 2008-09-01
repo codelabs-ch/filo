@@ -117,11 +117,11 @@ include util/Makefile.inc
 
 $(obj)/%.o: $(src)/%.c
 	$(Q)printf "  CC      $(subst $(shell pwd)/,,$(@))\n"
-	$(Q)$(CC) -m32 $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
+	$(Q)$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
 
 $(obj)/%.S.o: $(src)/%.S
 	$(Q)printf "  AS      $(subst $(shell pwd)/,,$(@))\n"
-	$(Q)$(AS) --32 -o $@ $<
+	$(Q)$(AS) -o $@ $<
 
 endif
 

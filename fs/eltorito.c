@@ -100,7 +100,7 @@ int open_eltorito_image(int part, unsigned long *offset_p,
 	return 0;
     }
 
-    cat_offset = get_le32(boot_record.catalog_offset);
+    cat_offset = le32_to_cpu(*(u32*)boot_record.catalog_offset);
     debug("El-Torito boot catalog at sector %u\n", cat_offset);
     if (!devread(cat_offset<<2, 0, 2048, catalog))
 	return 0;
@@ -115,7 +115,7 @@ int open_eltorito_image(int part, unsigned long *offset_p,
     /* All words must sum up to zero */
     sum = 0;
     for (i = 0; i < sizeof(*ve); i += 2)
-	sum += get_le16(&catalog[i]);
+	sum += le16_to_cpu(catalog[i]);
     sum &= 0xffff;
     if (sum != 0) {
 	printf("El Torito boot catalog verify failed\n");
@@ -153,7 +153,7 @@ int open_eltorito_image(int part, unsigned long *offset_p,
 	printf("Disc uses hard disk emulation - not supported\n");
 	return 0;
     }
-    *offset_p = get_le32(de->start_sector) << 2;
+    *offset_p = le32_to_cpu(*(u32*)(de->start_sector)) << 2;
     debug("offset=%#lx length=%#lx\n", *offset_p, *length_p);
 
     return 1;

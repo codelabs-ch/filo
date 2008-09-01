@@ -53,9 +53,9 @@ SECTIONS
     .text : { *(.text) *(.text.*) }
     .rodata : {
 	. = ALIGN(4);
-	sound_drivers_start = .;
-	*(.rodata.sound_drivers)
-	sound_drivers_end = .;
+	drivers_start = .;
+	*(.rodata.drivers)
+	drivers_end = .;
 	*(.rodata)
 	*(.rodata.*)
     }

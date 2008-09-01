@@ -108,7 +108,7 @@ int main(void)
 #if CONFIG_AUTOBOOT_DELAY
 static inline int autoboot_delay(void)
 {
-    unsigned int timeout;
+    u64 timeout;
     int sec, tmp;
     char key;
     

@@ -82,8 +82,8 @@ static int open_pc_partition(int part, unsigned long *start_p,
 	    printf("Partition %d does not exist\n", part+1);
 	    return 0;
 	}
-	*start_p = get_le32(p->start_sect);
-	*length_p = get_le32(p->nr_sects);
+	*start_p = cpu_to_le32(*(u32 *)(p->start_sect));
+	*length_p = cpu_to_le32(*(u32 *)(p->nr_sects));
 	return 1;
     } else {
 	/* Extended partition */
@@ -102,7 +102,7 @@ static int open_pc_partition(int part, unsigned long *start_p,
 	}
 	debug("Extended partition at %d\n", i+1);
 	/* Visit each logical partition labels */
-	ext_start = get_le32(p[i].start_sect);
+	ext_start = cpu_to_le32(*(u32*)(p[i].start_sect));
 	cur_table = ext_start;
 	cur_part = 4;
 	for (;;) {
@@ -121,8 +121,8 @@ static int open_pc_partition(int part, unsigned long *start_p,
 		    printf("Partition %d is empty\n", part+1);
 		    return 0;
 		}
-		*start_p = cur_table + get_le32(p->start_sect);
-		*length_p = get_le32(p->nr_sects);
+		*start_p = cur_table + cpu_to_le32(*(u32*)(p->start_sect));
+		*length_p = cpu_to_le32(*(u32*)(p->nr_sects));
 		return 1;
 	    }
 	    /* Second entry is link to next partition */
@@ -130,7 +130,7 @@ static int open_pc_partition(int part, unsigned long *start_p,
 		debug("no link\n");
 		break;
 	    }
-	    cur_table = ext_start + get_le32(p[1].start_sect);
+	    cur_table = ext_start + cpu_to_le32(*(u32*)(p[1].start_sect));
 
 	    cur_part++;
 	}
@@ -449,19 +449,5 @@ int devread(unsigned long sector, unsigned long byte_offset,
 	dest += len;
     }
     return 1;
-}
-
-uint32_t get_le32(const unsigned char *p)
-{
-	return ((unsigned int) p[0] << 0)
-		| ((unsigned int) p[1] << 8)
-		| ((unsigned int) p[2] << 16)
-		| ((unsigned int) p[3] << 24);
-}
-
-uint16_t get_le16(const unsigned char *p)
-{
-	return ((unsigned int) p[0] << 0) 
-		| ((unsigned int) p[1] << 8);
 }
 

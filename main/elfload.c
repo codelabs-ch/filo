@@ -135,7 +135,7 @@ static int load_segments(Elf_phdr *phdr, int phnum,
 	unsigned long checksum_offset)
 {
     unsigned long bytes;
-    unsigned int start_time, time;
+    u64 start_time, time;
     int i;
 
     bytes = 0;
