@@ -22,7 +22,6 @@
 #include <arch/timer.h>
 
 extern char config_file[];
-// #include <grub/shared.h>
 
 #define ENTER '\r'
 #define ESCAPE '\x1b'
@@ -34,7 +33,6 @@ extern char config_file[];
 #define menulst_delay() 0 /* success */
 #endif
 
-#ifdef CONFIG_USE_GRUB
 #if CONFIG_MENULST_TIMEOUT
 static inline int menulst_delay(void)
 {
@@ -115,5 +113,4 @@ void grub_menulst(void)
 
     
 }
-#endif /* CONFIG_USE_GRUB */
 

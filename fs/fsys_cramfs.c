@@ -20,7 +20,6 @@
 /* fsys_minix.c used as a skeleton, cramfs code in kernel used as
  * documentation and some code */
 
-#include "shared.h"
 #include "filesys.h"
 #include "mini_inflate.h"
 
@@ -28,16 +27,6 @@
 # define debug_cramfs(str, args...) printf(str, ## args)
 #else
 # define debug_cramfs(str, args...) do {;} while(0)
-#endif
-
-#if 0
-/* include/asm-i386/type.h */
-typedef __signed__ char s8;
-typedef unsigned char u8;
-typedef __signed__ short s16;
-typedef unsigned short u16;
-typedef __signed__ int s32;
-typedef unsigned int u32;
 #endif
 
 #define BLOCK_SIZE 	SECTOR_SIZE

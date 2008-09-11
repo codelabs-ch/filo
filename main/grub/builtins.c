@@ -21,6 +21,7 @@
 
 #include <libpayload.h>
 #include <config.h>
+#include <fs.h>
 #include <grub/shared.h>
 #include <grub/term.h>
 #include <grub/terminfo.h>
@@ -41,7 +42,11 @@ unsigned long current_drive = GRUB_INVALID_DRIVE;
 unsigned long saved_drive;
 unsigned long saved_partition;
 unsigned long saved_mem_upper;
-
+// other..
+unsigned long install_partition = 0x20000;
+unsigned long boot_drive = 0;
+int saved_entryno = 0;
+char config_file[128] = "\0"; 
 
 kernel_t kernel_type;
 
@@ -255,6 +260,44 @@ static struct builtin builtin_color =
   " light-green, light-cyan, light-red, light-magenta, yellow and white."
   " But only the first eight names can be used for BG. You can prefix"
   " \"blink-\" to FG if you want a blinking foreground color."
+};
+
+/* configfile */
+static int
+configfile_func (char *arg, int flags)
+{
+  char *new_config = config_file;
+
+  /* Check if the file ARG is present.  */
+  if (! grub_open (arg))
+    return 1;
+
+  grub_close ();
+
+  /* Copy ARG to CONFIG_FILE.  */
+  while ((*new_config++ = *arg++) != 0)
+    ;
+
+  /* Force to load the configuration file.  */
+  // use_config_file = 1;
+
+  /* Make sure that the user will not be authoritative.  */
+  auth = 0;
+
+  /* Restart cmain.  */
+  grub_main();
+
+  /* Never reach here.  */
+  return 0;
+}
+
+static struct builtin builtin_configfile =
+{
+  "configfile",
+  configfile_func,
+  BUILTIN_CMDLINE | BUILTIN_HELP_LIST,
+  "configfile FILE",
+  "Load FILE as the configuration file."
 };
 
 /* default */
@@ -952,22 +995,6 @@ serial_func (char *arg, int flags)
 	      return 1;
 	    }
 	}
-# ifdef GRUB_UTIL
-      /* In the grub shell, don't use any port number but open a tty
-	 device instead.  */
-      else if (grub_memcmp (arg, "--device=", sizeof ("--device=") - 1) == 0)
-	{
-	  char *p = arg + sizeof ("--device=") - 1;
-	  char dev[256];	/* XXX */
-	  char *q = dev;
-	  
-	  while (*p && ! grub_isspace (*p))
-	    *q++ = *p++;
-	  
-	  *q = 0;
-	  serial_set_device (dev);
-	}
-# endif /* GRUB_UTIL */
       else
 	break;
 
@@ -1337,6 +1364,7 @@ struct builtin *builtin_table[] =
 {
 	&builtin_boot,
 	&builtin_color,
+	&builtin_configfile,
 	&builtin_default,
 #ifdef CONFIG_EXPERIMENTAL
 	&builtin_find,

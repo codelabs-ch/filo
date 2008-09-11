@@ -39,7 +39,7 @@ int usb_read(int drive, sector_t sector, void *buffer);
 
 #ifdef CONFIG_USB_NEW_DISK
 int usb_new_probe(int drive);
-int usb_new_read(int drive, sector_t sector, void *buffer);
+int usb_new_read(const int drive, const sector_t sector, const int size, void *buffer);
 #endif
 
 #ifdef CONFIG_FLASH_DISK
@@ -63,7 +63,7 @@ void dev_get_partition(unsigned long *start, unsigned long *size);
 
 int file_open(const char *filename);
 int file_read(void *buf, unsigned long len);
-int file_seek(unsigned long offset);
+unsigned long file_seek(unsigned long offset);
 unsigned long file_size(void);
 void file_set_size(unsigned long size);
 void file_close(void);

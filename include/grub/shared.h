@@ -25,24 +25,11 @@
 #ifndef GRUB_SHARED_HEADER
 #define GRUB_SHARED_HEADER	1
 
-#include <grub/config.h>
-
-/* Add an underscore to a C symbol in assembler code if needed. */
-#ifdef HAVE_ASM_USCORE
-# define EXT_C(sym) _ ## sym
-#else
-# define EXT_C(sym) sym
-#endif
+void grub_main(void);
 
 /* Maybe redirect memory requests through grub_scratch_mem. */
-#ifdef GRUB_UTIL
-extern char *grub_scratch_mem;
-# define RAW_ADDR(x) ((x) + (int) grub_scratch_mem)
-# define RAW_SEG(x) (RAW_ADDR ((x) << 4) >> 4)
-#else
 # define RAW_ADDR(x) (x)
 # define RAW_SEG(x) (x)
-#endif
 
 /*
  *  Integer sizes
@@ -215,33 +202,7 @@ extern char *grub_scratch_mem;
 #define STAGE2_ID_ISO9660_STAGE1_5	9
 #define STAGE2_ID_UFS2_STAGE1_5		10
 
-#ifndef STAGE1_5
 # define STAGE2_ID	STAGE2_ID_STAGE2
-#else
-# if defined(FSYS_FFS)
-#  define STAGE2_ID	STAGE2_ID_FFS_STAGE1_5
-# elif defined(FSYS_EXT2FS)
-#  define STAGE2_ID	STAGE2_ID_E2FS_STAGE1_5
-# elif defined(FSYS_FAT)
-#  define STAGE2_ID	STAGE2_ID_FAT_STAGE1_5
-# elif defined(FSYS_MINIX)
-#  define STAGE2_ID	STAGE2_ID_MINIX_STAGE1_5
-# elif defined(FSYS_REISERFS)
-#  define STAGE2_ID	STAGE2_ID_REISERFS_STAGE1_5
-# elif defined(FSYS_VSTAFS)
-#  define STAGE2_ID	STAGE2_ID_VSTAFS_STAGE1_5
-# elif defined(FSYS_JFS)
-#  define STAGE2_ID	STAGE2_ID_JFS_STAGE1_5
-# elif defined(FSYS_XFS)
-#  define STAGE2_ID	STAGE2_ID_XFS_STAGE1_5
-# elif defined(FSYS_ISO9660)
-#  define STAGE2_ID	STAGE2_ID_ISO9660_STAGE1_5
-# elif defined(FSYS_UFS2)
-#  define STAGE2_ID	STAGE2_ID_UFS2_STAGE1_5
-# else
-#  error "unknown Stage 2"
-# endif
-#endif
 
 /*
  *  defines for use when switching between real and protected mode
@@ -255,17 +216,6 @@ extern char *grub_scratch_mem;
 #define PSEUDO_RM_DSEG	0x20
 #define STACKOFF	(0x2000 - 0x10)
 #define PROTSTACKINIT   (FSYS_BUF - 0x10)
-
-
-/*
- * Assembly code defines
- *
- * "EXT_C" is assumed to be defined in the Makefile by the configure
- *   command.
- */
-
-#define ENTRY(x) .globl EXT_C(x) ; EXT_C(x):
-#define VARIABLE(x) ENTRY(x)
 
 
 #define K_RDWR  	0x60	/* keyboard data & cmds (read/write) */
@@ -284,7 +234,10 @@ extern char *grub_scratch_mem;
 
 /* Codes for getchar. */
 #define ASCII_CHAR(x)   ((x) & 0xFF)
-#if !defined(GRUB_UTIL) || !defined(HAVE_LIBCURSES)
+
+#warning "CURSES keys fundamentally different from libpayload's"
+// And that's why we can't just do
+// # include <curses.h>
 # define KEY_LEFT        0x4B00
 # define KEY_RIGHT       0x4D00
 # define KEY_UP          0x4800
@@ -298,13 +251,6 @@ extern char *grub_scratch_mem;
 # define KEY_PPAGE       0x4900
 # define A_NORMAL        0x7
 # define A_REVERSE       0x70
-#elif defined(HAVE_NCURSES_CURSES_H)
-# include <ncurses/curses.h>
-#elif defined(HAVE_NCURSES_H)
-# include <ncurses.h>
-#elif defined(HAVE_CURSES_H)
-# include <curses.h>
-#endif
 
 /* In old BSD curses, A_NORMAL and A_REVERSE are not defined, so we
    define them here if they are undefined.  */
@@ -358,21 +304,8 @@ extern char *grub_scratch_mem;
 /* Remap some libc-API-compatible function names so that we prevent
    circularararity. */
 #ifndef WITHOUT_LIBC_STUBS
-//#define memmove grub_memmove
-//#define memcpy grub_memmove	/* we don't need a separate memcpy */
-//#define memset grub_memset
-//#define isspace grub_isspace
-// #define printf grub_printf
-//#define sprintf grub_sprintf
 #undef putchar
 #define putchar grub_putchar
-//#define strncat grub_strncat
-//#define strstr grub_strstr
-//#define memcmp grub_memcmp
-//#define strcmp grub_strcmp
-//#define tolower grub_tolower
-//#define strlen grub_strlen
-//#define strcpy grub_strcpy
 
 /* Instead, for FILO we map the grub_ functions to 
  * "normal" functions:
@@ -583,32 +516,6 @@ extern unsigned long linux_text_len;
 extern char *linux_data_tmp_addr;
 extern char *linux_data_real_addr;
 
-#ifdef GRUB_UTIL
-/* If not using config file, this variable is set to zero,
-   otherwise non-zero.  */
-extern int use_config_file;
-/* If using the preset menu, this variable is set to non-zero,
-   otherwise zero.  */
-extern int use_preset_menu;
-/* If not using curses, this variable is set to zero, otherwise non-zero.  */
-extern int use_curses;
-/* The flag for verbose messages.  */
-extern int verbose;
-/* The flag for read-only.  */
-extern int read_only;
-/* The number of floppies to be probed.  */
-extern int floppy_disks;
-/* The map between BIOS drives and UNIX device file names.  */
-extern char **device_map;
-/* The filename which stores the information about a device map.  */
-extern char *device_map_file;
-/* The array of geometries.  */
-extern struct geometry *disks;
-/* Assign DRIVE to a device name DEVICE.  */
-extern void assign_device_name (int drive, const char *device);
-#endif
-
-#ifndef STAGE1_5
 /* GUI interface variables. */
 # define MAX_FALLBACK_ENTRIES	8
 extern int fallback_entries[MAX_FALLBACK_ENTRIES];
@@ -634,7 +541,6 @@ extern char commands[];
 extern int max_lines;
 extern int count_lines;
 extern int use_pager;
-#endif
 
 #ifndef NO_DECOMPRESSION
 extern int no_decompression;
@@ -644,11 +550,6 @@ extern int compressed_file;
 /* instrumentation variables */
 extern void (*disk_read_hook) (int, int, int);
 extern void (*disk_read_func) (int, int, int);
-
-#ifndef STAGE1_5
-/* The flag for debug mode.  */
-extern int debug;
-#endif /* STAGE1_5 */
 
 extern unsigned long current_drive;
 extern unsigned long current_partition;
@@ -695,10 +596,8 @@ extern struct multiboot_info mbi;
 extern unsigned long saved_drive;
 extern unsigned long saved_partition;
 extern unsigned long cdrom_drive;
-#ifndef STAGE1_5
 extern unsigned long saved_mem_upper;
 extern unsigned long extended_memory;
-#endif
 
 /*
  *  Error variables.
@@ -833,7 +732,6 @@ int biosdisk (int subfunc, int drive, struct geometry *geometry,
 void stop_floppy (void);
 
 /* Command-line interface functions. */
-#ifndef STAGE1_5
 
 /* The flags for the builtins.  */
 #define BUILTIN_CMDLINE		0x1	/* Run in the command-line.  */
@@ -891,43 +789,9 @@ int run_script (char *script, char *heap);
 #define CMDLINE_EDIT_MODE 0x2
 
 void print_cmdline_message (int type);
-#endif
 
 /* C library replacement functions with identical semantics. */
 void grub_printf (const char *format,...);
-//int grub_sprintf (char *buffer, const char *format, ...);
-//int grub_tolower (int c);
-//int grub_isspace (int c);
-//int grub_strncat (char *s1, const char *s2, int n);
-//void *grub_memmove (void *to, const void *from, int len);
-//void *grub_memset (void *start, int c, int len);
-//int grub_strncat (char *s1, const char *s2, int n);
-//char *grub_strstr (const char *s1, const char *s2);
-//int grub_memcmp (const char *s1, const char *s2, int n);
-//int grub_strcmp (const char *s1, const char *s2);
-//int grub_strlen (const char *str);
-//char *grub_strcpy (char *dest, const char *src);
-
-#ifndef GRUB_UTIL
-typedef unsigned long grub_jmp_buf[6];
-#else
-/* In the grub shell, use the libc jmp_buf instead.  */
-# include <setjmp.h>
-# define grub_jmp_buf jmp_buf
-#endif
-
-#ifdef GRUB_UTIL
-# define grub_setjmp	setjmp
-# define grub_longjmp	longjmp
-#else /* ! GRUB_UTIL */
-int grub_setjmp (grub_jmp_buf env);
-void grub_longjmp (grub_jmp_buf env, int val);
-#endif /* ! GRUB_UTIL */
-
-/* The environment for restarting Stage 2.  */
-extern grub_jmp_buf restart_env;
-/* The environment for restarting the command-line interface.  */
-extern grub_jmp_buf restart_cmdline_env;
 
 /* misc */
 void init_page (void);
@@ -948,11 +812,6 @@ int gunzip_test_header (void);
 int gunzip_read (char *buf, int len);
 #endif /* NO_DECOMPRESSION */
 
-int rawread (int drive, int sector, int byte_offset, int byte_len, char *buf);
-int devread (int sector, int byte_offset, int byte_len, char *buf);
-int rawwrite (int drive, int sector, char *buf);
-int devwrite (int sector, int sector_len, char *buf);
-
 /* Parse a device string and initialize the global parameters. */
 char *set_device (char *device);
 int open_device (void);
@@ -970,22 +829,6 @@ int make_saved_active (void);
 /* Set or clear the current root partition's hidden flag.  */
 int set_partition_hidden_flag (int hidden);
 
-#if 0
-/* Open a file or directory on the active device, using GRUB's
-   internal filesystem support. */
-int grub_open (char *filename);
-
-/* Read LEN bytes into BUF from the file that was opened with
-   GRUB_OPEN.  If LEN is -1, read all the remaining data in the file.  */
-int grub_read (char *buf, int len);
-
-/* Reposition a file offset.  */
-int grub_seek (int offset);
-
-/* Close a file.  */
-void grub_close (void);
-#endif
-
 /* List the contents of the directory that was opened with GRUB_OPEN,
    printing all completions. */
 int dir (char *dirname);
@@ -1002,7 +845,6 @@ int print_completions (int is_filename, int is_completion);
 /* Copies the current partition data to the desired address. */
 void copy_current_part_entry (char *buf);
 
-#ifndef STAGE1_5
 void bsd_boot (kernel_t type, int bootdev, char *arg)
      __attribute__ ((noreturn));
 
@@ -1017,7 +859,6 @@ int load_module (char *module, char *arg);
 int load_initrd (char *initrd);
 
 int check_password(char *entered, char* expected, password_t type);
-#endif
 
 void init_bios_info (void);
 

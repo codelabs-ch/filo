@@ -1,6 +1,7 @@
 /*
  *  GRUB  --  GRand Unified Bootloader
  *  Copyright (C) 2000,2001,2002,2004,2005  Free Software Foundation, Inc.
+ *  Copyright (C) 2005-2008 coresystems GmbH
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,36 +22,24 @@
 #include <config.h>
 #include <grub/shared.h>
 #include <grub/term.h>
+#include <fs.h>
 
-int file_open(const char *filename);
-int file_read(void *buf, unsigned long len);
-int file_seek(unsigned long offset);
-void file_close(void);
+/* Define if there is user specified preset menu string */
+/* #undef PRESET_MENU_STRING */
+
 void grub_menulst(void);
 
 struct multiboot_info mbi;
 
-#if defined(PRESET_MENU_STRING) || defined(SUPPORT_DISKLESS)
+#if defined(PRESET_MENU_STRING)
 
-# if defined(PRESET_MENU_STRING)
 static const char *preset_menu = PRESET_MENU_STRING;
-# elif defined(SUPPORT_DISKLESS)
-/* Execute the command "bootp" automatically.  */
-static const char *preset_menu = "bootp\n";
-# endif /* SUPPORT_DISKLESS */
 
 static int preset_menu_offset;
 
 static int
 open_preset_menu (void)
 {
-#ifdef GRUB_UTIL
-  /* Unless the user explicitly requests to use the preset menu,
-     always opening the preset menu fails in the grub shell.  */
-  if (! use_preset_menu)
-    return 0;
-#endif /* GRUB_UTIL */
-  
   preset_menu_offset = 0;
   return preset_menu != 0;
 }
@@ -76,13 +65,13 @@ close_preset_menu (void)
   preset_menu = 0;
 }
 
-#else /* ! PRESET_MENU_STRING && ! SUPPORT_DISKLESS */
+#else /* ! PRESET_MENU_STRING */
 
 #define open_preset_menu()	0
 #define read_from_preset_menu(buf, maxlen)	0
 #define close_preset_menu()
 
-#endif /* ! PRESET_MENU_STRING && ! SUPPORT_DISKLESS */
+#endif /* ! PRESET_MENU_STRING */
 
 static char *
 get_entry (char *list, int num, int nested)
@@ -798,13 +787,6 @@ restart:
 
 		  break;
 		}
-#ifdef GRUB_UTIL
-	      if (c == 'q')
-		{
-		  /* The same as ``quit''.  */
-		  stop ();
-		}
-#endif
 	    }
 	}
     }
@@ -951,19 +933,16 @@ grub_main (void)
       init_config ();
     }
   
-  // /* Initialize the environment for restarting Stage 2.  */
-  // grub_setjmp (restart_env);
-  
   /* Initialize the kill buffer.  */
   *kill_buf = 0;
   
-#if (defined(CONFIG_SERIAL_CONSOLE) && CONFIG_SERIAL_CONSOLE == 1) 
+#ifdef CONFIG_SERIAL_CONSOLE
   {
     errnum=0;
     memset(myheap, 0, 256);
     run_script("serial --unit=0 --speed=9600\n\0", myheap); // dummy call
     memset(myheap, 0, 256);
-#if !(defined(CONFIG_VGA_CONSOLE) && CONFIG_VGA_CONSOLE == 1 )
+#ifndef CONFIG_VGA_CONSOLE
     run_script("terminal serial\n\0", myheap);
 #endif
   }
@@ -979,9 +958,6 @@ grub_main (void)
       
       /* Here load the configuration file.  */
       
-#ifdef GRUB_UTIL
-      if (use_config_file)
-#endif /* GRUB_UTIL */
 	{
 	  char *default_file = (char *) DEFAULT_FILE_BUF;
 	  int i;

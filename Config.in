@@ -281,6 +281,7 @@ config DEBUG_ALL
 	select DEBUG_SEGMENT
 	select DEBUG_SYS_INFO
 	select DEBUG_BLOCKDEV
+	select DEBUG_VFS
 	select DEBUG_FSYS_EXT2FS
 	select DEBUG_PCI
 	select DEBUG_VIA_SOUND
@@ -310,6 +311,10 @@ config DEBUG_SYS_INFO
 
 config DEBUG_BLOCKDEV
 	bool "DEBUG_BLOCKDEV"
+	default n
+
+config DEBUG_VFS
+	bool "DEBUG_VFS"
 	default n
 
 config DEBUG_FSYS_EXT2FS

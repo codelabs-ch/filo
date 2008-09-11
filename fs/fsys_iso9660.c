@@ -34,7 +34,6 @@
  * 2003-10 by SONE Takeshi
  */
 
-#include "shared.h"
 #include "filesys.h"
 #include "iso9660.h"
 #define DEBUG_THIS CONFIG_DEBUG_ISO9660
@@ -175,8 +174,7 @@ iso9660_dir (char *dirname)
 		  if (rr_ptr.rr->version != 1)
 		  {
 #ifndef STAGE1_5
-		    if (debug)
-		      printf(
+		      debug(
 			    "Non-supported version (%d) RockRidge chunk "
 			    "`%c%c'\n", rr_ptr.rr->version,
 			    rr_ptr.rr->signature & 0xFF,
@@ -272,7 +270,7 @@ iso9660_dir (char *dirname)
 		      print_possibilities = -print_possibilities;
 		  memcpy(NAME_BUF, name, name_len);
 		  NAME_BUF[name_len] = '\0';
-            	  print_a_completion (NAME_BUF);
+            	  print_a_completion ((char *)NAME_BUF);
 #endif
 	        }
 	      }

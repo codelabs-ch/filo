@@ -26,7 +26,6 @@
 #include <fs.h>
 
 #include "artecboot.h"
-#include "shared.h"
 #include "filesys.h"
 
 #define DEBUG_THIS CONFIG_DEBUG_ARTECBOOT

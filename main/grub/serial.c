@@ -33,8 +33,6 @@ static int serial_y;
 
 static int keep_track = 1;
 
-#ifndef GRUB_UTIL
-
 /* Fetch a key.  */
 int
 serial_hw_fetch (void)
@@ -94,9 +92,7 @@ serial_hw_init (unsigned short port, unsigned int speed,
 #endif
   return 1;
 }
-#endif /* ! GRUB_UTIL */
 
-
 /* Generic definitions.  */
 
 #if CONFIG_SERIAL_CONSOLE

@@ -23,9 +23,6 @@
 #include <config.h>
 #include <fs.h>
 
-/* This disables some portion of code */
-#define STAGE1_5 1
-
 #if defined(__i386__)
 /*
  * ffz = Find First Zero in word. Undefined if no zero exists,
@@ -153,7 +150,8 @@ extern void (*disk_read_func) (int, int, int);
 #define FSYS_BUFLEN 0x8000
 extern char FSYS_BUF[FSYS_BUFLEN];
 
-#define print_possibilities 0
+extern int print_possibilities;
+void print_a_completion (char *filename);
 
 #define SECTOR_SIZE 512
 #define SECTOR_BITS 9

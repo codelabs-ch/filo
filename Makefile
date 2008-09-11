@@ -69,13 +69,13 @@ BUILD-y += drivers/usb/Makefile.inc drivers/newusb/Makefile.inc drivers/flash/Ma
 
 include $(PLATFORM-y) $(BUILD-y)
 
-LIBPAYLOAD = libpayload/lib/libpayload.a
-INCPAYLOAD = libpayload/include
-INCPAYLOADDRIVERS = libpayload/drivers
+LIBPAYLOAD_PREFIX ?= libpayload
+LIBPAYLOAD = $(LIBPAYLOAD_PREFIX)/lib/libpayload.a
+INCPAYLOAD = $(LIBPAYLOAD_PREFIX)/include
 LIBGCC = $(shell $(CC) -print-libgcc-file-name)
 
 OBJS     := $(patsubst %,$(obj)/%,$(TARGETS-y))
-INCLUDES := -I$(INCPAYLOAD) -I$(INCPAYLOADDRIVERS) -Iinclude -I$(ARCHDIR-y)/include -Ibuild
+INCLUDES := -I$(INCPAYLOAD) -Iinclude -I$(ARCHDIR-y)/include -Ibuild
 INCLUDES += -I$(shell $(CC) -print-search-dirs | head -n 1 | cut -d' ' -f2)include
 
 try-run= $(shell set -e; \

@@ -23,7 +23,6 @@
    mkfs.minix -c DEVICE 
 */
 
-#include "shared.h"
 #include "filesys.h"
 
 #define DEBUG_MINIX CONFIG_DEBUG_MINIX

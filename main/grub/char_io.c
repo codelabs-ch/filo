@@ -67,7 +67,6 @@ char *err_list[] =
 
 
 
-#ifndef STAGE1_5
 struct term_entry term_table[] =
   {
 #if CONFIG_VGA_CONSOLE == 1 && CONFIG_PC_KEYBOARD ==1
@@ -115,18 +114,12 @@ struct term_entry *current_term = term_table;
 int max_lines = 24;
 int count_lines = -1;
 int use_pager = 1;
-#endif
 
 void
 print_error (void)
 {
   if (errnum > ERR_NONE && errnum < MAX_ERR_NUM)
-#ifndef STAGE1_5
-    /* grub_printf("\7\n %s\n", err_list[errnum]); */
     grub_printf ("\nError %u: %s\n", errnum, err_list[errnum]);
-#else /* STAGE1_5 */
-    grub_printf ("Error %u\n", errnum);
-#endif /* STAGE1_5 */
 }
 
 char *
@@ -135,7 +128,6 @@ convert_to_ascii (char *buf, int c,...)
   unsigned long num = *((&c) + 1), mult = 10;
   char *ptr = buf;
 
-#ifndef STAGE1_5
   if (c == 'x' || c == 'X')
     mult = 16;
 
@@ -145,7 +137,6 @@ convert_to_ascii (char *buf, int c,...)
       *(ptr++) = '-';
       buf++;
     }
-#endif
 
   do
     {
@@ -193,17 +184,14 @@ grub_printf (const char *format,...)
       else
 	switch (c = *(format++))
 	  {
-#ifndef STAGE1_5
 	  case 'd':
 	  case 'x':
 	  case 'X':
-#endif
 	  case 'u':
 	    *convert_to_ascii (str, c, *((unsigned long *) dataptr++)) = 0;
 	    grub_putstr (str);
 	    break;
 
-#ifndef STAGE1_5
 	  case 'c':
 	    grub_putchar ((*(dataptr++)) & 0xff);
 	    break;
@@ -211,12 +199,10 @@ grub_printf (const char *format,...)
 	  case 's':
 	    grub_putstr ((char *) *(dataptr++));
 	    break;
-#endif
 	  }
     }
 }
 
-#ifndef STAGE1_5
 void
 init_page (void)
 {
@@ -882,7 +868,6 @@ safe_parse_maxint (char **str_ptr, int *myint_ptr)
 
   return 1;
 }
-#endif /* STAGE1_5 */
 
 /* Wait for a keypress and return its code.  */
 int

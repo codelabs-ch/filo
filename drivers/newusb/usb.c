@@ -16,8 +16,8 @@
  */
 
 #include <fs.h>
-#include "usb/usb.h"
-#include "usb/usbmsc.h"
+#include <usb/usb.h>
+#include <usb/usbmsc.h>
 
 
 static usbdev_t* devs[4]; // FIXME: only 4 devices
@@ -43,17 +43,14 @@ int usb_new_probe(int drive)
 	   this would be a nice place, but the usb disk handling
 	   must be more clever for that.
 	*/
+	usb_poll();
 	if (count >= drive) return drive;
 	return -1;
 }
 
-int usb_new_read(int drive, sector_t sector, void *buffer)
+int usb_new_read(const int drive, const sector_t sector, const int size, void *buffer)
 {
 	if (count < drive) return -1;
-	/* FIXME: only one sector at a time :-(
-	   This must happen some layers further up
-	*/
-	const int size = 1;
 	int result = -readwrite_blocks(devs[drive], sector, size, cbw_direction_data_in, buffer);
 	return result;
 }
