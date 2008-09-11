@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # FILO version: 0.6.0b1
-# Tue Aug 19 18:33:40 2008
+# Thu Sep 11 20:18:11 2008
 #
 CONFIG_TARGET_I386=y
 # CONFIG_REVIEW is not set
@@ -69,6 +69,7 @@ CONFIG_LINUX_LOADER=y
 # CONFIG_DEBUG_SEGMENT is not set
 # CONFIG_DEBUG_SYS_INFO is not set
 # CONFIG_DEBUG_BLOCKDEV is not set
+# CONFIG_DEBUG_VFS is not set
 # CONFIG_DEBUG_FSYS_EXT2FS is not set
 # CONFIG_DEBUG_PCI is not set
 # CONFIG_DEBUG_LINUXLOAD is not set
