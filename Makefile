@@ -72,7 +72,7 @@ include $(PLATFORM-y) $(BUILD-y)
 LIBPAYLOAD_PREFIX ?= libpayload
 LIBPAYLOAD = $(LIBPAYLOAD_PREFIX)/lib/libpayload.a
 INCPAYLOAD = $(LIBPAYLOAD_PREFIX)/include
-LIBGCC = $(shell $(CC) -print-libgcc-file-name)
+LIBGCC = $(shell $(CC) $(CFLAGS) -print-libgcc-file-name)
 
 OBJS     := $(patsubst %,$(obj)/%,$(TARGETS-y))
 INCLUDES := -I$(INCPAYLOAD) -Iinclude -I$(ARCHDIR-y)/include -Ibuild
@@ -121,7 +121,7 @@ $(obj)/%.o: $(src)/%.c
 
 $(obj)/%.S.o: $(src)/%.S
 	$(Q)printf "  AS      $(subst $(shell pwd)/,,$(@))\n"
-	$(Q)$(AS) -o $@ $<
+	$(Q)$(AS) $(ASFLAGS) -o $@ $<
 
 endif
 
