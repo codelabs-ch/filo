@@ -17,11 +17,8 @@
 #
 
 
-TARGETS-$(CONFIG_USE_GRUB) += main/grub/stage2.o main/grub/builtins.o 
-TARGETS-$(CONFIG_USE_GRUB) += main/grub/cmdline.o main/grub/char_io.o 
-TARGETS-$(CONFIG_USE_GRUB) += main/grub/grubcons.o main/grub/serial.o
-TARGETS-$(CONFIG_USE_GRUB) += main/grub/terminfo.o main/grub/tparm.o 
+TARGETS-$(CONFIG_USE_GRUB) += main/grub/grub.o main/grub/builtins.o
+TARGETS-$(CONFIG_USE_GRUB) += main/grub/cmdline.o main/grub/char_io.o
 TARGETS-$(CONFIG_USE_GRUB) += main/grub/completions.o
-TARGETS-$(CONFIG_USE_GRUB) += main/grub/grub.o
 TARGETS-$(CONFIG_USE_MD5_PASSWORDS) += main/grub/md5.o
 

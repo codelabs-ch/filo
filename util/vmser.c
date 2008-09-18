@@ -20,6 +20,7 @@
  * Simple terminal for VMware serial port
  */
 #include <stdio.h>
+#include <string.h>
 #include <curses.h>
 #include <unistd.h>
 #include <sys/types.h>

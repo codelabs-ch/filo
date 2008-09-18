@@ -94,10 +94,12 @@ void boot(const char *line)
 /* The main routine */
 int main(void)
 {
+    void grub_menulst(void);
     void grub_main(void);
     
     /* Initialize */
     init();
+    grub_menulst();
     grub_main();
     return 0;   
 }

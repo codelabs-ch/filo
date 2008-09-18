@@ -20,31 +20,34 @@ EBCHECKSUM = ebchecksum.o ipchecksum.o checksum_elf32le.o checksum_elf32be.o che
 EBCHECKSUM_OBJS     := $(patsubst %,$(obj)/util/%,$(EBCHECKSUM))
 
 $(obj)/util/ebchecksum: $(EBCHECKSUM_OBJS)
-	@echo "  HOSTCC  $@"
+	@echo "  HOSTCC  $(subst $(shell pwd)/,,$(@))"
 	@$(HOSTCC) $(HOSTCFLAGS) $(EBCHECKSUM_OBJS) -o $@
 
 $(obj)/util/%.o: $(src)/util/%.c
-	@echo "  HOSTCC  $<"
+	@echo "  HOSTCC  $(subst $(shell pwd)/,,$(<))"
 	@$(HOSTCC) $(HOSTCFLAGS) -Iinclude -c $< -o $@
 
 $(obj)/util/ipchecksum.o: $(src)/main/ipchecksum.c
-	@echo "  HOSTCC  $<"
+	@echo "  HOSTCC  $(subst $(shell pwd)/,,$(<))"
 	@$(HOSTCC) $(HOSTCFLAGS) -Iinclude -c $< -o $@
 
 $(obj)/util/checksum_elf32le.o: util/checksum_elf.c
-	@echo "  HOSTCC  $< -> `basename $@`"
+	@echo "  HOSTCC  $< -> $(subst $(shell pwd)/,,$(@))"
 	@$(HOSTCC) $(HOSTCFLAGS) -Iinclude -DTARGET_CLASS=ELFCLASS32 -DTARGET_DATA=ELFDATA2LSB -c $< -o $@
 $(obj)/util/checksum_elf32be.o: util/checksum_elf.c
-	@echo "  HOSTCC  $< -> `basename $@`"
+	@echo "  HOSTCC  $< -> $(subst $(shell pwd)/,,$(@))"
 	@$(HOSTCC) $(HOSTCFLAGS) -Iinclude -DTARGET_CLASS=ELFCLASS32 -DTARGET_DATA=ELFDATA2MSB -c $< -o $@
 $(obj)/util/checksum_elf64le.o: util/checksum_elf.c
-	@echo "  HOSTCC  $< -> `basename $@`"
+	@echo "  HOSTCC  $< -> $(subst $(shell pwd)/,,$(@))"
 	@$(HOSTCC) $(HOSTCFLAGS) -Iinclude -DTARGET_CLASS=ELFCLASS64 -DTARGET_DATA=ELFDATA2LSB -c $< -o $@
 $(obj)/util/checksum_elf64be.o: util/checksum_elf.c
-	@echo "  HOSTCC  $< -> `basename $@`"
+	@echo "  HOSTCC  $< -> $(subst $(shell pwd)/,,$(@))"
 	@$(HOSTCC) $(HOSTCFLAGS) -Iinclude -DTARGET_CLASS=ELFCLASS64 -DTARGET_DATA=ELFDATA2MSB -c $< -o $@
 
-$(obj)/util/vmser: vmser.o
-	@echo "  HOSTCC  $<"
-	@$(HOSTCC) $(HOSTCFLAGS) vmser.o -lcurses -o $@
+$(obj)/util/vmser: util/vmser.c
+	@echo "  HOSTCC  $(subst $(shell pwd)/,,$(<))"
+	@$(HOSTCC) $(HOSTCFLAGS) $< -lcurses -o $@
 
+vmser: $(obj)/util/vmser
+
+.PHONY : vmser

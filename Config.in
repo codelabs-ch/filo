@@ -160,38 +160,6 @@ config VIA_SOUND
 
 endmenu
 
-menu "Console"
-
-config VGA_CONSOLE
-	bool "VGA Text Console"
-	default y
-
-config PC_KEYBOARD
-	bool "PC Keyboard Support"
-	default y
-
-config SERIAL_CONSOLE
-	bool "Serial Console"
-	default y
-
-config SERIAL_IOBASE
-	hex "Serial Console IO base"
-	depends on SERIAL_CONSOLE
-	default 0x3f8
-
-config SERIAL_SPEED_DEFAULT
-	bool "Use default serial speed"
-	depends on SERIAL_CONSOLE
-	default y
-
-config SERIAL_SPEED
-	int "Serial Speed"
-	depends on SERIAL_CONSOLE
-	depends on !SERIAL_SPEED_DEFAULT
-	default 115200
-
-endmenu
-
 menu "Filesystems"
 
 config FSYS_EXT2FS
