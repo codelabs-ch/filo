@@ -41,6 +41,7 @@ ifneq ($(V),1)
 Q := @
 endif
 
+CC = gcc
 HOSTCC = gcc
 HOSTCXX = g++
 HOSTCFLAGS := -I$(srck) -I$(objk)
