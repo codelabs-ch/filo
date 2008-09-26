@@ -56,3 +56,21 @@ int usb_new_read(const int drive, const sector_t sector, const int size, void *b
 	int result = -readwrite_blocks(devs[drive], sector, size, cbw_direction_data_in, buffer);
 	return result;
 }
+
+int __attribute__((weak)) usb_initialize(void)
+{
+	printf("NOTE: In order to use USB support, your libpayload needs USB"
+			" support enabled, too.\n");
+
+	return 0;
+}
+
+int __attribute__((weak)) readwrite_blocks (usbdev_t *dev, int start, int n, cbw_direction dir, u8 *buf)
+{
+	return 1;
+}
+
+void __attribute__((weak)) usb_poll(void)
+{
+}
+
