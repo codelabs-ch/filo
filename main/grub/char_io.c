@@ -737,38 +737,21 @@ int safe_parse_maxint(char **str_ptr, int *myint_ptr)
 
 int terminal_flags;
 
-static int console_current_color = A_NORMAL;
-static int console_standard_color = A_NORMAL;
-static int console_normal_color = A_NORMAL;
-static int console_highlight_color = A_REVERSE;
 static color_state console_color_state = COLOR_STATE_STANDARD;
 
 void console_setcolorstate(color_state state)
 {
-	switch (state) {
-	case COLOR_STATE_STANDARD:
-		console_current_color = console_standard_color;
-		break;
-	case COLOR_STATE_NORMAL:
-		console_current_color = console_normal_color;
-		break;
-	case COLOR_STATE_HIGHLIGHT:
-		console_current_color = console_highlight_color;
-		break;
-	default:
-		console_current_color = console_standard_color;
-		break;
-	}
-
 	console_color_state = state;
 }
 
 void console_setcolor(int normal_color, int highlight_color)
 {
-	console_normal_color = normal_color;
-	console_highlight_color = highlight_color;
+	init_pair(1,(normal_color >> 4) &0xf, normal_color & 0xf);
+	init_pair(2,(highlight_color >> 4) &0xf, highlight_color & 0xf);
 
-	console_setcolorstate(console_color_state);
+	/* Make curses update the whole screen */
+	redrawwin(stdscr);
+	refresh();
 }
 
 /* The store for ungetch simulation. This is necessary, because
@@ -954,7 +937,11 @@ void console_putchar(int c)
 		if (x + 1 == COLS) {
 			console_putchar('\n');
 		}
-		addch(c | console_current_color);
+		if (console_color_state == COLOR_STATE_HIGHLIGHT)
+			color_set(2, NULL);
+		else
+			color_set(1, NULL);
+		addch(c);
 	} else {
 		addch(c);
 	}

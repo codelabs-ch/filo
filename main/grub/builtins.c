@@ -67,6 +67,10 @@ char boot_line[BOOT_LINE_LENGTH] = { 0 };
 char root_device[16] = { 0 };
 /* ---------------------------- */
 
+/* temporary space for run time checks */
+static char temp_space[BOOT_LINE_LENGTH];
+char initrd_space[BOOT_LINE_LENGTH]="\0";
+
 int show_menu = 1;
 
 /* Initialize the data for builtins.  */
@@ -104,7 +108,19 @@ int check_password(char *entered, char *expected, password_t type)
 static int boot_func(char *arg, int flags)
 {
 	void boot(const char *line);
+
+	if(!boot_line[0]) {
+		grub_printf("No kernel.\n");
+		return 1;
+	}
+
 	cls();
+
+	if (initrd_space[0]) {
+		strncat(boot_line, " initrd=", BOOT_LINE_LENGTH);
+		strncat(boot_line, initrd_space, BOOT_LINE_LENGTH);
+	}
+
 	grub_printf("\nBooting '%s'\n", boot_line);
 	boot(boot_line);
 	return 1;
@@ -131,20 +147,20 @@ static int color_func(char *arg, int flags)
 	int new_highlight_color;
 	static char *color_list[16] = {
 		"black",
-		"blue",
-		"green",
-		"cyan",
 		"red",
-		"magenta",
+		"green",
 		"brown",
+		"blue",
+		"magenta",
+		"cyan",
 		"light-gray",
 		"dark-gray",
-		"light-blue",
-		"light-green",
-		"light-cyan",
 		"light-red",
-		"light-magenta",
+		"light-green",
 		"yellow",
+		"light-blue",
+		"light-magenta",
+		"light-cyan",
 		"white"
 	};
 
@@ -175,7 +191,7 @@ static int color_func(char *arg, int flags)
 		/* Search for the color name.  */
 		for (i = 0; i < 16; i++)
 			if (strcmp(color_list[i], str) == 0) {
-				color |= i;
+				color |= (i << 4);
 				break;
 			}
 
@@ -188,7 +204,7 @@ static int color_func(char *arg, int flags)
 		/* Search for the color name.  */
 		for (i = 0; i < 8; i++)
 			if (strcmp(color_list[i], str) == 0) {
-				color |= i << 4;
+				color |= i;
 				break;
 			}
 
@@ -237,17 +253,16 @@ static struct builtin builtin_color = {
 	    " \"blink-\" to FG if you want a blinking foreground color."
 };
 
-static char temp_config_file[128];
 /* configfile */
 static int configfile_func(char *arg, int flags)
 {
 	extern int is_opened, keep_cmdline_running;
 
 	/* Check if the file ARG is present.  */
-	memset(temp_config_file, 0, 128);
-	copy_path_to_filo_bootline(arg, temp_config_file, 1);
-	if (!file_open(temp_config_file)) {
-		grub_printf("Could not open '%s'.\n", temp_config_file);
+	temp_space[0]=0;
+	copy_path_to_filo_bootline(arg, temp_space, 1);
+	if (!file_open(temp_space)) {
+		errnum = ERR_FILE_NOT_FOUND;
 		return 1;
 	}
 
@@ -293,51 +308,6 @@ static struct builtin builtin_default = {
 	"Set the default entry to entry number NUM (if not specified, it is"
 	    " 0, the first entry) or the entry number saved by savedefault."
 #endif
-};
-
-/* nvram-default */
-static int nvram_default_func(char *arg, int flags)
-{
-	u8 boot_default;
-
-	if (get_option(&boot_default, "boot_default"))
-		return 1;
-
-	default_entry = boot_default;
-
-	return 0;
-}
-
-static struct builtin builtin_nvram_default = {
-	"nvram-default",
-	nvram_default_func,
-	BUILTIN_MENU,
-#if 0
-	"nvram-default",
-	"Set the default entry to entry number NUM read from nvram."
-#endif
-};
-
-/* nvram-root */
-static int nvram_root_func(char *arg, int flags)
-{
-	char new_root[16]; /* Assume 128 bits in cmos.layout */
-
-	if (get_option(new_root, "boot_device"))
-		return 1;
-
-	memset(root_device, 0, 16);
-	copy_path_to_filo_bootline(new_root, root_device, 0);
-
-	return 0;
-}
-
-static struct builtin builtin_nvram_root = {
-	"nvram-root",
-	nvram_root_func,
-	BUILTIN_CMDLINE | BUILTIN_HELP_LIST,
-	"nvram-root",
-	"Set the root device according to the NVRAM entry boot_device"
 };
 
 #if CONFIG_EXPERIMENTAL
@@ -614,9 +584,16 @@ void copy_path_to_filo_bootline(char *arg, char *path, int use_rootdev)
 /* initrd */
 static int initrd_func(char *arg, int flags)
 {
-	strncat(boot_line, " initrd=", BOOT_LINE_LENGTH);
-	copy_path_to_filo_bootline(arg, boot_line, 1);
+	initrd_space[0]=0; // Erase string
+	copy_path_to_filo_bootline(arg, initrd_space, 1);
+	if (!file_open(initrd_space)) {
+		initrd_space[0]=0; // Erase string
+		errnum = ERR_FILE_NOT_FOUND;
+		file_close();
+		return 1;
+	}
 
+	file_close();
 	return 0;
 }
 
@@ -635,11 +612,29 @@ static struct builtin builtin_initrd = {
 /* kernel */
 static int kernel_func(char *arg, int flags)
 {
-	/* Needed to pass grub checks */
-	kernel_type = KERNEL_TYPE_LINUX;
+	int i;
+
+	kernel_type = KERNEL_TYPE_NONE;
 
 	/* clear out boot_line. Kernel is the first thing */
-	memset(boot_line, 0, BOOT_LINE_LENGTH);
+	boot_line[0] = 0;  // Erase string
+
+	/* Get the real boot line and extract the kernel name */
+	temp_space[0] = 0; // Erase string
+	copy_path_to_filo_bootline(arg, temp_space, 1);
+	i=0; while ((temp_space[i] != 0) && (temp_space[i]!=' ')) i++;
+	temp_space[i] = 0;
+
+	if (!file_open(temp_space)) {
+		errnum = ERR_FILE_NOT_FOUND;
+		file_close();
+		return 1;
+	}
+
+	file_close();
+
+	/* Needed to pass grub checks */
+	kernel_type = KERNEL_TYPE_LINUX;
 
 	copy_path_to_filo_bootline(arg, boot_line, 1);
 
@@ -814,17 +809,16 @@ static struct builtin builtin_pause = {
 	"Print MESSAGE, then wait until a key is pressed."
 };
 
+void __attribute__((weak)) platform_poweroff(void)
+{
+	grub_printf("Poweroff not supported.\n");
+}
+
 static int poweroff_func(char *arg, int flags)
 {
-	void platform_poweroff(void);
-
-#ifdef PLATFORM_SUPPORT
 	platform_poweroff();
-#else
-	grub_printf("Poweroff not supported.\n");
-#endif
 
-	// Will never return;
+	// Will (hopefully) never return;
 	return 0;
 }
 
@@ -840,13 +834,9 @@ static int reboot_func(char *arg, int flags)
 {
 	void platform_reboot(void);
 
-#ifdef PLATFORM_SUPPORT
 	platform_reboot();
-#else
-	grub_printf("Rebooting not supported.\n");
-#endif
 
-	// Will never return;
+	// Will (hopefully) never return;
 	return 0;
 }
 
@@ -860,8 +850,20 @@ static struct builtin builtin_reboot = {
 
 static int root_func(char *arg, int flags)
 {
-	memset(root_device, 0, 16);
+	int len;
+
+	root_device[0] = 0; /* Clear root device */
 	copy_path_to_filo_bootline(arg, root_device, 0);
+
+	/* The following code handles an extra case
+	 * where the user specifies "root hde1" without
+	 * a trailing colon.
+	 */
+	len=strlen(root_device);
+	if(root_device[len - 1] != ':') {
+		root_device[len] = ':';
+		root_device[len + 1] = 0;
+	}
 
 	return 0;
 }
@@ -874,15 +876,20 @@ static struct builtin builtin_root = {
 	"Set the current \"root device\" to the device DEVICE."
 };
 
+void __attribute__((weak))  serial_hardware_init(int port, int speed, int word_bits, int parity, int stop_bits)
+{
+	grub_printf("This version of FILO does not have serial console support.\n");
+}
+
 /* serial */
 static int serial_func(char *arg, int flags)
 {
-#if 0
-	unsigned short port = serial_hw_get_port(0);
+	unsigned short serial_port[] = {0x3f8, 0x2f8, 0x3e8, 0x2e8 };
+	unsigned short port = 0x3f8;
 	unsigned int speed = 9600;
-	int word_len = UART_8BITS_WORD;
-	int parity = UART_NO_PARITY;
-	int stop_bit_len = UART_1_STOP_BIT;
+	int word_len = 8;
+	int parity = 0;
+	int stop_bit_len = 1;
 
 	/* Process GNU-style long options.
 	   FIXME: We should implement a getopt-like function, to avoid
@@ -900,7 +907,7 @@ static int serial_func(char *arg, int flags)
 				return 1;
 			}
 
-			port = serial_hw_get_port(unit);
+			port = serial_port[unit];
 		} else if (memcmp(arg, "--speed=", sizeof("--speed=") - 1) == 0) {
 			char *p = arg + sizeof("--speed=") - 1;
 			int num;
@@ -927,17 +934,8 @@ static int serial_func(char *arg, int flags)
 				return 1;
 
 			switch (len) {
-			case 5:
-				word_len = UART_5BITS_WORD;
-				break;
-			case 6:
-				word_len = UART_6BITS_WORD;
-				break;
-			case 7:
-				word_len = UART_7BITS_WORD;
-				break;
-			case 8:
-				word_len = UART_8BITS_WORD;
+			case 5 ... 8:
+				word_len = len;
 				break;
 			default:
 				errnum = ERR_BAD_ARGUMENT;
@@ -952,11 +950,8 @@ static int serial_func(char *arg, int flags)
 				return 1;
 
 			switch (len) {
-			case 1:
-				stop_bit_len = UART_1_STOP_BIT;
-				break;
-			case 2:
-				stop_bit_len = UART_2_STOP_BITS;
+			case 1 ... 2:
+				stop_bit_len = len;
 				break;
 			default:
 				errnum = ERR_BAD_ARGUMENT;
@@ -966,13 +961,13 @@ static int serial_func(char *arg, int flags)
 			char *p = arg + sizeof("--parity=") - 1;
 
 			if (memcmp(p, "no", sizeof("no") - 1) == 0)
-				parity = UART_NO_PARITY;
+				parity = 0;
 			else if (memcmp(p, "odd", sizeof("odd") - 1)
 				 == 0)
-				parity = UART_ODD_PARITY;
+				parity = 1;
 			else if (memcmp(p, "even", sizeof("even") - 1)
 				 == 0)
-				parity = UART_EVEN_PARITY;
+				parity = 2;
 			else {
 				errnum = ERR_BAD_ARGUMENT;
 				return 1;
@@ -984,11 +979,8 @@ static int serial_func(char *arg, int flags)
 	}
 
 	/* Initialize the serial unit.  */
-	if (!serial_hw_init(port, speed, word_len, parity, stop_bit_len)) {
-		errnum = ERR_BAD_ARGUMENT;
-		return 1;
-	}
-#endif
+	serial_hardware_init(port, speed, word_len, parity, stop_bit_len);
+
 	return 0;
 }
 
@@ -1011,29 +1003,19 @@ static struct builtin builtin_serial = {
 /* terminal */
 static int terminal_func(char *arg, int flags)
 {
-#if 0
+	int use_serial = 0, use_vga = 0;
+	int terminal_changed = 0;
 	/* The index of the default terminal in TERM_TABLE.  */
-	int default_term = -1;
-	struct term_entry *prev_term = current_term;
-	int to = -1;
 	int lines = 0;
-	int no_message = 0;
 	unsigned long term_flags = 0;
-	/* XXX: Assume less than 32 terminals.  */
-	unsigned long term_bitmap = 0;
 
 	/* Get GNU-style long options.  */
 	while (1) {
-		if (memcmp(arg, "--no-echo", sizeof("--no-echo") - 1) == 0)
+		if (memcmp(arg, "--no-echo", sizeof("--no-echo") - 1) == 0) {
 			/* ``--no-echo'' implies ``--no-edit''.  */
 			term_flags |= (TERM_NO_ECHO | TERM_NO_EDIT);
-		else if (memcmp(arg, "--no-edit", sizeof("--no-edit") - 1) == 0)
+		} else if (memcmp(arg, "--no-edit", sizeof("--no-edit") - 1) == 0) {
 			term_flags |= TERM_NO_EDIT;
-		else if (memcmp(arg, "--timeout=", sizeof("--timeout=") - 1) == 0) {
-			char *val = arg + sizeof("--timeout=") - 1;
-
-			if (!safe_parse_maxint(&val, &to))
-				return 1;
 		} else if (memcmp(arg, "--lines=", sizeof("--lines=") - 1) == 0) {
 			char *val = arg + sizeof("--lines=") - 1;
 
@@ -1045,26 +1027,25 @@ static int terminal_func(char *arg, int flags)
 				errnum = ERR_BAD_ARGUMENT;
 				return 1;
 			}
-		} else if (memcmp(arg, "--silent", sizeof("--silent") - 1) == 0)
-			no_message = 1;
-		else {
+		} else {
 			while (*arg) {
-				int i;
 				char *next = skip_to(0, arg);
 
 				nul_terminate(arg);
 
-				for (i = 0; term_table[i].name; i++) {
-					if (strcmp(arg, term_table[i].name) == 0) {
-						if (default_term < 0)
-							default_term = i;
-
-						term_bitmap |= (1 << i);
-						break;
-					}
-				}
-
-				if (!term_table[i].name) {
+				/* We also accept "terminal console" as GRUB
+				 * heritage.
+				 */
+				if (strcmp(arg, "serial") == 0) {
+					use_serial = 1;
+					terminal_changed = 1;
+				} else if (strcmp(arg, "console") == 0) {
+					use_vga = 1;
+					terminal_changed = 1;
+				} else if (strcmp(arg, "vga") == 0) {
+					use_vga = 1;
+					terminal_changed = 1;
+				} else {
 					errnum = ERR_BAD_ARGUMENT;
 					return 1;
 				}
@@ -1080,78 +1061,29 @@ static int terminal_func(char *arg, int flags)
 		arg = skip_to(0, arg);
 	}
 
-	/* If no argument is specified, show current setting.  */
-	// if (! *arg)
-	if (!term_bitmap) {
-		grub_printf("%s%s%s\n",
-			    current_term->name,
-			    current_term->
-			    current_term->
-			    flags & TERM_NO_EDIT ? " (no edit)" : "",
-			    terminal_flags & TERM_NO_ECHO ? " (no echo)" : "");
-		return 0;
+	if (terminal_changed) {
+		curses_enable_serial(use_serial);
+		curses_enable_vga(use_vga);
+		terminal_flags = term_flags;
 	}
-
-	/* If multiple terminals are specified, wait until the user pushes any key on one of the terminals.  */
-	if (term_bitmap & ~(1 << default_term)) {
-		int time1, time2 = -1;
-
-		/* XXX: Disable the pager.  */
-		count_lines = -1;
-
-		/* Get current time.  */
-		while ((time1 = getrtsecs()) == 0xFF);
-
-		/* Wait for a key input.  */
-		while (to) {
-			int i;
-
-			for (i = 0; term_table[i].name; i++) {
-				if (term_bitmap & (1 << i)) {
-					if (term_table[i].checkkey() >= 0) {
-						(void) term_table[i].getkey();
-						default_term = i;
-
-						goto end;
-					}
-				}
-			}
-
-			/* Prompt the user, once per sec.  */
-			if ((time1 = getrtsecs()) != time2 && time1 != 0xFF) {
-				if (!no_message) {
-					/* Need to set CURRENT_TERM to each of selected terminals.  */
-					for (i = 0; term_table[i].name; i++)
-						if (term_bitmap & (1 << i)) {
-							current_term = term_table + i;
-							grub_printf("\rPress any key to continue.\n");
-						}
-
-					/* Restore CURRENT_TERM.  */
-					current_term = prev_term;
-				}
-
-				time2 = time1;
-				if (to > 0)
-					to--;
-			}
-		}
-	}
-
-      end:
-	current_term = term_table + default_term;
-	terminal_flags = term_flags;
 
 	if (lines)
 		max_lines = lines;
 	else
-		/* 24 would be a good default value.  */
-		max_lines = 24;
+		/* 25 would be a good default value.  */
+		max_lines = 25;
 
-	/* If the interface is currently the command-line, restart it to repaint the screen. */
-	//if (current_term != prev_term && (flags & BUILTIN_CMDLINE))
-	//  grub_longjmp (restart_cmdline_env, 0);
-#endif
+	/* If no argument is specified, show current setting.  */
+	if (! *arg) {
+		grub_printf("Serial console terminal %s.\n",
+				curses_serial_enabled()?"enabled":"disabled");
+		grub_printf("VGA console terminal %s.\n",
+				curses_vga_enabled()?"enabled":"disabled");
+		grub_printf("Flags:%s%s\n",
+			    terminal_flags & TERM_NO_EDIT ? " (no edit)" : "",
+			    terminal_flags & TERM_NO_ECHO ? " (no echo)" : "");
+	}
+
 	return 0;
 }
 
@@ -1159,17 +1091,15 @@ static struct builtin builtin_terminal = {
 	"terminal",
 	terminal_func,
 	BUILTIN_MENU | BUILTIN_CMDLINE | BUILTIN_HELP_LIST | BUILTIN_NO_ECHO,
-	"terminal [--dumb] [--no-echo] [--no-edit] [--timeout=SECS] [--lines=LINES] [--silent] [console] [serial]",
+	"terminal [--no-echo] [--no-edit] [--timeout=SECS] [--lines=LINES] [--silent] [console] [serial]",
 	"Select a terminal. When multiple terminals are specified, wait until"
 	    " you push any key to continue. If both console and serial are specified,"
 	    " the terminal to which you input a key first will be selected. If no"
-	    " argument is specified, print current setting. The option --dumb"
-	    " specifies that your terminal is dumb, otherwise, vt100-compatibility"
-	    " is assumed. If you specify --no-echo, input characters won't be echoed."
+	    " argument is specified, print current setting. If you specify --no-echo,"
+	    " input characters won't be echoed."
 	    " If you specify --no-edit, the BASH-like editing feature will be disabled."
 	    " If --timeout is present, this command will wait at most for SECS"
 	    " seconds. The option --lines specifies the maximum number of lines."
-	    " The option --silent is used to suppress messages."
 };
 
 /* timeout */
@@ -1193,6 +1123,22 @@ static struct builtin builtin_timeout = {
 };
 
 
+static int keymap_func(char *arg, int flags)
+{
+	if (keyboard_set_layout(arg)) {
+		errnum = ERR_BAD_ARGUMENT;
+		return 1;
+	}
+	return 0;
+}
+
+static struct builtin builtin_keymap = {
+	"keymap",
+	keymap_func,
+	BUILTIN_MENU | BUILTIN_CMDLINE | BUILTIN_HELP_LIST | BUILTIN_NO_ECHO,
+	"keymap LANGCODE",
+	"Select a keymap to use. Currently only 'en' and 'de' are supported."
+};
 
 static int title_func(char *arg, int flags)
 {
@@ -1226,12 +1172,11 @@ struct builtin *builtin_table[] = {
 	&builtin_hiddenmenu,
 	&builtin_initrd,
 	&builtin_kernel,
+	&builtin_keymap,
 	&builtin_lock,
 #ifdef CONFIG_USE_MD5_PASSWORDS
 	&builtin_md5crypt,
 #endif
-	&builtin_nvram_default,
-	&builtin_nvram_root,
 	&builtin_password,
 	&builtin_pause,
 	&builtin_poweroff,

@@ -350,9 +350,9 @@ static char *parse_command_line(const char *orig_cmdline, char *kern_cmdline)
 	 * which I believe is a paramter to the realmode part of Linux,
 	 * which we don't execute. */
 	if (strcmp(name, "initrd") == 0) {
-	    if (!val)
+	    if (!val) {
 		printf("Missing filename to initrd parameter\n");
-	    else {
+	    } else {
 		initrd = malloc(len + 1);
 		memcpy(initrd, val, len);
 		initrd[len] = 0;
@@ -361,9 +361,9 @@ static char *parse_command_line(const char *orig_cmdline, char *kern_cmdline)
 	    /* Don't pass this to kernel */
 	    to_kern = 0;
 	} else if (strcmp(name, "mem") == 0) {
-	    if (!val)
+	    if (!val) {
 		printf("Missing value for mem parameter\n");
-	    else {
+	    } else {
 		forced_memsize = strtoull_with_suffix(val, (char**)&val, 0);
 		if (forced_memsize == 0)
 		    printf("Invalid mem option, ignored\n");

@@ -204,7 +204,7 @@ static int parse_device_name(const char *name, int *type, int *drive,
 	}
 
 	if (*name != '\0') {
-		printf("Can't parse device name\n");
+		printf("Can't parse device name.\n");
 		return 0;
 	}
 

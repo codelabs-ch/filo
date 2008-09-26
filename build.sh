@@ -1,6 +1,8 @@
 #!/bin/sh
 
-#ALLCLEAN=1
+CONFIG=defconfig
+
+ALLCLEAN=1
 
 OS=`uname -s`
 if [ "$OS" == "Darwin" -o "${OS:0:6}" == "CYGWIN" ]; then
@@ -21,6 +23,7 @@ fi
 
 if [ "$ALLCLEAN" != "" -o ! -r libpayload/build/lib/libpayload.a ]; then
   cd libpayload
+  cp configs/$CONFIG .config
   make clean
   make oldconfig
   eval make $MAKEFLAGS
@@ -28,6 +31,7 @@ if [ "$ALLCLEAN" != "" -o ! -r libpayload/build/lib/libpayload.a ]; then
 fi
 
 make distclean
-make defconfig
+cp configs/$CONFIG ./.config
+make oldconfig
 eval make $MAKEFLAGS
 

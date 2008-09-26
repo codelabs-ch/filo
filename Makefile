@@ -17,7 +17,7 @@
 #
 
 export PROGRAM_NAME := FILO
-export PROGRAM_VERSION := 0.6.0b1
+export PROGRAM_VERSION := 0.6.0rc1
 
 export src := $(shell pwd)
 export srctree := $(src)

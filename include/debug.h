@@ -39,4 +39,10 @@
 # define debug_hexdump(...) /* nothing */
 #endif
 
+#ifdef CONFIG_USE_GRUB
+extern int using_grub_interface;
+void grub_printf (const char *format,...);
+#define printf(x...) { if (using_grub_interface) { grub_printf(x); } else { printf(x); } }
+#endif
+
 #endif /* DEBUG_H */

@@ -347,9 +347,9 @@ static int ide_software_reset(struct controller *ctrl)
 		if (master_exist) {
 			debug("master found.");
 		}
-		if (slave_exist)
+		if (slave_exist) {
 			printf ("reset failed, but slave may exist\n");
-		else {
+		} else {
 			// return -1;
 			printf("reset failed, but we may be on SATA\n");
 		}
@@ -822,12 +822,13 @@ static int init_drive(struct harddisk_info *info, struct controller *ctrl,
 		(info->address_mode==ADDRESS_MODE_LBA48) ? "LBA48" :
 		(info->address_mode==ADDRESS_MODE_PACKET) ? "ATAPI" : "???");
 
-	if (info->sectors > (10LL*1000*1000*1000/512))
+	if (info->sectors > (10LL*1000*1000*1000/512)) {
 		printf(" %uGB", (unsigned) (info->sectors / (1000*1000*1000/512)));
-	else if (info->sectors > (10*1000*1000/512))
+	} else if (info->sectors > (10*1000*1000/512)) {
 		printf(" %uMB", (unsigned) (info->sectors / (1000*1000/512)));
-	else if (info->sectors > 0)
+	} else if (info->sectors > 0) {
 		printf(" %uKB", (unsigned) (info->sectors / 2));
+	}
 	printf(": %s\n", info->model_number);
 
 	return 0;

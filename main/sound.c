@@ -18,6 +18,7 @@
 #include <drivers.h>
 #include <sound.h>
 #include <pci.h>
+#include <debug.h>
 
 static const struct sound_ops *ops;
 

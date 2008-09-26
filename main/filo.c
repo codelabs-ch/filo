@@ -23,6 +23,7 @@
 #include <sys_info.h>
 #include <sound.h>
 #include <arch/timer.h>
+#include <debug.h>
 
 PAYLOAD_INFO(name, PROGRAM_NAME " " PROGRAM_VERSION);
 PAYLOAD_INFO(listname, PROGRAM_NAME);
@@ -90,6 +91,19 @@ void boot(const char *line)
     free(file);
 }
 
+
+void __attribute__((weak)) platform_reboot(void)
+{
+	grub_printf("Rebooting not supported.\n");
+}
+
+void reset_handler(void)
+{
+	void platform_reboot(void);
+
+	platform_reboot();
+}
+
 #if CONFIG_USE_GRUB
 /* The main routine */
 int main(void)
@@ -99,6 +113,7 @@ int main(void)
     
     /* Initialize */
     init();
+    keyboard_add_reset_handler(reset_handler);
     grub_menulst();
     grub_main();
     return 0;   

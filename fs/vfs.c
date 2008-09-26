@@ -124,7 +124,7 @@ int mount_fs(void)
 			continue;
 
 		fsys = &fsys_table[i];
-		printf("Mounted %s\n", fsys->name);
+		debug("Mounted %s\n", fsys->name);
 		return 1;
 	}
 	fsys = 0;

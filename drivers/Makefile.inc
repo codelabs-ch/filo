@@ -18,4 +18,5 @@
 
 TARGETS-$(CONFIG_IDE_DISK) += drivers/ide.o
 TARGETS-$(CONFIG_VIA_SOUND) += drivers/via-sound.o
+TARGETS-y += drivers/intel.o
 

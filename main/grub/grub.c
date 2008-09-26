@@ -39,6 +39,8 @@ char KILL_BUF[KILL_BUFLEN]; /* The kill buffer for the command-line.  */
 char MENU_BUF[MENU_BUFLEN]; /* The buffer for the menu entries.  */
 static char configs[16384];
 
+int using_grub_interface = 0;
+
 #define ENTER '\r'
 #define ESCAPE '\x1b'
 
@@ -89,7 +91,7 @@ static inline int menulst_delay(void)
 }
 #endif				/* CONFIG_MENULST_TIMEOUT */
 
-void grub_menulst(void)
+void manual_grub_menulst(void)
 {
 	char line[256];
 
@@ -127,6 +129,53 @@ void grub_menulst(void)
 		}
 	}
 
+
+}
+
+int probe_menulst(char *bootdevice, char *filename)
+{
+	char menulst[256];
+
+	strcpy(menulst, bootdevice);
+	strncat(menulst, filename, 256);
+	copy_path_to_filo_bootline(menulst, config_file, 0);
+	if (file_open(config_file)) {
+		/* We found a config file. Bail out */
+		/* The valid config file name stays in config_file[] */
+		file_close();
+		return 1;
+	}
+
+	return 0;
+}
+
+void grub_menulst(void)
+{
+	char bootdevices[256];
+	char *running = bootdevices;
+	char *bootdevice;
+
+	if (get_option(bootdevices, "boot_devices"))
+		goto old;
+
+	printf("boot_devices = '%s'\n", bootdevices);
+
+	do {
+		bootdevice = strsep(&running, ";");
+		if (bootdevice && *bootdevice) {
+			if (probe_menulst(bootdevice, "/filo.lst"))
+				return;
+			if (probe_menulst(bootdevice, "/boot/filo.lst"))
+				return;
+			if (probe_menulst(bootdevice, "/menu.lst"))
+				return;
+			if (probe_menulst(bootdevice, "/boot/menu.lst"))
+				return;
+		}
+	} while (bootdevice);
+
+old:
+	manual_grub_menulst();
 
 }
 
@@ -850,6 +899,10 @@ void grub_main(void)
 	keypad(stdscr, TRUE);
 	wtimeout(stdscr, 100);
 	endwin();
+	using_grub_interface = 1;
+
+	console_setcolor((COLOR_WHITE << 4) | COLOR_BLACK, 
+			 (COLOR_BLACK << 4) | COLOR_WHITE);
 
 	/* Initialize the kill buffer.  */
 	*kill_buf = 0;
