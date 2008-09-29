@@ -42,7 +42,7 @@
 #ifdef CONFIG_USE_GRUB
 extern int using_grub_interface;
 void grub_printf (const char *format,...);
-#define printf(x...) { if (using_grub_interface) { grub_printf(x); } else { printf(x); } }
+#define printf(x...) do { if (using_grub_interface) { grub_printf(x); } else { printf(x); } } while (0)
 #endif
 
 #endif /* DEBUG_H */
