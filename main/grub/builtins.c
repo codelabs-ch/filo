@@ -182,6 +182,12 @@ static int color_func(char *arg, int flags)
 		/* Terminate the string STR.  */
 		*ptr++ = 0;
 
+		/* If STR contains the prefix "blink-", then set the `blink' bit in COLOR.  */
+		if (substring("blink-", str) <= 0) {
+			color = 0x80;
+			str += 6;
+		}
+
 		/* Search for the color name.  */
 		for (i = 0; i < 16; i++)
 			if (strcmp(color_list[i], str) == 0) {
@@ -196,13 +202,13 @@ static int color_func(char *arg, int flags)
 		nul_terminate(str);
 
 		/* Search for the color name.  */
-		for (i = 0; i < 16; i++)
+		for (i = 0; i < 8; i++)
 			if (strcmp(color_list[i], str) == 0) {
 				color |= i;
 				break;
 			}
 
-		if (i == 16)
+		if (i == 8)
 			return -1;
 
 		return color;
