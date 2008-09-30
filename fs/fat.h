@@ -1,6 +1,7 @@
 /*
  *  GRUB  --  GRand Unified Bootloader
  *  Copyright (C) 2001  Free Software Foundation, Inc.
+ *  Copyright (C) 2008  coresystems GmbH
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -30,6 +31,35 @@ typedef unsigned short __u16;
 typedef __signed__ int __s32;
 typedef unsigned int __u32;
 
+
+struct fat16_extended_bpb {
+	__u8    drive_number;	/* Physical Drive Number */
+	__u8    reserved;	/* "current head" */
+	__u8	boot_signature;	/* Extended Boot Signature 0x28 or 0x29 */
+	__u8    id[4];		/* ID (serial number) */
+	__u8    volumelabel[11];/* volume label */
+	__s8    type[8];	/* Padded with blanks: "FAT12", "FAT16" */
+} __attribute__((packed));
+
+struct fat32_extended_bpb {
+	/* The following fields are only used by FAT32 */
+	__u32	fat32_length;	/* sectors/FAT */
+	__u16	flags;		/* bit 8: fat mirroring, low 4: active fat */
+	__u8	version[2];	/* major, minor filesystem version */
+	__u32	root_cluster;	/* first cluster in root directory */
+	__u16	info_sector;	/* filesystem info sector */
+	__u16	backup_boot;	/* backup boot sector */
+	__u16	reserved2[12];	/* Reserved */
+	/* from here on it looks like the fat12/fat16 code */
+	__u8    drive_number;	/* Physical Drive Number */
+	__u8    reserved;	/* "current head" */
+	__u8	boot_signature;	/* Extended Boot Signature 0x28 or 0x29 */
+	__u8    id[4];		/* ID (serial number) */
+	__u8    volumelabel[11];/* volume label */
+	__s8    type[8];	/* Padded with blanks: "FAT32" */
+} __attribute__((packed));
+
+
 /* Note that some shorts are not aligned, and must therefore
  * be declared as array of two bytes.
  */
@@ -50,14 +80,10 @@ struct fat_bpb {
 	__u32	hidden;		/* hidden sectors (unused) */
 	__u32	long_sectors;	/* number of sectors (if short_sectors == 0) */
 
-	/* The following fields are only used by FAT32 */
-	__u32	fat32_length;	/* sectors/FAT */
-	__u16	flags;		/* bit 8: fat mirroring, low 4: active fat */
-	__u8	version[2];	/* major, minor filesystem version */
-	__u32	root_cluster;	/* first cluster in root directory */
-	__u16	info_sector;	/* filesystem info sector */
-	__u16	backup_boot;	/* backup boot sector */
-	__u16	reserved2[6];	/* Unused */
+	union {
+		struct fat16_extended_bpb fat16;
+		struct fat32_extended_bpb fat32;
+	} extended;
 };
 
 #define FAT_CVT_U16(bytarr) (* (__u16*)(bytarr))

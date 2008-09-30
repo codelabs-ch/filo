@@ -83,7 +83,7 @@ fat_mount (void)
   /* FAT offset and length */
   FAT_SUPER->fat_offset = FAT_CVT_U16 (bpb.reserved_sects);
   FAT_SUPER->fat_length = 
-    bpb.fat_length ? bpb.fat_length : bpb.fat32_length;
+    bpb.fat_length ? bpb.fat_length : bpb.extended.fat32.fat32_length;
   
   /* Rootdir offset and length for FAT12/16 */
   FAT_SUPER->root_offset = 
@@ -99,23 +99,31 @@ fat_mount (void)
 	 / bpb.sects_per_clust);
   FAT_SUPER->sects_per_clust = bpb.sects_per_clust;
   
+  if (strncmp(bpb.extended.fat16.type, "FAT12", 5) &&
+	strncmp(bpb.extended.fat16.type, "FAT16", 5) &&
+	strncmp(bpb.extended.fat32.type, "FAT32", 5))
+    {
+      /* None of them matched. Bail out */
+      return 0;
+    }
+
   if (!bpb.fat_length)
     {
       /* This is a FAT32 */
       if (FAT_CVT_U16(bpb.dir_entries))
  	return 0;
       
-      if (bpb.flags & 0x0080)
+      if (bpb.extended.fat32.flags & 0x0080)
 	{
 	  /* FAT mirroring is disabled, get active FAT */
-	  int active_fat = bpb.flags & 0x000f;
+	  int active_fat = bpb.extended.fat32.flags & 0x000f;
 	  if (active_fat >= bpb.num_fats)
 	    return 0;
 	  FAT_SUPER->fat_offset += active_fat * FAT_SUPER->fat_length;
 	}
       
       FAT_SUPER->fat_size = 8;
-      FAT_SUPER->root_cluster = bpb.root_cluster;
+      FAT_SUPER->root_cluster = bpb.extended.fat32.root_cluster;
 
       /* Yes the following is correct.  FAT32 should be called FAT28 :) */
       FAT_SUPER->clust_eof_marker = 0xffffff8;
