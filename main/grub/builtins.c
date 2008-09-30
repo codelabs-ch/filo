@@ -247,6 +247,7 @@ static struct builtin builtin_color = {
 	    " \"blink-\" to FG if you want a blinking foreground color."
 };
 
+static int help_func(char *arg, int flags);
 /* configfile */
 static int configfile_func(char *arg, int flags)
 {
@@ -255,6 +256,9 @@ static int configfile_func(char *arg, int flags)
 	/* Check if the file ARG is present.  */
 	temp_space[0]=0;
 	copy_path_to_filo_bootline(arg, temp_space, 1);
+	if (temp_space[0]==0) {
+		return help_func("configfile",0);
+	}
 	if (!file_open(temp_space)) {
 		errnum = ERR_FILE_NOT_FOUND;
 		return 1;
