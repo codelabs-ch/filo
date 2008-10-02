@@ -746,8 +746,8 @@ void console_setcolorstate(color_state state)
 
 void console_setcolor(int normal_color, int highlight_color)
 {
-	init_pair(1,(normal_color >> 4) &0xf, normal_color & 0xf);
-	init_pair(2,(highlight_color >> 4) &0xf, highlight_color & 0xf);
+	init_pair(1, normal_color & 0xf, (normal_color >> 4) & 0xf);
+	init_pair(2, highlight_color & 0xf, (highlight_color >> 4) & 0xf);
 
 	/* Make curses update the whole screen */
 	redrawwin(stdscr);

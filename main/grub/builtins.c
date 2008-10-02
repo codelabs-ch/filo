@@ -166,7 +166,7 @@ static int color_func(char *arg, int flags)
 
 	auto int color_number(char *str);
 
-	/* Convert the color name STR into the magical number.  */
+	/* Convert the color name STR into a VGA color number.  */
 	auto int color_number(char *str) {
 		char *ptr;
 		int i;
@@ -188,10 +188,10 @@ static int color_func(char *arg, int flags)
 			str += 6;
 		}
 
-		/* Search for the color name.  */
+		/* Search for the foreground color name.  */
 		for (i = 0; i < 16; i++)
 			if (strcmp(color_list[i], str) == 0) {
-				color |= (i << 4);
+				color |= i;
 				break;
 			}
 
@@ -201,10 +201,10 @@ static int color_func(char *arg, int flags)
 		str = ptr;
 		nul_terminate(str);
 
-		/* Search for the color name.  */
+		/* Search for the background color name.  */
 		for (i = 0; i < 8; i++)
 			if (strcmp(color_list[i], str) == 0) {
-				color |= i;
+				color |= (i <<4);
 				break;
 			}
 

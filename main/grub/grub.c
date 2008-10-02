@@ -901,8 +901,8 @@ void grub_main(void)
 	endwin();
 	using_grub_interface = 1;
 
-	console_setcolor((COLOR_WHITE << 4) | COLOR_BLACK, 
-			 (COLOR_BLACK << 4) | COLOR_WHITE);
+	console_setcolor((COLOR_BLACK << 4) | COLOR_WHITE,
+			 (COLOR_WHITE << 4) | COLOR_BLACK);
 
 	/* Initialize the kill buffer.  */
 	*kill_buf = 0;
