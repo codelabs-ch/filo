@@ -450,7 +450,7 @@ static int help_func(char *arg, int flags)
 									break;
 						}
 
-						grub_printf("    ");
+						grub_putstr("    ");
 						for (i = 0; i < len; i++)
 							grub_putchar(*doc++);
 						grub_putchar('\n');

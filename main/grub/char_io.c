@@ -935,6 +935,7 @@ void console_putchar(int c)
 	} else if (isprint(c)) {
 		getyx(stdscr, y, x);
 		if (x + 1 == COLS) {
+			console_putchar('\r');
 			console_putchar('\n');
 		}
 		if (console_color_state == COLOR_STATE_HIGHLIGHT)
