@@ -150,6 +150,7 @@ void grub_printf(const char *format, ...)
 
 void init_page(void)
 {
+	color_set(1, NULL);
 	cls();
 	grub_printf("\n                                  %s %s\n\n", 
 			PROGRAM_NAME, PROGRAM_VERSION);
