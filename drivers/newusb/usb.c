@@ -22,20 +22,32 @@
 #include <usb/usbmsc.h>
 
 
-static usbdev_t* devs[4]; // FIXME: only 4 devices
+// FIXME: should be dynamic?
+#define maxdevs 4
+static usbdev_t* devs[maxdevs];
 static int count = -1;
 
 void usbdisk_create (usbdev_t* dev)
 {
-	if (count == 3) return;
+	if (count == maxdevs-1) return;
 	devs[++count] = dev;
 }
 
 void usbdisk_remove (usbdev_t* dev)
 {
-	/* FIXME: actually remove the right device */
+	int i;
 	if (count == -1) return;
-	count--;
+	if (devs[count] == dev) {
+		count--;
+		return;
+	}
+	for (i=0; i<count; i++) {
+		if (devs[i] == dev) {
+			devs[i] = devs[count];
+			count--;
+			return;
+		}
+	}
 }
 
 int usb_new_probe(int drive)
@@ -46,7 +58,7 @@ int usb_new_probe(int drive)
 	   must be more clever for that.
 	*/
 	usb_poll();
-	if (count >= drive) return drive;
+	if (count >= drive) return 0;
 	return -1;
 }
 
@@ -56,21 +68,3 @@ int usb_new_read(const int drive, const sector_t sector, const int size, void *b
 	int result = -readwrite_blocks(devs[drive], sector, size, cbw_direction_data_in, buffer);
 	return result;
 }
-
-int __attribute__((weak)) usb_initialize(void)
-{
-	printf("NOTE: In order to use USB support, your libpayload needs USB"
-			" support enabled, too.\n");
-
-	return 0;
-}
-
-int __attribute__((weak)) readwrite_blocks (usbdev_t *dev, int start, int n, cbw_direction dir, u8 *buf)
-{
-	return 1;
-}
-
-void __attribute__((weak)) usb_poll(void)
-{
-}
-
