@@ -809,11 +809,10 @@ static int init_drive(struct harddisk_info *info, struct controller *ctrl,
 		cmd.sector_count = drive_info[6];
 		cmd.command = IDE_CMD_INITIALIZE_DRIVE_PARAMETERS;
 		debug("Init device params... ");
-		if (pio_non_data(ctrl, &cmd) < 0) {
+		if (pio_non_data(ctrl, &cmd) < 0)
 			debug("failed (ok for newer drives)\n");
-		} else {
+		else
 			debug("ok\n");
-		}
 	}
 
 	printf("hd%c: %s",
