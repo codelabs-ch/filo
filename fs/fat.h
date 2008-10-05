@@ -49,7 +49,7 @@ struct fat32_extended_bpb {
 	__u32	root_cluster;	/* first cluster in root directory */
 	__u16	info_sector;	/* filesystem info sector */
 	__u16	backup_boot;	/* backup boot sector */
-	__u16	reserved2[12];	/* Reserved */
+	__u8	reserved2[12];	/* Reserved */
 	/* from here on it looks like the fat12/fat16 code */
 	__u8    drive_number;	/* Physical Drive Number */
 	__u8    reserved;	/* "current head" */

@@ -110,6 +110,8 @@ fat_mount (void)
   if (!bpb.fat_length)
     {
       /* This is a FAT32 */
+
+      /* FAT32 should have 0 in this field, as its root directory can grow dynamically now */
       if (FAT_CVT_U16(bpb.dir_entries))
  	return 0;
       
