@@ -94,7 +94,7 @@ void boot(const char *line)
 
 void __attribute__((weak)) platform_reboot(void)
 {
-	grub_printf("Rebooting not supported.\n");
+	printf("Rebooting not supported.\n");
 }
 
 void reset_handler(void)
