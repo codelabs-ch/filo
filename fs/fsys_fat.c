@@ -99,9 +99,9 @@ fat_mount (void)
 	 / bpb.sects_per_clust);
   FAT_SUPER->sects_per_clust = bpb.sects_per_clust;
   
-  if (strncmp(bpb.extended.fat16.type, "FAT12", 5) &&
-	strncmp(bpb.extended.fat16.type, "FAT16", 5) &&
-	strncmp(bpb.extended.fat32.type, "FAT32", 5))
+  if (strncmp((const char *)bpb.extended.fat16.type, "FAT12", 5) &&
+	strncmp((const char *)bpb.extended.fat16.type, "FAT16", 5) &&
+	strncmp((const char *)bpb.extended.fat32.type, "FAT32", 5))
     {
       /* None of them matched. Bail out */
       return 0;
