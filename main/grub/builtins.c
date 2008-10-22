@@ -27,6 +27,7 @@
 #ifdef CONFIG_USE_MD5_PASSWORDS
 #include <grub/md5.h>
 #endif
+#include <pci.h>
 
 /* The default entry.  */
 int default_entry = 0;
@@ -615,7 +616,114 @@ static struct builtin builtin_initrd = {
 };
 
 
+#ifdef CONFIG_DEVELOPER_TOOLS
+/* io */
+static int io_func(char *arg, int flags)
+{
+	char *walk = arg;
+	unsigned int port = 0;
+	unsigned int value = 0;
+	unsigned int write_mode = 0;
+	unsigned int maxval=0xff, len=1;
 
+	while ((*walk != 0) && (*walk != '.') && (*walk != '=')) {
+		port *= 16;
+		port += hex2bin(*walk);
+		walk++;
+	}
+	if (port > 0xffff) {
+		grub_printf("port too high\n");
+		errnum = ERR_BAD_ARGUMENT;
+		return 1;
+	}
+
+	if (*walk == '.') {
+		walk++;
+		switch (*walk) {
+		case 'l':
+		case 'L':
+			len = 4;
+			maxval = 0xffffffff;
+			break;
+		case 'w':
+		case 'W':
+			len=2;
+			maxval = 0xffff;
+			break;
+		case 'b':
+		case 'B':
+			len=1;
+			maxval = 0xff;
+			break;
+		default:
+			grub_printf("width must be b, w, or l\n");
+			errnum = ERR_BAD_ARGUMENT;
+			return 1;
+		}
+		walk++;
+	}
+
+	if (*walk == '=') {
+		while (*walk!=0 && *walk != '.') {
+			value *= 16;
+			value += hex2bin(*walk);
+			walk++;
+		}
+
+		if (value > maxval) {
+			grub_printf("value too big.\n");
+			errnum = ERR_BAD_ARGUMENT;
+			return 1;
+		}
+
+		write_mode = 1;
+	}
+
+	if (write_mode) {
+		grub_printf ("out");
+		switch (len) {
+		case 1:
+			grub_printf("b 0x%02x -> 0x%04x\n", value, port);
+			outb(value, port);
+			break;
+		case 2:
+			grub_printf("w 0x%04x -> 0x%04x\n", value, port);
+			outw(value, port);
+			break;
+		case 4:
+			grub_printf("l 0x%08x -> 0x%04x\n", value, port);
+			outl(value, port);
+			break;
+		}
+	} else {
+		grub_printf ("in");
+		switch (len) {
+		case 1:
+			value = inb(port);
+			grub_printf("b 0x%04x: 0x%02x\n", port, value);
+			break;
+		case 2:
+			value = inw(port);
+			grub_printf("w 0x%04x: 0x%04x\n", port, value);
+			break;
+		case 4:
+			value = inl(port);
+			grub_printf("l 0x%04x: 0x%08x\n", port, value);
+			break;
+		}
+	}
+
+	return 0;
+}
+
+static struct builtin builtin_io = {
+	"io",
+	io_func,
+	BUILTIN_MENU | BUILTIN_CMDLINE | BUILTIN_HELP_LIST | BUILTIN_NO_ECHO,
+	"io port[.bwl][=val]",
+	"Read/write IO ports."
+};
+#endif
 
 /* kernel */
 static int kernel_func(char *arg, int flags)
@@ -680,6 +788,117 @@ static struct builtin builtin_lock = {
 	"lock",
 	"Break a command execution unless the user is authenticated."
 };
+
+#ifdef CONFIG_DEVELOPER_TOOLS
+static int lspci_indent = 0;
+static void lspci_scan_bus(int bus)
+{
+	int slot, func;
+	unsigned int val;
+	unsigned char hdr;
+	int i;
+
+	for (slot = 0; slot < 0x20; slot++) {
+		for (func = 0; func < 8; func++) {
+			pcidev_t dev = PCI_DEV(bus, slot, func);
+
+			val = pci_read_config32(dev, REG_VENDOR_ID);
+
+			/* Nobody home. */
+			if (val == 0xffffffff || val == 0x00000000 ||
+			    val == 0x0000ffff || val == 0xffff0000)
+				continue;
+
+			for (i=0; i<lspci_indent; i++)
+				grub_printf("|  ");
+			grub_printf("|- %x:%x.%x [%x:%x]\n", bus, slot, func,
+					val & 0xffff, val >> 16);
+
+			/* If this is a bridge, then follow it. */
+			hdr = pci_read_config8(dev, REG_HEADER_TYPE);
+			hdr &= 0x7f;
+			if (hdr == HEADER_TYPE_BRIDGE ||
+			    hdr == HEADER_TYPE_CARDBUS) {
+				unsigned int busses;
+
+				busses = pci_read_config32(dev, REG_PRIMARY_BUS);
+				lspci_indent++;
+				lspci_scan_bus((busses >> 8) & 0xff);
+				lspci_indent--;
+			}
+		}
+	}
+}
+
+static void lspci_configspace(pcidev_t dev)
+{
+	unsigned char cspace[256];
+	int i, x, y;
+
+	for (i = 0; i < 256; i ++)
+		cspace[i] = pci_read_config8(dev, i);
+
+	for (y = 0; y < 16; y++) {
+		grub_printf("%x0:", y);
+		for (x = 0; x < 16; x++)
+			grub_printf(" %02x", cspace[(y * 16) + x]);
+		grub_printf("\n");
+	}
+
+	grub_printf("\n");
+}
+
+static int lspci_func(char *arg, int flags)
+{
+	char *walk = arg;
+	int bus, slot, fn;
+
+	if(strlen(walk)) {
+		pcidev_t dev;
+
+		if((walk[1] != ':') && (walk[2] =! ':'))
+			goto out;
+		if(walk[1] == ':') {
+			bus = hex2bin(walk[0]);
+			walk+=2;
+		} else {
+			bus = (hex2bin(walk[0]) * 16) + hex2bin(walk[1]);
+			walk+=3;
+		}
+		if((walk[1] != '.') && (walk[2] =! '.'))
+			goto out;
+
+		if(walk[1] == '.') {
+			slot = hex2bin(walk[0]);
+			walk+=2;
+		} else {
+			slot = (hex2bin(walk[0]) * 16) + hex2bin(walk[1]);
+			walk+=3;
+		}
+		if (!walk[0])
+			goto out;
+
+		fn=hex2bin(walk[0]);
+
+		grub_printf("Dumping %x:%x.%x\n", bus, slot, fn);
+
+		dev = PCI_DEV(bus, slot, fn);
+		lspci_configspace(dev);
+		return 0;
+	}
+out:
+	lspci_scan_bus(0);
+	return 0;
+}
+
+static struct builtin builtin_lspci = {
+	"lspci",
+	lspci_func,
+	BUILTIN_MENU | BUILTIN_CMDLINE | BUILTIN_HELP_LIST | BUILTIN_NO_ECHO,
+	"lspci <device>",
+	"Show PCI devices or dump PCI config space"
+};
+#endif
 
 #ifdef CONFIG_USE_MD5_PASSWORDS
 /* md5crypt */
@@ -817,14 +1036,13 @@ static struct builtin builtin_pause = {
 	"Print MESSAGE, then wait until a key is pressed."
 };
 
-void __attribute__((weak)) platform_poweroff(void)
-{
-	grub_printf("Poweroff not supported.\n");
-}
-
 static int poweroff_func(char *arg, int flags)
 {
-	platform_poweroff();
+	void __attribute__((weak)) platform_poweroff(void);
+	if (platform_poweroff)
+		platform_poweroff();
+	else
+		grub_printf("Poweroff not supported.\n");
 
 	// Will (hopefully) never return;
 	return 0;
@@ -838,11 +1056,38 @@ static struct builtin builtin_poweroff = {
 	"Power off the system."
 };
 
+#ifdef CONFIG_DEVELOPER_TOOLS
+static int probe_func(char *arg, int flags)
+{
+#if CONFIG_IDE_DISK
+	int i;
+
+	for (i=0; i<8; i++)
+		ide_probe(i);
+#else
+	grub_printf("No IDE driver.\n");
+#endif
+
+	return 0;
+}
+
+static struct builtin builtin_probe = {
+	"probe",
+	probe_func,
+	BUILTIN_CMDLINE | BUILTIN_HELP_LIST,
+	"probe",
+	"Probe IDE drives"
+};
+#endif
+
 static int reboot_func(char *arg, int flags)
 {
-	void platform_reboot(void);
+	void __attribute__((weak)) platform_reboot(void);
 
-	platform_reboot();
+	if (platform_reboot)
+		platform_reboot();
+	else
+		grub_printf("Reboot not supported.\n");
 
 	// Will (hopefully) never return;
 	return 0;
@@ -884,10 +1129,8 @@ static struct builtin builtin_root = {
 	"Set the current \"root device\" to the device DEVICE."
 };
 
-void __attribute__((weak))  serial_hardware_init(int port, int speed, int word_bits, int parity, int stop_bits)
-{
-	grub_printf("This version of FILO does not have serial console support.\n");
-}
+void __attribute__((weak))  serial_hardware_init(int port, int speed, int
+		word_bits, int parity, int stop_bits);
 
 /* serial */
 static int serial_func(char *arg, int flags)
@@ -987,7 +1230,10 @@ static int serial_func(char *arg, int flags)
 	}
 
 	/* Initialize the serial unit.  */
-	serial_hardware_init(port, speed, word_len, parity, stop_bit_len);
+	if (serial_hardware_init)
+		serial_hardware_init(port, speed, word_len, parity, stop_bit_len);
+	else
+		grub_printf("This version of FILO does not have serial console support.\n");
 
 	return 0;
 }
@@ -1006,7 +1252,162 @@ static struct builtin builtin_serial = {
 	    " default values are COM1, 9600, 8N1."
 };
 
+#ifdef CONFIG_DEVELOPER_TOOLS
+static int setpci_func(char *arg, int flags)
+{
+	char *walk = arg;
+	int bus, slot, fn;
+	pcidev_t dev;
+	unsigned int reg=0;
+	unsigned int len=1, maxval=0xff, value=0;
+	int write_mode = 0;
 
+	// setpci bus:dev.fn reg.[bwl][=val]
+
+	if(!strlen(arg)) {
+		errnum = ERR_BAD_ARGUMENT;
+		return 1;
+	}
+
+	if((walk[1] != ':') && (walk[2] =! ':')) {
+		errnum = ERR_BAD_ARGUMENT;
+		return 1;
+	}
+
+	if(walk[1] == ':') {
+		bus = hex2bin(walk[0]);
+		walk+=2;
+	} else {
+		bus = (hex2bin(walk[0]) * 16) + hex2bin(walk[1]);
+		walk+=3;
+	}
+	if((walk[1] != '.') && (walk[2] =! '.')) {
+		errnum = ERR_BAD_ARGUMENT;
+		return 1;
+	}
+
+	if(walk[1] == '.') {
+		slot = hex2bin(walk[0]);
+		walk+=2;
+	} else {
+		slot = (hex2bin(walk[0]) * 16) + hex2bin(walk[1]);
+		walk+=3;
+	}
+	if (!walk[0]) {
+		errnum = ERR_BAD_ARGUMENT;
+		return 1;
+	}
+
+	fn=hex2bin(walk[0]);
+
+	dev = PCI_DEV(bus, slot, fn);
+
+	walk++;
+	if (walk[0] != ' ') {
+		grub_printf("No register specified\n");
+		errnum = ERR_BAD_ARGUMENT;
+		return 1;
+	}
+
+	while (*walk!=0 && *walk != '.' && *walk != ':' ) {
+		reg *= 16;
+		reg += hex2bin(*walk);
+		walk++;
+	}
+
+	if (reg > 0xff) {
+		grub_printf("Only 256 byte config space supported.\n");
+		errnum = ERR_BAD_ARGUMENT;
+		return 1;
+	}
+
+	if (*walk == '.') {
+		walk++;
+		switch (*walk) {
+		case 'l':
+		case 'L':
+			len = 4;
+			maxval = 0xffffffff;
+			break;
+		case 'w':
+		case 'W':
+			len=2;
+			maxval = 0xffff;
+			break;
+		case 'b':
+		case 'B':
+			len=1;
+			maxval = 0xff;
+			break;
+		default:
+			grub_printf("width must be b, w, or l\n");
+			errnum = ERR_BAD_ARGUMENT;
+			return 1;
+		}
+		walk++;
+	}
+
+	if (*walk == '=') {
+		while (*walk!=0 && *walk != '.') {
+			value *= 16;
+			value += hex2bin(*walk);
+			walk++;
+		}
+
+		if (value > maxval) {
+			grub_printf("value too big.\n");
+			errnum = ERR_BAD_ARGUMENT;
+			return 1;
+		}
+
+		write_mode = 1;
+	}
+
+	if (write_mode) {
+		grub_printf ("pci_write_config");
+		switch (len) {
+		case 1:
+			grub_printf("8 0x%02x -> %x:%x.%x [%02x]\n", value, bus, slot, fn, reg);
+			pci_write_config8(dev, reg, value);
+			break;
+		case 2:
+			grub_printf("16 0x%04x -> %x:%x.%x [%02x]\n", value, bus, slot, fn, reg);
+			pci_write_config16(dev, reg, value);
+			break;
+		case 4:
+			grub_printf("32 0x%08x -> %x:%x.%x [%02x]\n", value, bus, slot, fn, reg);
+			pci_write_config32(dev, reg, value);
+			break;
+		}
+	} else {
+		grub_printf ("pci_read_config");
+		switch (len) {
+		case 1:
+			value = pci_read_config8(dev, reg);
+			grub_printf("8 %x:%x.%x [%02x] -> %02x\n", bus, slot, fn, reg, value);
+			break;
+		case 2:
+			value = pci_read_config16(dev, reg);
+			grub_printf("16 %x:%x.%x [%02x] -> %04x\n", bus, slot, fn, reg, value);
+			break;
+		case 4:
+			value = pci_read_config32(dev, reg);
+			grub_printf("32 %x:%x.%x [%02x] -> %08x\n", bus, slot, fn, reg, value);
+			break;
+		}
+	}
+
+	return 0;
+}
+
+static struct builtin builtin_setpci = {
+	"setpci",
+	setpci_func,
+	BUILTIN_MENU | BUILTIN_CMDLINE | BUILTIN_HELP_LIST | BUILTIN_NO_ECHO,
+	"setpci <device>[.bwl][=value]",
+	"Show/change PCI config space values"
+};
+#endif
 
 /* terminal */
 static int terminal_func(char *arg, int flags)
@@ -1145,7 +1546,7 @@ static struct builtin builtin_keymap = {
 	keymap_func,
 	BUILTIN_MENU | BUILTIN_CMDLINE | BUILTIN_HELP_LIST | BUILTIN_NO_ECHO,
 	"keymap LANGCODE",
-	"Select a keymap to use. Currently only 'en' and 'de' are supported."
+	"Select a keymap to use. Currently only 'us' and 'de' are supported."
 };
 
 static int title_func(char *arg, int flags)
@@ -1179,18 +1580,30 @@ struct builtin *builtin_table[] = {
 	&builtin_help,
 	&builtin_hiddenmenu,
 	&builtin_initrd,
+#ifdef CONFIG_DEVELOPER_TOOLS
+	&builtin_io,
+#endif
 	&builtin_kernel,
 	&builtin_keymap,
 	&builtin_lock,
+#ifdef CONFIG_DEVELOPER_TOOLS
+	&builtin_lspci,
+#endif
 #ifdef CONFIG_USE_MD5_PASSWORDS
 	&builtin_md5crypt,
 #endif
 	&builtin_password,
 	&builtin_pause,
 	&builtin_poweroff,
+#ifdef CONFIG_DEVELOPER_TOOLS
+	&builtin_probe,
+#endif
 	&builtin_reboot,
 	&builtin_root,
 	&builtin_serial,
+#ifdef CONFIG_DEVELOPER_TOOLS
+	&builtin_setpci,
+#endif
 	&builtin_terminal,
 	&builtin_timeout,
 	&builtin_title,

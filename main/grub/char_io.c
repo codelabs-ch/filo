@@ -73,42 +73,6 @@ void print_error(void)
 		grub_printf("\nError %u: %s\n", errnum, err_list[errnum]);
 }
 
-char *convert_to_ascii(char *buf, int c, ...)
-{
-	unsigned long num = *((&c) + 1), mult = 10;
-	char *ptr = buf;
-
-	if (c == 'x' || c == 'X')
-		mult = 16;
-
-	if ((num & 0x80000000uL) && c == 'd') {
-		num = (~num) + 1;
-		*(ptr++) = '-';
-		buf++;
-	}
-
-	do {
-		int dig = num % mult;
-		*(ptr++) = ((dig > 9) ? dig + 'a' - 10 : '0' + dig);
-	}
-	while (num /= mult);
-
-	/* reorder to correct direction!! */
-	{
-		char *ptr1 = ptr - 1;
-		char *ptr2 = buf;
-		while (ptr1 > ptr2) {
-			int tmp = *ptr1;
-			*ptr1 = *ptr2;
-			*ptr2 = tmp;
-			ptr1--;
-			ptr2++;
-		}
-	}
-
-	return ptr;
-}
-
 void grub_putstr(const char *str)
 {
 	while (*str)
@@ -117,35 +81,17 @@ void grub_putstr(const char *str)
 
 void grub_printf(const char *format, ...)
 {
-	int *dataptr = (int *) &format;
-	char c, str[16];
+	int ret;
+	va_list args;
+#define OUTPUT_SIZE 256
+	char output[OUTPUT_SIZE];
 
-	dataptr++;
-
-	while ((c = *(format++)) != 0) {
-		if (c != '%')
-			grub_putchar(c);
-		else
-			switch (c = *(format++)) {
-			case 'd':
-			case 'x':
-			case 'X':
-			case 'u':
-				*convert_to_ascii(str, c, *((unsigned long *)
-							    dataptr++)) = 0;
-				grub_putstr(str);
-				break;
-
-			case 'c':
-				grub_putchar((*(dataptr++)) & 0xff);
-				break;
-
-			case 's':
-				grub_putstr((char *) *(dataptr++));
-				break;
-			}
-	}
+	va_start(args, format);
+	ret = vsnprintf(output, OUTPUT_SIZE, format, args);
+	va_end(args);
+	grub_putstr(output);
 	refresh();
+#undef OUTPUT_SIZE
 }
 
 void init_page(void)

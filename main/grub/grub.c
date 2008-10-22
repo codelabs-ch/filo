@@ -138,6 +138,8 @@ int probe_menulst(char *bootdevice, char *filename)
 
 	strcpy(menulst, bootdevice);
 	strncat(menulst, filename, 256);
+	/* Set string to zero: */
+	config_file[0] = 0;
 	copy_path_to_filo_bootline(menulst, config_file, 0);
 	if (file_open(config_file)) {
 		/* We found a config file. Bail out */
@@ -634,6 +636,8 @@ static void run_menu(char *menu_entries, char *config_entries, int num_entries, 
 					if (config_entries)
 						run_menu(heap, NULL, new_num_entries, new_heap, 0);
 					else {
+						/* flush color map */
+						grub_printf(" ");
 						cls();
 						print_cmdline_message(CMDLINE_EDIT_MODE);
 
@@ -800,7 +804,6 @@ static void run_menu(char *menu_entries, char *config_entries, int num_entries, 
 			break;
 	}
 
-	for (;;);
 	show_menu = 1;
 	goto restart;
 }

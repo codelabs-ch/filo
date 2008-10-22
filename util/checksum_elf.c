@@ -28,6 +28,16 @@
 #else
 #include "byteorder.h"
 #endif
+#if defined(__sun)
+#include <sys/isa_defs.h>
+#define LITTLE_ENDIAN 1
+#define BIG_ENDIAN 2
+#if defined(_LITTLE_ENDIAN)
+#define BYTE_ORDER LITTLE_ENDIAN
+#else
+#define BYTE_ORDER BIG_ENDIAN
+#endif
+#endif
 #define STDINT_H
 #include "elf.h"
 #include "elf_boot.h"

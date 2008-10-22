@@ -16,6 +16,7 @@
  */
 
 #include <libpayload.h>
+#include <libpayload-config.h>
 #include <config.h>
 #include <version.h>
 #include <lib.h>
@@ -59,9 +60,18 @@ static void init(void)
     collect_sys_info(&sys_info);
     relocate();
 
-#if defined(CONFIG_USB_DISK) || defined(CONFIG_USB_NEW_DISK)
+#if defined(CONFIG_USB_DISK)
     usb_initialize();
 #endif
+#if defined(CONFIG_USB_NEW_DISK)
+#if defined(CONFIG_USB)
+    /* libpayload USB stack is there */
+    usb_initialize();
+#else
+    printf("No USB stack in libpayload.\n");
+#endif
+#endif
+
 
 #ifdef CONFIG_SUPPORT_SOUND
     sound_init();
@@ -91,17 +101,15 @@ void boot(const char *line)
     free(file);
 }
 
-
-void __attribute__((weak)) platform_reboot(void)
-{
-	printf("Rebooting not supported.\n");
-}
-
 void reset_handler(void)
 {
-	void platform_reboot(void);
+	void __attribute__((weak)) platform_reboot(void);
 
-	platform_reboot();
+	if (platform_reboot)
+		platform_reboot();
+	else
+		printf("Rebooting not supported.\n");
+
 }
 
 #if CONFIG_USE_GRUB

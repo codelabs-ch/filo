@@ -70,7 +70,7 @@ BUILD-y += drivers/usb/Makefile.inc drivers/newusb/Makefile.inc drivers/flash/Ma
 
 include $(PLATFORM-y) $(BUILD-y)
 
-LIBPAYLOAD_PREFIX ?= libpayload
+LIBPAYLOAD_PREFIX ?= $(obj)/libpayload
 LIBPAYLOAD = $(LIBPAYLOAD_PREFIX)/lib/libpayload.a
 INCPAYLOAD = $(LIBPAYLOAD_PREFIX)/include
 LIBGCC = $(shell $(CC) $(CFLAGS) -print-libgcc-file-name)

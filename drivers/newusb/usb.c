@@ -17,6 +17,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
+#include <libpayload-config.h>
+
+/* Only use this code if libpayload is compiled with USB stack */
+#ifdef CONFIG_USB
 #include <fs.h>
 #include <usb/usb.h>
 #include <usb/usbmsc.h>
@@ -68,3 +72,4 @@ int usb_new_read(const int drive, const sector_t sector, const int size, void *b
 	int result = -readwrite_blocks(devs[drive], sector, size, cbw_direction_data_in, buffer);
 	return result;
 }
+#endif

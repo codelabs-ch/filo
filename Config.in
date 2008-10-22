@@ -330,5 +330,13 @@ config DEBUG_ARTECBOOT
 	depends on ARTEC_BOOT
 	default n
 
+config DEVELOPER_TOOLS
+	bool "Developer Tools"
+	depends on USE_GRUB
+	default y
+	help
+	  Add commands useful for hardware development to the GRUB
+	  interface. These are lspci, setpci, io.
+
 endmenu
 

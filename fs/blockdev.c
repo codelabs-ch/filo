@@ -19,6 +19,7 @@
  */
 
 #include <libpayload.h>
+#include <libpayload-config.h>
 #include <config.h>
 #include <fs.h>
 
@@ -255,7 +256,7 @@ int devopen(const char *name, int *reopen)
 		disk_size = (uint32_t) - 1;	/* FIXME */
 		break;
 #endif
-#ifdef CONFIG_USB_NEW_DISK
+#if defined(CONFIG_USB_NEW_DISK) && defined(CONFIG_USB)
 	case DISK_NEW_USB:
 		if (usb_new_probe(drive) != 0) {
 			debug("Failed to open USB.\n");
@@ -389,7 +390,7 @@ static void *read_sector(unsigned long sector)
 				goto readerr;
 			break;
 #endif
-#ifdef CONFIG_USB_NEW_DISK
+#if defined(CONFIG_USB_NEW_DISK) && defined(CONFIG_USB)
 		case DISK_NEW_USB:
 		{
 			int count = (NUM_CACHE-hash>8)?8:(NUM_CACHE-hash);

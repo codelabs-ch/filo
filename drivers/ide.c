@@ -734,7 +734,7 @@ static int init_drive(struct harddisk_info *info, struct controller *ctrl,
 		(drive_info[2] != 0x8C73) &&
 		(drive_info[2] != 0xC837) &&
 		(drive_info[2] != 0x0000)) {
-		printf("Invalid IDE Configuration: %hx\n", drive_info[2]);
+		printf("Invalid IDE Configuration: %04x\n", drive_info[2]);
 		return 1;
 	}
 	for(i = 27; i < 47; i++) {

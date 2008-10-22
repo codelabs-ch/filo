@@ -286,7 +286,6 @@ void grub_printf (const char *format,...);
 /* misc */
 void init_page (void);
 void print_error (void);
-char *convert_to_ascii (char *buf, int c, ...);
 int get_cmdline (char *prompt, char *cmdline, int maxlen,
 		 int echo_char, int history);
 int substring (const char *s1, const char *s2);

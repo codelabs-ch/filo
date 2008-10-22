@@ -139,9 +139,18 @@ void enter_cmdline(char *heap, int forever)
 		print_error();
 		errnum = ERR_NONE;
 
+		short col1, col2, col3, col4;
+		pair_content(1, &col1, &col2);
+		pair_content(2, &col3, &col4);
+		/* reset to light-gray-on-black on console */
+		console_setcolor(0x07, 0x70);
+
 		/* Get the command-line with the minimal BASH-like interface. */
-		if (get_cmdline(CONFIG_PROMPT "> ", heap, 2048, 0, 1))
+		if (get_cmdline(CONFIG_PROMPT "> ", heap, 2048, 0, 1)) {
+			init_pair(1, col1, col2);
+			init_pair(2, col3, col4);
 			return;
+		}
 
 		/* If there was no command, grab a new one. */
 		if (!heap[0])
@@ -195,7 +204,7 @@ int run_script(char *script, char *heap)
 			   intervention.  */
 			if (fallback_entryno < 0) {
 				grub_printf("\nPress any key to continue...");
-				(void) getkey();
+				(void) getchar();
 			}
 
 			return 1;
