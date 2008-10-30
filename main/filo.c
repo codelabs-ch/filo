@@ -49,9 +49,6 @@ static void init(void)
 {
     /* Set up the consoles. */
     console_init();
-#ifdef CONFIG_VIDEO_CONSOLE
-    video_console_init();
-#endif
 
     /* Gather system information, and implicitly sets up timers */
     lib_get_sysinfo();
