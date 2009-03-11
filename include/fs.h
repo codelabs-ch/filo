@@ -27,9 +27,15 @@ typedef uint64_t sector_t;
 #define DEV_SECTOR_SIZE		(1<<9)
 #define DEV_SECTOR_MASK		(DEV_SECTOR_SIZE-1)
 
-#ifdef CONFIG_IDE_DISK
+#if defined(CONFIG_IDE_DISK)
 int ide_probe(int drive);
 int ide_read(int drive, sector_t sector, void *buffer);
+#endif
+
+#if defined(CONFIG_IDE_NEW_DISK)
+int ide_probe(int drive);
+int ide_probe_verbose(int drive);
+int ide_read_blocks(const int drive, const sector_t sector, const int size, void *buffer);
 #endif
 
 #ifdef CONFIG_USB_DISK

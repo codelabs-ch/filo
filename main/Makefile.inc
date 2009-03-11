@@ -16,6 +16,7 @@
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
-TARGETS-y += main/filo.o main/elfload.o main/elfnote.o main/ipchecksum.o main/strtox.o
+TARGETS-y += main/filo.o main/strtox.o
+TARGETS-y += main/elfload.o main/elfnote.o main/ipchecksum.o 
 TARGETS-$(CONFIG_SUPPORT_SOUND) += main/sound.o
 

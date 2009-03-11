@@ -118,15 +118,23 @@ config PCMCIA_CF
 	  Use PCMCIA compact flash on Via Epia MII10000 and MII6000E
 	  This device is referred to as hde.
 
+config IDE_NEW_DISK
+	bool "New IDE driver"
+	default n
+	depends on !IDE_DISK
+	help
+	  Jens Axboe's fine IDE driver
+
 config USB_NEW_DISK
-	bool "new USB Stack"
+	bool "USB Stack"
 	default y
 	help
 	  Driver for USB Storage
 
 config USB_DISK
-	bool "USB Stack (obsolete?)"
+	bool "Old USB Stack (obsolete?)"
 	default n
+	depends on !USB_NEW_DISK
 	help
 	  Driver for USB Storage
 

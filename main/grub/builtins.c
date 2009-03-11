@@ -319,6 +319,56 @@ static struct builtin builtin_default = {
 #endif
 };
 
+#if CONFIG_DEVELOPER_TOOLS
+/* default */
+static int dumppm_func(char *arg, int flags)
+{
+	u16 pmbase;
+
+	pmbase = pci_read_config16(PCI_DEV(0,0x1f, 0), 0x40) & 0xfffe;
+
+	grub_printf("pmbase+0x0000: 0x%04x     (PM1_STS)\n", inw(pmbase+0x0000));
+	grub_printf("pmbase+0x0002: 0x%04x     (PM1_EN)\n", inw(pmbase+0x0002));
+	grub_printf("pmbase+0x0004: 0x%08x (PM1_CNT)\n", inl(pmbase+0x0004));
+	grub_printf("pmbase+0x0008: 0x%08x (PM1_TMR)\n", inl(pmbase+0x0008));
+	grub_printf("pmbase+0x0010: 0x%08x (PROC_CNT)\n", inl(pmbase+0x0010));
+	grub_printf("pmbase+0x0020: 0x%08x (PM2_CNT)\n", inl(pmbase+0x0020));
+	grub_printf("pmbase+0x0028: 0x%08x (GPE0_STS)\n", inl(pmbase+0x0028));
+	grub_printf("pmbase+0x002c: 0x%08x (GPE0_EN)\n", inl(pmbase+0x002c));
+	grub_printf("pmbase+0x0030: 0x%08x (SMI_EN)\n", inl(pmbase+0x0030));
+	grub_printf("pmbase+0x0034: 0x%08x (SMI_STS)\n", inl(pmbase+0x0034));
+	grub_printf("pmbase+0x0038: 0x%04x     (ALT_GP_SMI_EN)\n", inw(pmbase+0x0038));
+	grub_printf("pmbase+0x003a: 0x%04x     (ALT_GP_SMI_STS)\n", inw(pmbase+0x003a));
+	grub_printf("pmbase+0x0042: 0x%02x       (GPE_CNTL)\n", inb(pmbase+0x0042));
+	grub_printf("pmbase+0x0044: 0x%04x     (DEVACT_STS)\n", inw(pmbase+0x0044));
+	grub_printf("pmbase+0x0050: 0x%02x       (SS_CNT)\n", inb(pmbase+0x0050));
+	grub_printf("pmbase+0x0054: 0x%08x (C3_RES)\n", inl(pmbase+0x0054));
+#if 0
+	// TCO
+	grub_printf("pmbase+0x0060: 0x%04x     (TCO_RLD)\n", inw(pmbase+0x0060));
+	grub_printf("pmbase+0x0062: 0x%02x       (TCO_DAT_IN)\n", inb(pmbase+0x0062));
+	grub_printf("pmbase+0x0063: 0x%02x       (TCO_DAT_OUT)\n", inb(pmbase+0x0063));
+	grub_printf("pmbase+0x0064: 0x%04x     (TCO1_STS)\n", inw(pmbase+0x0064));
+	grub_printf("pmbase+0x0066: 0x%04x     (TCO2_STS)\n", inw(pmbase+0x0066));
+	grub_printf("pmbase+0x0068: 0x%04x     (TCO1_CNT)\n", inw(pmbase+0x0068));
+	grub_printf("pmbase+0x006a: 0x%04x     (TCO2_CNT)\n", inw(pmbase+0x006a));
+	grub_printf("pmbase+0x006c: 0x%04x     (TCO_MESSAGE)\n", inw(pmbase+0x006c));
+	grub_printf("pmbase+0x006e: 0x%02x       (TCO_WDCNT)\n", inb(pmbase+0x006e));
+	grub_printf("pmbase+0x0070: 0x%02x       (TCO_SW_IRQ_GEN)\n", inb(pmbase+0x0070));
+	grub_printf("pmbase+0x0072: 0x%04x     (TCO_TMR)\n", inw(pmbase+0x0072));
+#endif
+	return 0;
+}
+
+static struct builtin builtin_dumppm = {
+	"dumppm",
+	dumppm_func,
+	BUILTIN_CMDLINE | BUILTIN_HELP_LIST,
+	"dumppm",
+	"Dump Powermanagement registers"
+};
+#endif
+
 #if CONFIG_EXPERIMENTAL
 #warning "FIND not implemented yet."
 /* find */
@@ -1059,11 +1109,16 @@ static struct builtin builtin_poweroff = {
 #ifdef CONFIG_DEVELOPER_TOOLS
 static int probe_func(char *arg, int flags)
 {
-#if CONFIG_IDE_DISK
+#if CONFIG_IDE_DISK 
 	int i;
 
 	for (i=0; i<8; i++)
 		ide_probe(i);
+#elif CONFIG_IDE_NEW_DISK
+	int i;
+
+	for (i=0; i<8; i++)
+		ide_probe_verbose(i);
 #else
 	grub_printf("No IDE driver.\n");
 #endif
@@ -1566,14 +1621,52 @@ static struct builtin builtin_title = {
 #endif
 };
 
+static int cat_func(char *arg, int flags)
+{
+	char buf[4096];
+	int len;
+
+	temp_space[0]=0;
+	copy_path_to_filo_bootline(arg, temp_space, 1);
+	if (temp_space[0]==0) {
+		return help_func("cat",0);
+	}
+	if (!file_open(temp_space)) {
+		errnum = ERR_FILE_NOT_FOUND;
+		return 1;
+	}
+
+	while ((len = file_read(buf, sizeof(buf))) != 0) {
+		int cnt;
+		for (cnt = 0; cnt < len; cnt++) {
+			grub_putchar(buf[cnt]);
+		}
+	}
+
+	file_close();
+
+	return 0;
+}
+
+static struct builtin builtin_cat = {
+	"cat",
+	cat_func,
+	BUILTIN_CMDLINE | BUILTIN_HELP_LIST,
+	"cat FILENAME",
+	"Print the content of FILENAME to the terminal."
+};
 
 /* README !!! XXX !!! This list has to be alphabetically ordered !!! */
 
 struct builtin *builtin_table[] = {
 	&builtin_boot,
+	&builtin_cat,
 	&builtin_color,
 	&builtin_configfile,
 	&builtin_default,
+#ifdef CONFIG_DEVELOPER_TOOLS
+	&builtin_dumppm,
+#endif
 #ifdef CONFIG_EXPERIMENTAL
 	&builtin_find,
 #endif

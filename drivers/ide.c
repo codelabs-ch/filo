@@ -1132,6 +1132,11 @@ static int pci_find_ata_device_on_bus(int bus, pcidev_t * dev, int *index, int s
 			if (hdr == HEADER_TYPE_BRIDGE || hdr == HEADER_TYPE_CARDBUS) {
 				unsigned int new_bus;
 				new_bus = (pci_read_config32(currdev, REG_PRIMARY_BUS) >> 8) & 0xff;
+				if (new_bus == 0) {
+					debug("Misconfigured bridge at %02x:%02x.%02x skipped.\n",
+						bus, slot, func);
+					continue;
+				}
 				if (pci_find_ata_device_on_bus(new_bus, dev, index, sata, pata))
 					return 1;
 			}

@@ -1,7 +1,7 @@
 /*
  * This file is part of FILO.
  *
- * Copyright (C) 2008 coresystems GmbH
+ * Copyright (C) 2008-2009 coresystems GmbH
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,9 @@
 
 void platform_poweroff(void)
 {
-	int pmbase = 0x800;
+	int pmbase;
+
+	pmbase = pci_read_config16(PCI_DEV(0,0x1f, 0), 0x40) & 0xfffe;
 
 	/* XXX The sequence is correct; It works fine under Linux. 
 	 * Yet, it does not power off the system in FILO. 

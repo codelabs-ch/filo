@@ -247,7 +247,7 @@ int devopen(const char *name, int *reopen)
 	}
 
 	switch (type) {
-#ifdef CONFIG_IDE_DISK
+#if defined(CONFIG_IDE_DISK) || defined(CONFIG_IDE_NEW_DISK)
 	case DISK_IDE:
 		if (ide_probe(drive) != 0) {
 			debug("Failed to open IDE.\n");
@@ -384,11 +384,23 @@ static void *read_sector(unsigned long sector)
 	if (cache_sect[hash] != sector) {
 		cache_sect[hash] = (unsigned long) -1;
 		switch (dev_type) {
-#ifdef CONFIG_IDE_DISK
+#if defined(CONFIG_IDE_DISK) 
 		case DISK_IDE:
 			if (ide_read(dev_drive, sector, buf) != 0)
 				goto readerr;
 			break;
+#endif
+#if defined(CONFIG_IDE_NEW_DISK)
+		case DISK_IDE:
+		{
+			int count = (NUM_CACHE-hash>8)?8:(NUM_CACHE-hash);
+			if (ide_read_blocks(dev_drive, sector, count, buf) != 0)
+				goto readerr;
+			while (--count>0) {
+				cache_sect[hash+count] = sector + count;
+			}
+			break;
+		}
 #endif
 #if defined(CONFIG_USB_NEW_DISK) && defined(CONFIG_USB)
 		case DISK_NEW_USB:
