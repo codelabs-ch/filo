@@ -218,7 +218,7 @@ ob_ide_read_blocks(struct ide_drive *drive, int n, u32 blk, char* dest);
 static int
 ob_ide_atapi_request_sense(struct ide_drive *drive);
 //int ob_ide_init(int (*func)(struct ide_drive*));
-int ob_ide_init(void);
+int ob_ide_init(int drive);
 
 
 /* FILO compat */

@@ -29,6 +29,10 @@
 #include "ide_new.h"
 #include "hdreg.h"
 
+#ifdef CONFIG_SUPPORT_PCI
+#include <pci.h>
+#endif
+
 #if 0
 #define dprintf printf
 #else
@@ -44,6 +48,7 @@
 #define IDE_NUM_CHANNELS CONFIG_IDE_NUM_CHANNELS
 #endif
 #define IDE_MAX_CHANNELS 4
+#define IDE_MAX_DRIVES (IDE_MAX_CHANNELS * 2)
 
 static struct ide_channel ob_ide_channels[IDE_MAX_CHANNELS];
 
@@ -1150,21 +1155,198 @@ ob_ide_block_size(int *idx)
 	return(drive->bs);
 }
 
-//int ob_ide_init(int (*func)(struct ide_drive*))
-int ob_ide_init(void)
+#ifdef CONFIG_SUPPORT_PCI
+static int pci_find_ata_device_on_bus(int bus, pcidev_t * dev, int *index, int sata, int pata)
 {
-	int i, j;
+	int slot, func;
+	u32 val;
+	unsigned char hdr;
+	u32 class;
 
-	for (i = 0; i < IDE_NUM_CHANNELS; i++) {
-		struct ide_channel *chan = &ob_ide_channels[i];
+        for (slot = 0; slot < 0x20; slot++) {
+		for (func = 0; func < 8; func++) {
+			pcidev_t currdev = PCI_DEV(bus, slot, func);
 
-		chan->mmio = 0;
+			val = pci_read_config32(currdev, REG_VENDOR_ID);
 
-		for (j = 0; j < 8; j++)
-			chan->io_regs[j] = io_ports[i] + j;
+			if (val == 0xffffffff || val == 0x00000000 ||
+			    val == 0x0000ffff || val == 0xffff0000)
+				continue;
 
-		chan->io_regs[8] = ctl_ports[i];
-		chan->io_regs[9] = ctl_ports[i] + 1;
+			class = pci_read_config16(currdev, 0x0a);
+			debug("%02x:%02x.%02x [%04x:%04x] class %04x\n",
+				bus, slot, func, val & 0xffff, val >> 16, class);
+
+			if ((sata && class == 0x180) || (pata && class == 0x101)) {
+				if (*index == 0) {
+					*dev = currdev;
+					return 1;
+				}
+				(*index)--;
+			}
+
+			hdr = pci_read_config8(currdev, REG_HEADER_TYPE) & 0x7f;
+
+			if (hdr == HEADER_TYPE_BRIDGE || hdr == HEADER_TYPE_CARDBUS) {
+				unsigned int new_bus;
+				new_bus = (pci_read_config32(currdev, REG_PRIMARY_BUS) >> 8) & 0xff;
+				if (new_bus == 0) {
+					debug("Misconfigured bridge at %02x:%02x.%02x skipped.\n",
+						bus, slot, func);
+					continue;
+				}
+				if (pci_find_ata_device_on_bus(new_bus, dev, index, sata, pata))
+					return 1;
+			}
+		}
+	}
+
+	return 0;
+}
+
+int pci_find_ata_device(pcidev_t *dev, int *index, int sata, int pata)
+{
+	debug(" Scanning for:%s%s\n", sata?" SATA":"", pata?" PATA":"");
+	return pci_find_ata_device_on_bus(0, dev, index, sata, pata);
+}
+#endif
+
+
+static void fixupregs(struct ide_channel *chan)
+{
+	int i;
+	for (i = 1; i < 8; i++)
+		chan->io_regs[i] = chan->io_regs[0] + i;
+	chan->io_regs[9] = chan->io_regs[8] + 1;
+}
+
+static int find_ide_controller_compat(struct ide_channel *chan, int index)
+{
+#ifdef CONFIG_SUPPORT_PCI
+	int skip, i, pci_index = index / 2;
+	pcidev_t dev;
+#else
+	if (index >= IDE_MAX_CHANNELS)
+		return -1;
+#endif
+#ifdef CONFIG_PCMCIA_CF
+	if (index == 2) {
+		chan->io_regs[0] = 0x1e0;
+		chan->io_regs[8] = 0x1ec;
+		fixupregs(chan);
+		return 0;
+	}
+#endif
+#ifdef CONFIG_SUPPORT_PCI
+	/* skip any SATA and PATA PCI controllers in native mode */
+	for (skip = i = 0; i < pci_index && index; i++) {
+		int devidx = i;
+		/* look for i:th ata (IDE/other storage really) device */
+		if(!pci_find_ata_device(&dev, &devidx, 1, 1))
+			break;
+		/* only IDE can be in compat mode so skip all others */
+		if (pci_read_config16(dev, 0xa) != 0x0101) {
+			/* other storage (SATA) always has two channels */
+			skip += 2;
+			continue;
+		}
+		/* primary in native mode? then skip it. */
+		if (1 == (pci_read_config8(dev, 0x09) & 1))
+			skip++;
+		/* secondary in native mode? then skip it. */
+		if (index && 4 == (pci_read_config8(dev, 0x09)  & 4))
+			skip++;
+	}
+	index = skip <= index ? index - skip : 0;
+	debug("skipping %d native PCI controllers, new index=%d\n", skip, index);
+	if (index >= IDE_MAX_CHANNELS)
+		return -1;
+#endif
+	chan->io_regs[0] = io_ports[index];
+	chan->io_regs[8] = ctl_ports[index];
+	fixupregs(chan);
+	return 0;
+}
+
+#ifdef CONFIG_SUPPORT_PCI
+static int find_ide_controller(struct ide_channel *chan, int chan_index)
+{
+	int pci_index;
+	pcidev_t dev;
+	unsigned int mask;
+	u8 prog_if;
+	u16 vendor, device, devclass;
+
+	/* A PCI IDE controller has two channels (pri, sec) */
+	pci_index = chan_index >> 1;
+
+	/* Find a IDE storage class device */
+
+	if (!pci_find_ata_device(&dev, &pci_index, 1, 0)) { // S-ATA first
+		pci_index = chan_index >> 1;
+		if (!pci_find_ata_device(&dev, &pci_index, 0, 1)) { // P-ATA second
+			debug("PCI IDE #%d not found\n", chan_index >> 1);
+			return -1;
+		}
+	}
+	
+	vendor = pci_read_config16(dev, 0);
+	device = pci_read_config16(dev, 2);
+	prog_if = pci_read_config8(dev, 9);
+	devclass = pci_read_config16(dev, 0x0a);
+
+	debug("found PCI IDE controller %04x:%04x prog_if=%#x\n",
+			vendor, device, prog_if);
+
+	/* See how this controller is configured */
+	mask = (chan_index & 1) ? 4 : 1;
+	debug("%s channel: ", (chan_index & 1) ? "secondary" : "primary");
+	if ((prog_if & mask) || (devclass != 0x0101)) {
+		debug("native PCI mode\n");
+		if ((chan_index & 1) == 0) {
+			/* Primary channel */
+			chan->io_regs[0] = pci_read_resource(dev, 0); // io ports
+			chan->io_regs[8] = pci_read_resource(dev, 1); // ctrl ports
+		} else {
+			/* Secondary channel */
+			chan->io_regs[0] = pci_read_resource(dev, 2); // io ports
+			chan->io_regs[8] = pci_read_resource(dev, 3); // ctrl ports
+		}
+		chan->io_regs[0] &= ~3;
+		chan->io_regs[8] &= ~3;
+		fixupregs(chan);
+	} else {
+		debug("compatibility mode\n");
+		if (find_ide_controller_compat(chan, chan_index) != 0)
+			return -1;
+	}
+	return 0;
+}
+#else /* !CONFIG_SUPPORT_PCI */
+# define find_ide_controller find_ide_controller_compat
+#endif
+//int ob_ide_init(int (*func)(struct ide_drive*))
+int ob_ide_init(int drive)
+{
+	int j;
+
+	struct ide_channel *chan;
+	int chan_index;
+
+	if (drive >= IDE_MAX_DRIVES) {
+		printf("Unsupported drive number\n");
+		return -1;
+	}
+
+	/* A controller has two drives (master, slave) */
+	chan_index = drive >> 1;
+
+	chan = &ob_ide_channels[chan_index];
+	if (chan->present == 0) {
+		if (find_ide_controller(chan, chan_index) != 0) {
+			printf("IDE channel %d not found\n", chan_index);
+			return -1;
+		}
 
 		chan->obide_inb = ob_ide_inb;
 		chan->obide_insw = ob_ide_insw;
@@ -1172,6 +1354,7 @@ int ob_ide_init(void)
 		chan->obide_outsw = ob_ide_outsw;
 
 		chan->selected = -1;
+		chan->mmio = 0;
 
 		/*
 		 * assume it's there, if not io port dead check will clear
@@ -1185,17 +1368,17 @@ int ob_ide_init(void)
 			/* init with a decent value */
 			chan->drives[j].bs = 512;
 
-			chan->drives[j].nr = i * 2 + j;
+			chan->drives[j].nr = chan_index * 2 + j;
 		}
 
 		ob_ide_probe(chan);
 
 		if (!chan->present)
-			continue;
+			return -1;
 
 		ob_ide_identify_drives(chan);
 
-		printf("ata-%d: [io ports 0x%x-0x%x,0x%x]\n", i,
+		printf("ata-%d: [io ports 0x%x-0x%x,0x%x]\n", chan_index,
 				chan->io_regs[0], chan->io_regs[0] + 7,
 				chan->io_regs[8]);
 
@@ -1232,10 +1415,7 @@ static int inited=0;
 int ide_probe(int drive)
 {
 	struct ide_drive *curr_drive = & ob_ide_channels[drive / 2].drives[drive % 2];
-	if (!inited) {
-		ob_ide_init();
-		inited = 1;
-	}
+	ob_ide_init(drive);
 
 	if (!curr_drive->present)
 		return -1;
@@ -1249,10 +1429,7 @@ int ide_probe_verbose(int drive)
 	struct ide_drive *curr_drive = & ob_ide_channels[drive / 2].drives[drive % 2];
 	char *media = "UNKNOWN";
 
-	if (!inited) {
-		ob_ide_init();
-		inited = 1;
-	}
+	ob_ide_init(drive);
 
 	if (!curr_drive->present) {
 		return -1;
@@ -1300,3 +1477,4 @@ int ide_read_blocks(int drive, sector_t sector, int count, void *buffer)
 	}
 	return 0;
 }
+
