@@ -315,7 +315,7 @@ config DEBUG_LINUXLOAD
 
 config DEBUG_IDE
 	bool "DEBUG_IDE"
-	depends on IDE_DISK
+	depends on IDE_DISK||IDE_NEW_DISK
 	default n
 
 config DEBUG_USB
