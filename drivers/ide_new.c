@@ -681,6 +681,14 @@ ob_ide_read_atapi(struct ide_drive *drive, unsigned long long block, char *buf,
 	if (ob_ide_atapi_drive_ready(drive))
 		return 1;
 
+	if (drive->bs == 2048) {
+		if ((block & 3 != 0) || (sectors & 3 != 0)) {
+			printf("ob_ide_read_atapi: unaligned atapi access: %x blocks, starting from %x\n", sectors, block);
+		}
+		block >>= 2;
+		sectors >>= 2;
+	}
+
 	memset(cmd, 0, sizeof(*cmd));
 
 	/*
