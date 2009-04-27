@@ -39,10 +39,34 @@ REQUIREMENTS
 
 INSTALL
 
-    First invocation of make creates the default Config file.
-	$ make
-    Edit this file as you like. It's fairly straightforward (I hope).
-	$ vi Config
+  First, you need to compile libpayload (included via svn:externals in FILO):
+
+    $ cd libpayload
+    $ make defconfig
+    $ make
+    $ make DESTDIR=../build install
+    $ cd ..
+
+  Configure FILO using the Kconfig interface:
+
+    $ make menuconfig
+
+  Then run make again will build filo.elf, the ELF boot image of FILO.
+
+    $ make
+
+  If you are compiling on an AMD64 platform, do
+
+    $ make CC="gcc -m32" LD="ld -b elf32-i386" HOSTCC="gcc" AS="as --32"
+
+  Alternatively, you can build libpayload and FILO in one go using the
+  build.sh script:
+
+    $ ./build.sh
+
+  Use build/filo.elf as your payload of coreboot, or a boot image for Etherboot.
+
+NOTES
 
     If you are using the GRUB like frontend:
 
@@ -53,12 +77,6 @@ INSTALL
         serial --unit=0 --speed=115200
         terminal serial console
 	
-    Then running make again will build filo.elf, the ELF boot image of FILO.
-	$ make
-
-    Use filo.elf as your payload of coreboot, or a boot image for
-    Etherboot.
-
 USING
 
     When FILO starts, it displays "boot:" prompt or the GRUB menu interface.
