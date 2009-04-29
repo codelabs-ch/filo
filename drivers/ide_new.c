@@ -63,9 +63,9 @@ static const int ctl_ports[IDE_MAX_CHANNELS] = { 0x3f6, 0x376, 0x3ee, 0x36e };
  */
 #undef ATA_PEDANTIC
 
+#ifdef CONFIG_DEBUG_IDE
 static void dump_drive(struct ide_drive *drive)
 {
-#ifdef CONFIG_DEBUG_IDE
 	printk("IDE DRIVE @%lx:\n", (unsigned long)drive);
 	printk("unit: %d\n",drive->unit);
 	printk("present: %d\n",drive->present);
@@ -77,8 +77,8 @@ static void dump_drive(struct ide_drive *drive)
 	printk("head: %d\n",drive->head);
 	printk("sect: %d\n",drive->sect);
 	printk("bs: %d\n",drive->bs);
-#endif
 }
+#endif
 
 /*
  * old style io port operations
@@ -673,7 +673,7 @@ ob_ide_atapi_drive_ready(struct ide_drive *drive)
  * read from an atapi device, using READ_10
  */
 static int
-ob_ide_read_atapi(struct ide_drive *drive, unsigned long long block, char *buf,
+ob_ide_read_atapi(struct ide_drive *drive, unsigned long long block, unsigned char *buf,
 		  unsigned int sectors)
 {
 	struct atapi_command *cmd = &drive->channel->atapi_cmd;
@@ -682,7 +682,7 @@ ob_ide_read_atapi(struct ide_drive *drive, unsigned long long block, char *buf,
 		return 1;
 
 	if (drive->bs == 2048) {
-		if ((block & 3 != 0) || (sectors & 3 != 0)) {
+		if (((block & 3) != 0) || ((sectors & 3) != 0)) {
 			printf("ob_ide_read_atapi: unaligned atapi access: %x blocks, starting from %x\n", sectors, block);
 		}
 		block >>= 2;
@@ -711,7 +711,7 @@ ob_ide_read_atapi(struct ide_drive *drive, unsigned long long block, char *buf,
 
 static int
 ob_ide_read_ata_chs(struct ide_drive *drive, unsigned long long block,
-		    char *buf, unsigned int sectors)
+		    unsigned char *buf, unsigned int sectors)
 {
 	struct ata_command *cmd = &drive->channel->ata_cmd;
 	unsigned int track = (block / drive->sect);
@@ -740,7 +740,7 @@ ob_ide_read_ata_chs(struct ide_drive *drive, unsigned long long block,
 
 static int
 ob_ide_read_ata_lba28(struct ide_drive *drive, unsigned long long block,
-		      char *buf, unsigned int sectors)
+		      unsigned char *buf, unsigned int sectors)
 {
 	struct ata_command *cmd = &drive->channel->ata_cmd;
 
@@ -766,7 +766,7 @@ ob_ide_read_ata_lba28(struct ide_drive *drive, unsigned long long block,
 
 static int
 ob_ide_read_ata_lba48(struct ide_drive *drive, unsigned long long block,
-		      char *buf, unsigned int sectors)
+		      unsigned char *buf, unsigned int sectors)
 {
 	struct ata_command *cmd = &drive->channel->ata_cmd;
 	struct ata_sector ata_sector;
@@ -799,8 +799,8 @@ ob_ide_read_ata_lba48(struct ide_drive *drive, unsigned long long block,
  * read 'sectors' sectors from ata device
  */
 static int
-ob_ide_read_ata(struct ide_drive *drive, unsigned long long block, char *buf,
-		unsigned int sectors)
+ob_ide_read_ata(struct ide_drive *drive, unsigned long long block, 
+		unsigned char *buf, unsigned int sectors)
 {
 	unsigned long long end_block = block + sectors;
 	const int need_lba48 = (end_block > (1ULL << 28)) || (sectors > 255);
@@ -823,7 +823,7 @@ ob_ide_read_ata(struct ide_drive *drive, unsigned long long block, char *buf,
 
 static int
 ob_ide_read_sectors(struct ide_drive *drive, unsigned long long block,
-		    char *buf, unsigned int sectors)
+		    unsigned char *buf, unsigned int sectors)
 {
 	if (!sectors)
 		return 1;
@@ -938,7 +938,7 @@ ob_ide_identify_drive(struct ide_drive *drive)
 		drive->sect = id.sectors;
 	}
 
-	strcpy(drive->model, id.model);
+	strcpy(drive->model, (char *)id.model);
 	return 0;
 }
 
@@ -1116,6 +1116,7 @@ ob_ide_probe(struct ide_channel *chan)
 	}
 }
 
+#ifdef OPENBIOS
 /*
  * The following functions are interfacing with OpenBIOS. They
  * are device node methods. Thus they have to do proper stack handling.
@@ -1132,9 +1133,10 @@ ob_ide_max_transfer(int *idx)
 
 	return (drive->max_sectors * drive->bs);
 }
+#endif
 
 int
-ob_ide_read_blocks(struct ide_drive *drive, int n, u32 blk, char* dest)
+ob_ide_read_blocks(struct ide_drive *drive, int n, u32 blk, unsigned char* dest)
 {
 	int cnt = n;
 	while (n) {
@@ -1156,12 +1158,14 @@ ob_ide_read_blocks(struct ide_drive *drive, int n, u32 blk, char* dest)
 	return (cnt);
 }
 
+#ifdef OPENBIOS
 static int
 ob_ide_block_size(int *idx)
 {
 	struct ide_drive *drive=&ob_ide_channels[idx[1]].drives[idx[0]];
 	return(drive->bs);
 }
+#endif
 
 #ifdef CONFIG_SUPPORT_PCI
 static int pci_find_ata_device_on_bus(int bus, pcidev_t * dev, int *index, int sata, int pata)
@@ -1417,8 +1421,6 @@ int ob_ide_init(int drive)
 
 	return 0;
 }
-
-static int inited=0;
 
 int ide_probe(int drive)
 {

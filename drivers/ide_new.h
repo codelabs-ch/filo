@@ -98,7 +98,7 @@ enum {
  * simple ata command that works for everything (except 48-bit lba commands)
  */
 struct ata_command {
-	char *buffer;
+	unsigned char *buffer;
 	unsigned int buflen;
 
 	/*
@@ -214,7 +214,7 @@ struct ata_sector {
 };
 
 int
-ob_ide_read_blocks(struct ide_drive *drive, int n, u32 blk, char* dest);
+ob_ide_read_blocks(struct ide_drive *drive, int n, u32 blk, unsigned char* dest);
 static int
 ob_ide_atapi_request_sense(struct ide_drive *drive);
 //int ob_ide_init(int (*func)(struct ide_drive*));

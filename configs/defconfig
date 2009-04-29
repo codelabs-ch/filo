@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
-# FILO version: 0.6.0b1
-# Thu Sep 11 20:18:11 2008
+# FILO version: 0.6.0
+# Wed Apr 29 21:18:12 2009
 #
 CONFIG_TARGET_I386=y
 # CONFIG_REVIEW is not set
@@ -18,12 +18,9 @@ CONFIG_USE_MD5_PASSWORDS=y
 #
 # Drivers
 #
-CONFIG_IDE_DISK=y
-CONFIG_IDE_DISK_POLL_DELAY=0
-# CONFIG_SLOW_SATA is not set
-# CONFIG_PCMCIA_CF is not set
+# CONFIG_IDE_DISK is not set
+CONFIG_IDE_NEW_DISK=y
 CONFIG_USB_NEW_DISK=y
-# CONFIG_USB_DISK is not set
 # CONFIG_FLASH_DISK is not set
 CONFIG_SUPPORT_PCI=y
 # CONFIG_PCI_BRUTE_SCAN is not set
