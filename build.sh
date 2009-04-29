@@ -9,22 +9,42 @@ for make in make gmake gnumake; do
 	fi
 done
 
-OS=`uname -s`
-if [ "$OS" = "Darwin" -o "$OS" = "SunOS" -o "${OS:0:6}" = "CYGWIN" ]; then
-    MAKEFLAGS="			\
-	AS=i386-elf-as		\
-	CC=i386-elf-gcc		\
-	AR=i386-elf-ar		\
-	LD=i386-elf-ld		\
-	STRIP=i386-elf-strip	\
-	NM=i386-elf-nm		\
-	HOSTCC=gcc		\
-	-j			\
-	"
+GCCPREFIX=invalid
+for gccprefixes in `pwd`/../crossgcc/xgcc/bin/i386-elf- i386-elf- ""; do
+	TMP=`mktemp /tmp/temp.XXXX`
+	echo "mov %eax, %eax" > ${TMP}.s
+	printf "\x7fELF" > ${TMP}.compare
+	if which ${gccprefixes}as 2>/dev/null >/dev/null; then
+		printf ""
+	else
+		continue
+	fi
+	if ${gccprefixes}as --32 -o ${TMP}.o ${TMP}.s; then
+		head -c 4 ${TMP}.o > ${TMP}.test
+		if cmp ${TMP}.test ${TMP}.compare; then
+			GCCPREFIX=$gccprefixes
+			rm -f $TMP ${TMP}.s ${TMP}.o ${TMP}.compare ${TMP}.test
+			break
+		fi
+	fi
+	rm -f $TMP ${TMP}.s ${TMP}.o ${TMP}.compare ${TMP}.test
+done
+
+if [ "$GCCPREFIX" = "invalid" ]; then
+	echo no suitable gcc found
+	exit 1
 fi
-if [ "$OS" = "Linux" ]; then
-    MAKEFLAGS='CC="gcc -m32" LD="ld -b elf32-i386" HOSTCC="gcc" AS="as --32"'
-fi
+
+MAKEFLAGS=" \
+	AS=\"${GCCPREFIX}as --32\"		\
+	CC=\"${GCCPREFIX}gcc -m32\"		\
+	AR=\"${GCCPREFIX}ar\"			\
+	LD=\"${GCCPREFIX}ld -b elf32-i386\"	\
+	STRIP=\"${GCCPREFIX}strip\"		\
+	NM=\"${GCCPREFIX}nm\"			\
+	HOSTCC=gcc				\
+	-j					\
+"
 
 $MAKE distclean
 cp configs/$CONFIG ./.config
