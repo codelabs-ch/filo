@@ -24,26 +24,140 @@
 #define DEBUG_THIS CONFIG_DEBUG_INTEL
 #include <debug.h>
 
+#define DEFAULT_RCBA            0xfed1c000
+
+#define PM1_STS		0x00
+#define   PWRBTN_STS	(1 << 8)
+#define PM1_EN		0x02
+#define PM1_CNT		0x04
+#define   SLP_EN	(1 << 13)
+#define   SLP_TYP	(7 << 10)
+#define   SLP_TYP_S0	(0 << 10)
+#define   SLP_TYP_S1	(1 << 10)
+#define   SLP_TYP_S3	(5 << 10)
+#define   SLP_TYP_S4	(6 << 10)
+#define   SLP_TYP_S5	(7 << 10)
+#define GPE0_EN		0x2c
+
+#define RCBA8(x) *((volatile u8 *)(DEFAULT_RCBA + x))
+#define RCBA16(x) *((volatile u16 *)(DEFAULT_RCBA + x))
+#define RCBA32(x) *((volatile u32 *)(DEFAULT_RCBA + x))
+
+
+void intel_lockdown_flash(void)
+{
+	u8 reg8;
+	u32 reg32;
+
+	reg32 = pci_read_config32(PCI_DEV(0,0x1f, 0), 0);
+	switch (reg32) {
+	case 0x27b08086:
+	case 0x27b88086:
+	case 0x27b98086:
+	case 0x27bd8086:
+		break;
+	default:
+		debug("Not an ICH7 southbridge\n");
+		return;
+	}
+
+	/* Now try this: */
+	debug("Locking BIOS to read-only... "); 
+	reg8 = pci_read_config8(PCI_DEV(0,0x1f,0), 0xdc);	/* BIOS_CNTL */
+	debug(" BIOS Lockdown Enable: %s; BIOS Write-Enable: %s\n",
+			(reg8&2)?"on":"off", (reg8&1)?"rw":"ro");
+
+	reg8 &= ~(1 << 0);			/* clear BIOSWE */
+	pci_write_config8(PCI_DEV(0,0x1f,0), 0xdc, reg8);
+
+	reg8 |= (1 << 1);			/* set BLE */
+	pci_write_config8(PCI_DEV(0,0x1f,0), 0xdc, reg8);
+
+	reg32 = RCBA32(0x3410); /* GCS - General Control and Status */
+	reg32 |= 1;		/* BILD - BIOS Interface Lockdown */
+	RCBA32(0x3410) = reg32; /* Set BUC.TS and GCS.BBS to RO */
+
+	debug("BIOS hard locked until next full reset.\n");
+
+}
+
+
+/* We should add some "do this for each pci device" function to libpayload */
+
+static void busmaster_disable_on_bus(int bus)
+{
+	int slot, func;
+	unsigned int val;
+	unsigned char hdr;
+
+	for (slot = 0; slot < 0x20; slot++) {
+		for (func = 0; func < 8; func++) {
+			u32 reg32;
+			pcidev_t dev = PCI_DEV(bus, slot, func);
+
+			val = pci_read_config32(dev, REG_VENDOR_ID);
+
+			if (val == 0xffffffff || val == 0x00000000 ||
+			    val == 0x0000ffff || val == 0xffff0000)
+				continue;
+
+			/* Disable Bus Mastering for this one device */
+			reg32 = pci_read_config32(dev, REG_COMMAND);
+			reg32 &= ~REG_COMMAND_BM;
+			pci_write_config32(dev, REG_COMMAND, reg32);
+
+			/* If this is a bridge, then follow it. */
+			hdr = pci_read_config8(dev, REG_HEADER_TYPE);
+			hdr &= 0x7f;
+			if (hdr == HEADER_TYPE_BRIDGE ||
+			    hdr == HEADER_TYPE_CARDBUS) {
+				unsigned int buses;
+				buses = pci_read_config32(dev, REG_PRIMARY_BUS);
+				busmaster_disable_on_bus((buses >> 8) & 0xff);
+			}
+		}
+	}
+}
+
+static void busmaster_disable(void)
+{
+	busmaster_disable_on_bus(0);
+}
+
 /**
  * Mostly for testing purposes without booting an OS
  */
 
 void platform_poweroff(void)
 {
-	int pmbase;
-
+	u16 pmbase;
+	u32 reg32;
+	
 	pmbase = pci_read_config16(PCI_DEV(0,0x1f, 0), 0x40) & 0xfffe;
 
-	/* XXX The sequence is correct; It works fine under Linux. 
-	 * Yet, it does not power off the system in FILO. 
-	 * Some initialization is missing
-	 */
+	/* Mask interrupts */
+	asm("cli");
+
+	/* Turn off all bus master enable bits */
+	busmaster_disable();
+
+	/* avoid any GPI waking the system from S5 */
+	outl(0x00000000, pmbase + GPE0_EN);
+
+	/* Clear Power Button Status */
+	outw(PWRBTN_STS, pmbase + PM1_STS);
 
         /* PMBASE + 4, Bit 10-12, Sleeping Type,
 	 * set to 110 -> S5, soft_off */
 
-	outl((6 << 10), pmbase + 0x04);
-	outl((1 << 13) | (6 << 10), pmbase + 0x04);
+	reg32 = inl(pmbase + PM1_CNT);
+
+	reg32 &= ~(SLP_EN | SLP_TYP);
+	reg32 |= SLP_TYP_S5;
+	outl(reg32, pmbase + PM1_CNT);
+
+	reg32 |= SLP_EN;
+	outl(reg32, pmbase + PM1_CNT);
 
 	for (;;) ;
 }
