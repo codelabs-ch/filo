@@ -22,6 +22,7 @@
  */
 
 #include <libpayload.h>
+#include <coreboot_tables.h>
 #include <config.h>
 #include "segment.h"
 
@@ -73,6 +74,8 @@ void relocate(void)
 
     new_base = 0;
     for (i = 0; i < info->n_memranges; i++) {
+	if (info->memrange[i].type != CB_MEM_RAM)
+	    continue;
 	if (info->memrange[i].base >= 1ULL<<32)
 	    continue;
 	segsize = info->memrange[i].size;
