@@ -63,20 +63,21 @@ static const int ctl_ports[IDE_MAX_CHANNELS] = { 0x3f6, 0x376, 0x3ee, 0x36e };
  */
 #undef ATA_PEDANTIC
 
-#ifdef CONFIG_DEBUG_IDE
+// debug function currently not used.
+#if defined(CONFIG_DEBUG_IDE) && 0
 static void dump_drive(struct ide_drive *drive)
 {
-	printk("IDE DRIVE @%lx:\n", (unsigned long)drive);
-	printk("unit: %d\n",drive->unit);
-	printk("present: %d\n",drive->present);
-	printk("type: %d\n",drive->type);
-	printk("media: %d\n",drive->media);
-	printk("model: %s\n",drive->model);
-	printk("nr: %d\n",drive->nr);
-	printk("cyl: %d\n",drive->cyl);
-	printk("head: %d\n",drive->head);
-	printk("sect: %d\n",drive->sect);
-	printk("bs: %d\n",drive->bs);
+	debug("IDE DRIVE @%lx:\n", (unsigned long)drive);
+	debug("unit: %d\n",drive->unit);
+	debug("present: %d\n",drive->present);
+	debug("type: %d\n",drive->type);
+	debug("media: %d\n",drive->media);
+	debug("model: %s\n",drive->model);
+	debug("nr: %d\n",drive->nr);
+	debug("cyl: %d\n",drive->cyl);
+	debug("head: %d\n",drive->head);
+	debug("sect: %d\n",drive->sect);
+	debug("bs: %d\n",drive->bs);
 }
 #endif
 
