@@ -271,9 +271,9 @@ set_memory_size(struct linux_params *params)
 	    /* Convert to BIOS e820 style */
 	    linux_map->addr = filo_map->base;
 	    linux_map->size = filo_map->size;
-	    linux_map->type = E820_RAM;
-	    debug("%016Lx - %016Lx\n", linux_map->addr,
-		    linux_map->addr + linux_map->size);
+	    linux_map->type = filo_map->type;
+	    debug("%016Lx - %016Lx (%d)\n", linux_map->addr,
+		    linux_map->addr + linux_map->size, linux_map->type);
 	    params->e820_map_nr = i+1;
 	}
 
@@ -284,6 +284,7 @@ set_memory_size(struct linux_params *params)
 		ramtop = (u32) end;
 	}
     }
+
     debug("ramtop=%#x\n", ramtop);
     /* Size of memory above 1MB in KB */
     params->alt_mem_k = (ramtop - (1<<20)) >> 10;

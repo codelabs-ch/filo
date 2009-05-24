@@ -76,7 +76,7 @@ INCPAYLOAD = $(LIBPAYLOAD_PREFIX)/include
 LIBGCC = $(shell $(CC) $(CFLAGS) -print-libgcc-file-name)
 
 OBJS     := $(patsubst %,$(obj)/%,$(TARGETS-y))
-INCLUDES := -I$(INCPAYLOAD) -Iinclude -I$(ARCHDIR-y)/include -Ibuild
+INCLUDES := -I$(INCPAYLOAD) -I$(INCPAYLOAD)/$(ARCHDIR-y) -Iinclude -I$(ARCHDIR-y)/include -Ibuild
 INCLUDES += -I$(GCCINCDIR)
 
 try-run= $(shell set -e; \
@@ -107,7 +107,7 @@ $(obj)/filo: $(src)/.config $(OBJS)
 
 $(TARGET): $(obj)/filo $(obj)/util/ebchecksum
 	$(Q)cp $(obj)/filo $@
-	$(Q)$(NM) $(obj)/filo > $(obj)/filo.map
+	$(Q)$(NM) $(obj)/filo | sort > $(obj)/filo.map
 	$(Q)printf "  STRIP   $(subst $(shell pwd)/,,$(@))\n"
 	$(Q)$(STRIP) -s $@
 	$(Q)printf "  EBCHECK $(subst $(shell pwd)/,,$(@))\n"
