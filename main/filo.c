@@ -37,7 +37,7 @@ PAYLOAD_INFO(desc, "Bootloader");
 #define autoboot() ((void) 0) /* nop */
 #endif
 
-#ifndef CONFIG_AUTOBOOT_DELAY
+#if CONFIG_AUTOBOOT_DELAY == 0
 #define autoboot_delay() 0 /* success */
 #endif
 
