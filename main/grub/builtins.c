@@ -18,7 +18,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-
+#include <libpayload-config.h>
 #include <libpayload.h>
 #include <config.h>
 #include <fs.h>
@@ -1589,11 +1589,16 @@ static struct builtin builtin_timeout = {
 
 static int keymap_func(char *arg, int flags)
 {
+#ifdef CONFIG_PC_KEYBOARD
 	if (keyboard_set_layout(arg)) {
 		errnum = ERR_BAD_ARGUMENT;
 		return 1;
 	}
 	return 0;
+#else
+	errnum = ERR_BAD_ARGUMENT;
+	return 1;
+#endif
 }
 
 static struct builtin builtin_keymap = {

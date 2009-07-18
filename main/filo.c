@@ -118,7 +118,9 @@ int main(void)
     
     /* Initialize */
     init();
+#ifdef CONFIG_PC_KEYBOARD
     keyboard_add_reset_handler(reset_handler);
+#endif
     grub_menulst();
     grub_main();
     return 0;   
