@@ -3,19 +3,14 @@
  *   
  *   Copyright (C) 2004 Jens Axboe <axboe@suse.de>
  *   Copyright (C) 2005 Stefan Reinauer <stepan@openbios.org>
+ *   Copyright (C) 2009 coresystems GmbH
  *
  *   Credit goes to Hale Landis for his excellent ata demo software
- *   OF node handling and some fixes by Stefan Reinauer
  *
  *   This program is free software; you can redistribute it and/or
  *   modify it under the terms of the GNU General Public License
  *   version 2
  *
- */
-
-/*
- * TODO:
- *  - Really probe for interfaces, don't just rely on legacy
  */
 
 #define GRUB
@@ -25,7 +20,6 @@
 #include <arch/byteorder.h>
 
 #include <fs.h>
-#include <debug.h>
 #include "ide_new.h"
 #include "hdreg.h"
 
@@ -33,11 +27,8 @@
 #include <pci.h>
 #endif
 
-#if 0
-#define dprintf printf
-#else
-#define dprintf(x...) 
-#endif
+#define DEBUG_THIS CONFIG_DEBUG_IDE
+#include <debug.h>
 
 /*
  * define to 2 for the standard 2 channels only
@@ -1117,25 +1108,6 @@ ob_ide_probe(struct ide_channel *chan)
 	}
 }
 
-#ifdef OPENBIOS
-/*
- * The following functions are interfacing with OpenBIOS. They
- * are device node methods. Thus they have to do proper stack handling.
- * 
- */
-
-/*
- * 255 sectors for ata lba28, 65535 for lba48, and 31 sectors for atapi
- */
-static int
-ob_ide_max_transfer(int *idx)
-{
-	struct ide_drive *drive=&ob_ide_channels[idx[1]].drives[idx[0]];
-
-	return (drive->max_sectors * drive->bs);
-}
-#endif
-
 int
 ob_ide_read_blocks(struct ide_drive *drive, int n, u32 blk, unsigned char* dest)
 {
@@ -1145,11 +1117,11 @@ ob_ide_read_blocks(struct ide_drive *drive, int n, u32 blk, unsigned char* dest)
 		if (len > drive->max_sectors)
 			len = drive->max_sectors;
 			
-		dprintf("reading %d sectors from blk %d\n",len, blk);
+		debug("reading %d sectors from blk %d\n",len, blk);
 		if (ob_ide_read_sectors(drive, blk, dest, len)) {
 			return n-1;
 		}
-		dprintf("done\n");
+		debug("done\n");
 
 		dest += len * drive->bs;
 		n -= len;
@@ -1158,15 +1130,6 @@ ob_ide_read_blocks(struct ide_drive *drive, int n, u32 blk, unsigned char* dest)
 
 	return (cnt);
 }
-
-#ifdef OPENBIOS
-static int
-ob_ide_block_size(int *idx)
-{
-	struct ide_drive *drive=&ob_ide_channels[idx[1]].drives[idx[0]];
-	return(drive->bs);
-}
-#endif
 
 #ifdef CONFIG_SUPPORT_PCI
 static int pci_find_ata_device_on_bus(int bus, pcidev_t * dev, int *index, int sata, int pata)
@@ -1185,6 +1148,11 @@ static int pci_find_ata_device_on_bus(int bus, pcidev_t * dev, int *index, int s
 			if (val == 0xffffffff || val == 0x00000000 ||
 			    val == 0x0000ffff || val == 0xffff0000)
 				continue;
+
+			if (val == 0xac8f104c) {
+				debug("Skipping TI bridge\n");
+				continue;
+			}
 
 			class = pci_read_config16(currdev, 0x0a);
 			debug("%02x:%02x.%02x [%04x:%04x] class %04x\n",
