@@ -26,9 +26,9 @@ OUTPUT_ARCH(i386)
 
 ENTRY(entry)
 
-/* 32KB heap and 16KB stack */
-HEAP_SIZE = 3276800;
-STACK_SIZE = 163840;
+/* 1024KB heap and 64KB stack */
+HEAP_SIZE = 1 * 1024 * 1024;
+STACK_SIZE = 64 * 1024;
 
 SECTIONS
 {
