@@ -278,6 +278,6 @@ int aboot_dir (char *dirname);
 #define	FS_FILECORE	16	/* Acorn Filecore Filing System */
 #define	FS_EXT2FS	17	/* Linux Extended 2 file system */
 
-#if CONFIG_DEBUG_FSYS_EXT2FS
+#ifdef CONFIG_DEBUG_FSYS_EXT2FS
 #define E2DEBUG 
 #endif

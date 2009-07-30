@@ -22,6 +22,7 @@
 #include <libpayload.h>
 #include <config.h>
 #include <fs.h>
+#include <lib.h>
 #include <grub/shared.h>
 #include <arch/timer.h>
 #ifdef CONFIG_USE_MD5_PASSWORDS
@@ -74,6 +75,8 @@ char initrd_space[BOOT_LINE_LENGTH]="\0";
 
 int show_menu = 1;
 
+static int last_normal_color = -1, last_highlight_color = -1;
+
 /* Initialize the data for builtins.  */
 void init_builtins(void)
 {
@@ -108,12 +111,19 @@ int check_password(char *entered, char *expected, password_t type)
 /* boot */
 static int boot_func(char *arg, int flags)
 {
-	void boot(const char *line);
+	int boot(const char *line);
+	int ret;
 
 	if(!boot_line[0]) {
-		grub_printf("No kernel.\n");
+		errnum = ERR_BOOT_COMMAND;
 		return 1;
 	}
+
+	/* Set color back to black and white, or Linux booting will look
+	 * very funny.
+	 */
+	console_setcolor((COLOR_BLACK << 4) | COLOR_WHITE,
+			 (COLOR_WHITE << 4) | COLOR_BLACK);
 
 	cls();
 
@@ -123,7 +133,27 @@ static int boot_func(char *arg, int flags)
 	}
 
 	grub_printf("\nBooting '%s'\n", boot_line);
-	boot(boot_line);
+
+	ret = boot(boot_line);
+
+	/* If we regain control, something went wrong. */
+
+	/* The menu color was changed and we failed to boot, so we
+	 * need to restore the colors in order to make the menu look as
+	 * it did before.
+	 */
+	if (last_normal_color != -1) {
+		console_setcolor(last_normal_color, last_highlight_color);
+	}
+
+	/* If no loader felt responsible for this image format, it's
+	 * a bad file format, otherwise we don't really know.
+	 */
+	if (ret == LOADER_NOT_SUPPORT)
+		errnum = ERR_EXEC_FORMAT;
+	else
+		errnum = ERR_BOOT_FAILURE;
+
 	return 1;
 }
 
@@ -237,6 +267,10 @@ static int color_func(char *arg, int flags)
 	}
 
 	console_setcolor(new_normal_color, new_highlight_color);
+
+	// keep the state so we can restore after a failed boot
+	last_normal_color = new_normal_color;
+	last_highlight_color = new_highlight_color;
 
 	return 0;
 }

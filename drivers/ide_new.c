@@ -819,11 +819,11 @@ ob_ide_read_sectors(struct ide_drive *drive, unsigned long long block,
 {
 	if (!sectors)
 		return 1;
-	if (block + sectors > drive->sectors)
+	if (block + sectors > (drive->sectors * (drive->bs / 512)))
 		return 1;
 
 #ifdef CONFIG_DEBUG_IDE
-		printf("ob_ide_read_sectors: block=%Ld sectors=%u\n", (unsigned long) block, sectors);
+		printf("ob_ide_read_sectors: block=%ld sectors=%u\n", (unsigned long) block, sectors);
 #endif
 
 	if (drive->type == ide_type_ata)
@@ -1306,21 +1306,20 @@ static int find_ide_controller(struct ide_channel *chan, int chan_index)
 #else /* !CONFIG_SUPPORT_PCI */
 # define find_ide_controller find_ide_controller_compat
 #endif
-//int ob_ide_init(int (*func)(struct ide_drive*))
-int ob_ide_init(int drive)
+int ob_ide_init(int driveno)
 {
 	int j;
 
 	struct ide_channel *chan;
 	int chan_index;
 
-	if (drive >= IDE_MAX_DRIVES) {
+	if (driveno >= IDE_MAX_DRIVES) {
 		printf("Unsupported drive number\n");
 		return -1;
 	}
 
 	/* A controller has two drives (master, slave) */
-	chan_index = drive >> 1;
+	chan_index = driveno >> 1;
 
 	chan = &ob_ide_channels[chan_index];
 	if (chan->present == 0) {

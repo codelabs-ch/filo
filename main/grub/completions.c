@@ -62,7 +62,7 @@ void print_a_completion(char *name)
 
 int print_completions(int is_filename, int is_completion)
 {
-#if CONFIG_EXPERIMENTAL
+#ifdef CONFIG_EXPERIMENTAL
 	char *buf = (char *) COMPLETION_BUF;
 	char *ptr = buf;
 

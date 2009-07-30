@@ -37,7 +37,7 @@ PAYLOAD_INFO(desc, "Bootloader");
 #define autoboot() ((void) 0) /* nop */
 #endif
 
-#if CONFIG_AUTOBOOT_DELAY == 0
+#ifndef CONFIG_AUTOBOOT_DELAY
 #define autoboot_delay() 0 /* success */
 #endif
 
@@ -78,9 +78,10 @@ static void init(void)
 #endif
 }
 
-void boot(const char *line)
+int boot(const char *line)
 {
     char *file, *param;
+    int ret;
 
     /* Split filename and parameter */
     file = strdup(line);
@@ -90,12 +91,38 @@ void boot(const char *line)
 	param++;
     }
 
-	if (artecboot_load(file, param) == LOADER_NOT_SUPPORT)
-    if (elf_load(file, param) == LOADER_NOT_SUPPORT)
-	if (linux_load(file, param) == LOADER_NOT_SUPPORT)
-	if (wince_load(file, param) == LOADER_NOT_SUPPORT)
-	    printf("Unsupported image format\n");
+    /* If the boot command is successful, the loader
+     * function will not return.
+     *
+     * If the loader is not supported, or it recognized 
+     * that it does not match for the given file type, it
+     * will return LOADER_NOT_SUPPORT.
+     *
+     * All other cases are an unknown error for now.
+     */
+
+    ret = artecboot_load(file, param);
+    if (ret != LOADER_NOT_SUPPORT)
+	    goto out;
+
+    ret = elf_load(file, param);
+    if (ret != LOADER_NOT_SUPPORT)
+	    goto out;
+
+    ret = linux_load(file, param);
+    if (ret != LOADER_NOT_SUPPORT)
+	    goto out;
+
+    ret = wince_load(file, param);
+    if (ret != LOADER_NOT_SUPPORT)
+	    goto out;
+
+    printf("Unsupported image format\n");
+
+out:
     free(file);
+
+    return ret;
 }
 
 void reset_handler(void)

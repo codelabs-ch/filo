@@ -188,7 +188,7 @@ static int parse_device_name(const char *name, int *type, int *drive,
 		name += 3;
 		*drive = 0;
 	} else {
-		printf("Unknown device type\n");
+		printf("Unknown device type: %s\n", name);
 		return 0;
 	}
 
@@ -450,8 +450,11 @@ int devread(unsigned long sector, unsigned long byte_offset,
 	char *dest = buf;
 	unsigned long len;
 
-	sector += byte_offset >> 9;
-	byte_offset &= 0x1ff;
+	/* while sectors are technically 512b in filo, iso9660 requires
+	   some special handling. This wastes up to three sectors worth
+	   of RAM on a 512b filesystem, but enables iso9660 to work. */
+	sector += (byte_offset >> 11) * 4;
+	byte_offset &= 0x7ff;
 
 	if (sector + ((byte_len + 0x1ff) >> 9) > part_length) {
 		printf("Attempt to read beyond device/partition.\n");
@@ -465,6 +468,15 @@ int devread(unsigned long sector, unsigned long byte_offset,
 		if (!sector_buffer) {
 			debug("Couldn't read sector.\n");
 			return 0;
+		}
+		/* now, we always only request one sector at a time,
+		   but rely on the cache system to iron out the
+		   issues with 2048b sectors. Yet, we have to skip
+		   the first fake sectors in processing. */
+		if (byte_offset >= 512) {
+			byte_offset -= 512;
+			sector++;
+			continue;
 		}
 		len = 512 - byte_offset;
 		if (len > byte_len)

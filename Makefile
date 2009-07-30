@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2008 by coresystems GmbH 
+# Copyright (C) 2008-2009 by coresystems GmbH 
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -93,7 +93,7 @@ STACKPROTECT += $(call cc-option, -fno-stack-protector,)
 
 GCCINCDIR = $(shell $(CC) -print-search-dirs | head -n 1 | cut -d' ' -f2)include
 CPPFLAGS = -nostdinc -imacros $(obj)/config.h -Iinclude -I$(GCCINCDIR) -MD
-CFLAGS += -Wall $(STACKPROTECT) $(INCLUDES) -Os -fomit-frame-pointer -fno-common -ffreestanding -fno-strict-aliasing
+CFLAGS += $(STACKPROTECT) $(INCLUDES) -Wall -Os -fomit-frame-pointer -fno-common -ffreestanding -fno-strict-aliasing -Wshadow
 
 TARGET  = $(obj)/filo.elf
 

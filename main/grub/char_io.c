@@ -125,7 +125,7 @@ static void add_history(const char *cmdline, int no)
 		num_history++;
 }
 
-static int real_get_cmdline(char *prompt, char *cmdline, int maxlen, int echo_char, int readline)
+static int real_get_cmdline(char *prompt, char *cmdline, int maxlen, int echo_char, int readline_like)
 {
 	/* This is a rather complicated function. So explain the concept.
 
@@ -369,7 +369,7 @@ static int real_get_cmdline(char *prompt, char *cmdline, int maxlen, int echo_ch
 
 	while ((c = ASCII_CHAR(getkey())) != '\n' && c != '\r') {
 		/* If READLINE is non-zero, handle readline-like key bindings.  */
-		if (readline) {
+		if (readline_like) {
 			switch (c) {
 			case 9:	/* TAB lists completions */
 				{
@@ -560,7 +560,7 @@ static int real_get_cmdline(char *prompt, char *cmdline, int maxlen, int echo_ch
 
 	/* If the readline-like feature is turned on and CMDLINE is not
 	   empty, add it into the history list.  */
-	if (readline && lpos < llen)
+	if (readline_like && lpos < llen)
 		add_history(cmdline, 0);
 
 	refresh();
@@ -576,7 +576,7 @@ static int real_get_cmdline(char *prompt, char *cmdline, int maxlen, int echo_ch
    or zero-length).
 
    If ECHO_CHAR is nonzero, echo it instead of the typed character. */
-int get_cmdline(char *prompt, char *cmdline, int maxlen, int echo_char, int readline)
+int get_cmdline(char *prompt, char *cmdline, int maxlen, int echo_char, int readline_like)
 {
 	int old_cursor;
 	int ret;
@@ -628,7 +628,7 @@ int get_cmdline(char *prompt, char *cmdline, int maxlen, int echo_char, int read
 	}
 
 	/* Complicated features are left to real_get_cmdline.  */
-	ret = real_get_cmdline(prompt, cmdline, maxlen, echo_char, readline);
+	ret = real_get_cmdline(prompt, cmdline, maxlen, echo_char, readline_like);
 	setcursor(old_cursor);
 	refresh();
 	return ret;

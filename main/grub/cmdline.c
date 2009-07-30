@@ -204,7 +204,7 @@ int run_script(char *script, char *heap)
 			   intervention.  */
 			if (fallback_entryno < 0) {
 				grub_printf("\nPress any key to continue...");
-				(void) getchar();
+				(void)getkey();
 			}
 
 			return 1;

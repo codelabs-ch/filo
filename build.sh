@@ -20,7 +20,7 @@ for gccprefixes in `pwd`/../crossgcc/xgcc/bin/i386-elf- i386-elf- ""; do
 		continue
 	fi
 	if ${gccprefixes}as --32 -o ${TMP}.o ${TMP}.s; then
-		head -c 4 ${TMP}.o > ${TMP}.test
+		dd bs=4 count=1 if=${TMP}.o > ${TMP}.test 2>/dev/null
 		if cmp ${TMP}.test ${TMP}.compare; then
 			GCCPREFIX=$gccprefixes
 			rm -f $TMP ${TMP}.s ${TMP}.o ${TMP}.compare ${TMP}.test

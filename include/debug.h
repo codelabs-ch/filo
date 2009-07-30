@@ -22,15 +22,15 @@
 #include <lib.h>
 
 /* Defining DEBUG_THIS before including this file enables debug() macro
- * for the file. DEBUG_ALL is for global control. */
+ * for the file. CONFIG_DEBUG_ALL is for global control. */
 
-#if DEBUG_THIS || DEBUG_ALL
+#if ( defined(DEBUG_THIS) && (DEBUG_THIS == 1)) || (defined(CONFIG_DEBUG_ALL) && (CONFIG_DEBUG_ALL == 1))
 #define DEBUG 1
 #else
 #undef DEBUG
 #endif
 
-#if DEBUG
+#ifdef DEBUG
 # define debug(...) \
     printf(__VA_ARGS__)
 # define debug_hexdump hexdump
@@ -39,7 +39,7 @@
 # define debug_hexdump(...) /* nothing */
 #endif
 
-#if CONFIG_USE_GRUB
+#ifdef CONFIG_USE_GRUB
 extern int using_grub_interface;
 void grub_printf (const char *format,...);
 #define printf(x...) do { if (using_grub_interface) { grub_printf(x); } else { printf(x); } } while (0)

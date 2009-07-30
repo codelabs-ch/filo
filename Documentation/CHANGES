@@ -1,3 +1,5 @@
+As of 0.6 this file is neglected in favor of svn commit messages.
+
 Version 0.6.0b1 stepan 2008-08-11
     * Use Kconfig for configuration
     * Drop recursive Makefiles
