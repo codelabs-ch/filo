@@ -24,7 +24,7 @@
 #define DEBUG_THIS CONFIG_DEBUG_INTEL
 #include <debug.h>
 
-#define DEFAULT_RCBA            0xfed1c000
+#define DEFAULT_RCBA            phys_to_virt(0xfed1c000)
 
 #define PM1_STS		0x00
 #define   PWRBTN_STS	(1 << 8)
