@@ -47,6 +47,9 @@ struct fsys_entry {
 };
 
 struct fsys_entry fsys_table[] = {
+# ifdef CONFIG_FSYS_CBFS
+	{"CBFS ROM Image", cbfs_mount, cbfs_read, cbfs_dir, 0, 0},
+# endif
 # ifdef CONFIG_FSYS_FAT
 	{"FAT filesystem", fat_mount, fat_read, fat_dir, 0, 0},
 # endif

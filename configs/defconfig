@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # FILO version: 0.6.0
-# Wed Apr 29 21:18:12 2009
+# Fri Aug 28 00:51:59 2009
 #
 CONFIG_TARGET_I386=y
 # CONFIG_REVIEW is not set
@@ -39,6 +39,7 @@ CONFIG_FSYS_ISO9660=y
 CONFIG_ELTORITO=y
 # CONFIG_FSYS_CRAMFS is not set
 # CONFIG_FSYS_SQUASHFS is not set
+CONFIG_FSYS_CBFS=y
 
 #
 # Loaders

@@ -213,6 +213,10 @@ config FSYS_SQUASHFS
 	bool "Squash filesystem"
 	default n
 
+config FSYS_CBFS
+	bool "CBFS ROM Image filesystem"
+	default y
+
 endmenu
 
 menu "Loaders"
