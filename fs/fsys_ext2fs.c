@@ -253,10 +253,16 @@ struct ext2_dir_entry
     ((char *)((char *)DATABLOCK1 + EXT2_BLOCK_SIZE(SUPERBLOCK)))
 
 /* linux/ext2_fs.h */
+#define EXT2_OLD_REV           0       /* The good old (original) format */
+#define EXT2_DYNAMIC_REV       1       /* V2 format w/ dynamic inode sizes */
+
+#define EXT2_OLD_INODE_SIZE    128
+
 #define EXT2_ADDR_PER_BLOCK(s)          (EXT2_BLOCK_SIZE(s) / sizeof (__u32))
 #define EXT2_ADDR_PER_BLOCK_BITS(s)	(log2(EXT2_ADDR_PER_BLOCK(s)))
 
-#define EXT2_INODE_SIZE(s)             (SUPERBLOCK->s_inode_size)
+#define EXT2_INODE_SIZE(s)             (((s)->s_rev_level == EXT2_OLD_REV) ? \
+                                       EXT2_OLD_INODE_SIZE : (s)->s_inode_size)
 #define EXT2_INODES_PER_BLOCK(s)       (EXT2_BLOCK_SIZE(s)/EXT2_INODE_SIZE(s))
 
 /* linux/ext2_fs.h */
@@ -287,6 +293,7 @@ dump_super(struct ext2_super_block *s)
     printf("  b_free=%d\n", le32_to_cpu(s->s_free_blocks_count));
     printf("  first=%d\n", le32_to_cpu(s->s_first_data_block));
     printf("  log_b_size=%d, b_size=%d\n", le32_to_cpu(s->s_log_block_size), EXT2_BLOCK_SIZE(s));
+    printf("  inode_size=%d\n", le32_to_cpu(EXT2_INODE_SIZE(s)));
     printf("  log_f_size=%d\n", le32_to_cpu(s->s_log_frag_size));
     printf("  bpg=%d\n", le32_to_cpu(s->s_blocks_per_group));
     printf("  fpg=%d\n", le32_to_cpu(s->s_frags_per_group));
