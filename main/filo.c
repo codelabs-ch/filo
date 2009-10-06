@@ -156,7 +156,7 @@ int main(void)
 #else // ! CONFIG_USE_GRUB
 
 #ifdef CONFIG_AUTOBOOT_FILE
-#if CONFIG_AUTOBOOT_DELAY
+#ifdef CONFIG_AUTOBOOT_DELAY
 static inline int autoboot_delay(void)
 {
     u64 timeout;
