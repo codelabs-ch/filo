@@ -139,11 +139,22 @@ void manual_grub_menulst(void)
 int probe_menulst(char *bootdevice, char *filename)
 {
 	char menulst[256];
+	struct builtin *root;
+	int use_root;
 
-	strcpy(menulst, bootdevice);
+	memset(menulst, 0, sizeof(menulst));
+	root = find_command("root");
+	if (root != NULL) {
+		(root->func)(bootdevice, BUILTIN_SCRIPT);
+		use_root = 1;
+	} else {
+		strcpy(menulst, bootdevice);
+		use_root = 0;
+	}
 	strncat(menulst, filename, 256);
+
 	/* Set string to zero: */
-	copy_path_to_filo_bootline(menulst, config_file, 0, 0);
+	copy_path_to_filo_bootline(menulst, config_file, use_root, 0);
 	if (file_open(config_file)) {
 		/* We found a config file. Bail out */
 		/* The valid config file name stays in config_file[] */
