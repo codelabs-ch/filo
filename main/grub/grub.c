@@ -28,6 +28,7 @@
 #include <arch/timer.h>
 
 extern char config_file[];
+extern int reload_configfile;
 
 char PASSWORD_BUF[PASSWORD_BUFLEN]; /* The buffer for the password.  */
 char DEFAULT_FILE_BUF[DEFAULT_FILE_BUFLEN]; /* THe buffer for the filename of "/boot/grub/default".  */
@@ -813,6 +814,11 @@ static void run_menu(char *menu_entries, char *config_entries, int num_entries, 
 			break;
 	}
 
+	/* return to reload the config file */
+	if (reload_configfile) {
+		return;
+	}
+
 	show_menu = 1;
 	goto restart;
 }
@@ -1004,8 +1010,11 @@ void grub_main(void)
 	/* Never return.  */
 	for (;;) {
 		char buf[10];	/* This is good enough.  */
-		char *default_file = (char *) DEFAULT_FILE_BUF;
+		char *default_file;
 		int i;
+
+restart:
+		default_file = (char *) DEFAULT_FILE_BUF;
 
 		reset();
 
@@ -1124,6 +1133,11 @@ void grub_main(void)
 								    cmdline);
 						(builtin->func) (arg, BUILTIN_MENU);
 						errnum = 0;
+
+						/* if the command was configfile, restart */
+						if (reload_configfile) {
+							goto restart;
+						}
 					} else
 						/* Ignored.  */
 						continue;

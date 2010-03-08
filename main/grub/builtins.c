@@ -49,6 +49,9 @@ unsigned long install_partition = 0x20000;
 unsigned long boot_drive = 0;
 char config_file[128] = "\0";
 
+/* indicator if we encountered a 'configfile' command and have to restart */
+int reload_configfile = 0;
+
 kernel_t kernel_type;
 
 /* The fallback entry.  */
@@ -91,6 +94,7 @@ void init_config(void)
 	fallback_entryno = -1;
 	fallback_entries[0] = -1;
 	grub_timeout = -1;
+	reload_configfile = 0;
 }
 
 int check_password(char *entered, char *expected, password_t type)
@@ -318,6 +322,7 @@ static int configfile_func(char *arg, int flags)
 	/* Force to load the configuration file.  */
 	is_opened = 0;
 	keep_cmdline_running = 0;
+	reload_configfile = 1;
 
 	/* Make sure that the user will not be authoritative.  */
 	auth = 0;
@@ -328,7 +333,7 @@ static int configfile_func(char *arg, int flags)
 static struct builtin builtin_configfile = {
 	"configfile",
 	configfile_func,
-	BUILTIN_CMDLINE | BUILTIN_HELP_LIST,
+	BUILTIN_CMDLINE | BUILTIN_MENU | BUILTIN_HELP_LIST,
 	"configfile FILE",
 	"Load FILE as the configuration file."
 };
@@ -1333,7 +1338,7 @@ static int root_func(char *arg, int flags)
 static struct builtin builtin_root = {
 	"root",
 	root_func,
-	BUILTIN_CMDLINE | BUILTIN_HELP_LIST,
+	BUILTIN_CMDLINE | BUILTIN_MENU | BUILTIN_HELP_LIST,
 	"root [DEVICE]",
 	"Set the current \"root device\" to the device DEVICE."
 };
