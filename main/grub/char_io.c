@@ -24,6 +24,8 @@
 #include <version.h>
 #include <grub/shared.h>
 
+extern char root_device[];
+
 char *err_list[] = {
 	[ERR_NONE] = 0,
 	[ERR_BAD_ARGUMENT] = "Invalid argument",
@@ -98,8 +100,10 @@ void init_page(void)
 {
 	color_set(1, NULL);
 	cls();
-	grub_printf("\n                                  %s %s\n\n", 
+	grub_printf("\n                                  %s %s\n",
 			PROGRAM_NAME, PROGRAM_VERSION);
+	grub_printf("                               root_dev = %s\n",
+			root_device[0] ? root_device : "unset");
 }
 
 /* The number of the history entries.  */
