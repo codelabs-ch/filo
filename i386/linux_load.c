@@ -26,6 +26,7 @@
  */
 
 #include <libpayload.h>
+#include <libpayload-config.h>
 #include <config.h>
 #include <fs.h>
 #include "context.h"
@@ -585,7 +586,7 @@ static int start_linux(u32 kern_addr, struct linux_params *params)
 {
     struct segment_desc *linux_gdt;
     struct context *ctx;
-#ifdef CONFIG_VGA_CONSOLE
+#ifdef CONFIG_VGA_VIDEO_CONSOLE
     unsigned int cursor_x, cursor_y, cursor_en;
 #endif
 #ifdef CONFIG_PCMCIA_CF
@@ -625,7 +626,7 @@ static int start_linux(u32 kern_addr, struct linux_params *params)
     debug("eip=%#x\n", kern_addr);
     printf("Jumping to entry point...\n");
 
-#ifdef CONFIG_VGA_CONSOLE
+#ifdef CONFIG_VGA_VIDEO_CONSOLE
     /* Update VGA cursor position.
      * This must be here because the printf changes the value! */
     video_console_get_cursor(&cursor_x, &cursor_y, &cursor_en);
