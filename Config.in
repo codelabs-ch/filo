@@ -24,6 +24,13 @@ config USE_GRUB
 	help
 	  Use GRUB legacy like interface instead of autoboot?
 
+config NON_INTERACTIVE
+	bool "non-interactive interface"
+	default n
+	help
+	  Build a non-interactive interface to disallow modifications of
+	  the boot options, e.g. the kernel to load or the command line.
+
 config PROMPT
 	string "Command line prompt"
 	default "filo"

@@ -40,6 +40,7 @@ char *skip_to(int after_equal, char *cmdline)
 	return cmdline;
 }
 
+#ifndef CONFIG_NON_INTERACTIVE
 /* Print a helpful message for the command-line interface.  */
 void print_cmdline_message(int type)
 {
@@ -67,6 +68,7 @@ void print_cmdline_message(int type)
 	grub_printf("\n");
 #endif
 }
+#endif /* CONFIG_NON_INTERACTIVE */
 
 /* Find the builtin whose command name is COMMAND and return the
  * pointer. If not found, return 0.
@@ -118,6 +120,7 @@ static void init_cmdline(void)
 	init_builtins();
 }
 
+#ifndef CONFIG_NON_INTERACTIVE
 /* Enter the command-line interface. HEAP is used for the command-line
  * buffer. Return only if FOREVER is nonzero and get_cmdline returns
  * nonzero (ESC is pushed).
@@ -179,6 +182,7 @@ void enter_cmdline(char *heap, int forever)
 		count_lines = -1;
 	}
 }
+#endif /* CONFIG_NON_INTERACTIVE */
 
 /* Run an entry from the script SCRIPT. HEAP is used for the
    command-line buffer. If an error occurs, return non-zero, otherwise

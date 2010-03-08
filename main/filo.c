@@ -156,6 +156,10 @@ int main(void)
 
 #ifdef CONFIG_AUTOBOOT_FILE
 #ifdef CONFIG_AUTOBOOT_DELAY
+#ifdef CONFIG_NON_INTERACTIVE
+#error "autoboot delay is not supported for non-interactive builds"
+#define autoboot_delay() 0 /* success */
+#else
 static inline int autoboot_delay(void)
 {
     u64 timeout;
@@ -189,13 +193,16 @@ static inline int autoboot_delay(void)
 	    return 0; /* default accepted */
     }
 }
+#endif /* CONFIG_NON_INTERACTIVE */
 #endif /* CONFIG_AUTOBOOT_DELAY */
 
 static void autoboot(void)
 {
+#ifndef CONFIG_NON_INTERACTIVE
     /* If Escape key is pressed already, skip autoboot */
     if (havechar() && getchar()==ESCAPE)
 	return;
+#endif /* CONFIG_NON_INTERACTIVE */
 
     if (autoboot_delay()==0) {
 	printf("boot: %s\n", CONFIG_AUTOBOOT_FILE);
@@ -215,6 +222,7 @@ int main(void)
     /* Try default image */
     autoboot();
 
+#ifndef CONFIG_NON_INTERACTIVE
     /* The above didn't work, ask user */
     while (havechar())
 	getchar();
@@ -233,6 +241,15 @@ int main(void)
 	if (line[0])
 	    boot(line);
     }
+#else /* ! CONFIG_NON_INTERACTIVE */
+    for (;;) {
+	printf("\nAutoboot failed! Press any key to reboot.\n");
+	getchar();
+	if (reset_handler) {
+	    reset_handler();
+	}
+    }
+#endif /* CONFIG_NON_INTERACTIVE */
 
     return 0;
 }

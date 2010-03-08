@@ -191,6 +191,16 @@ old:
 
 }
 
+static void reboot(void) {
+	for (;;) {
+		grub_printf("Press any key to reboot.\n");
+		getchar();
+		if (reset_handler) {
+			reset_handler();
+		}
+	}
+}
+
 /* Define if there is user specified preset menu string */
 /* #undef PRESET_MENU_STRING */
 
@@ -409,16 +419,27 @@ static void run_menu(char *menu_entries, char *config_entries, int num_entries, 
       password to unlock the next set of features.");
 		} else {
 			if (config_entries)
+#ifndef CONFIG_NON_INTERACTIVE
 				grub_printf("\
       Press enter to boot the selected OS, \'e\' to edit the\n\
       commands before booting, \'a\' to modify the kernel arguments\n\
       before booting, or \'c\' for a command-line.");
+#else /* ! CONFIG_NON_INTERACTIVE */
+				grub_printf("\
+      Press enter to boot the selected OS, \'e\' to see the\n\
+      commands before booting.");
+#endif /* CONFIG_NON_INTERACTIVE */
 			else
+#ifndef CONFIG_NON_INTERACTIVE
 				grub_printf("\
       Press \'b\' to boot, \'e\' to edit the selected command in the\n\
       boot sequence, \'c\' for a command-line, \'o\' to open a new line\n\
       after (\'O\' for before) the selected line, \'d\' to remove the\n\
       selected line, or escape to go back to the main menu.");
+#else /* ! CONFIG_NON_INTERACTIVE */
+				grub_printf("\
+      Press \'b\' to boot or escape to go back to the main menu.");
+#endif /* CONFIG_NON_INTERACTIVE */
 		}
 
 		print_entries(3, 12, first_entry, entryno, menu_entries);
@@ -520,6 +541,7 @@ static void run_menu(char *menu_entries, char *config_entries, int num_entries, 
 				if ((c == '\n') || (c == '\r') || (c == 6))
 					break;
 			} else {
+#ifndef CONFIG_NON_INTERACTIVE
 				if ((c == 'd') || (c == 'o') || (c == 'O')) {
 					print_entry(4 + entryno, 0,
 						    get_entry(menu_entries, first_entry + entryno, 0));
@@ -565,6 +587,7 @@ static void run_menu(char *menu_entries, char *config_entries, int num_entries, 
 
 					print_entries(3, 12, first_entry, entryno, menu_entries);
 				}
+#endif /* CONFIG_NON_INTERACTIVE */
 
 				cur_entry = menu_entries;
 				if (c == 27)
@@ -645,6 +668,7 @@ static void run_menu(char *menu_entries, char *config_entries, int num_entries, 
 
 					if (config_entries)
 						run_menu(heap, NULL, new_num_entries, new_heap, 0);
+#ifndef CONFIG_NON_INTERACTIVE
 					else {
 						/* flush color map */
 						grub_printf(" ");
@@ -677,9 +701,11 @@ static void run_menu(char *menu_entries, char *config_entries, int num_entries, 
 							heap += (j - i);
 						}
 					}
+#endif /* CONFIG_NON_INTERACTIVE */
 
 					goto restart;
 				}
+#ifndef CONFIG_NON_INTERACTIVE
 				if (c == 'c') {
 					extern int keep_cmdline_running;
 					enter_cmdline(heap, 0);
@@ -778,6 +804,7 @@ static void run_menu(char *menu_entries, char *config_entries, int num_entries, 
 
 					break;
 				}
+#endif /* CONFIG_NON_INTERACTIVE */
 			}
 		}
 	}
@@ -1077,7 +1104,11 @@ restart:
 			}
 
 			if (!is_opened) {
-				grub_printf("Could not open menu.lst file '%s'. Entering command line.\n", config_file);
+#ifndef CONFIG_NON_INTERACTIVE
+				grub_printf("Could not open configuration file '%s'. Entering command line.\n", config_file);
+#else /* ! CONFIG_NON_INTERACTIVE */
+				grub_printf("Could not open configuration file '%s'.\n", config_file);
+#endif /* CONFIG_NON_INTERACTIVE */
 				// memset(myheap, 0, 256);
 				// run_script("terminal console\n\0", myheap);
 				break;
@@ -1205,10 +1236,17 @@ restart:
 		} while (is_preset);
 
 		if (!num_entries) {
+#ifndef CONFIG_NON_INTERACTIVE
 			/* If no acceptable config file, goto command-line, starting
 			   heap from where the config entries would have been stored
 			   if there were any.  */
 			enter_cmdline(config_entries, 1);
+#else /* ! CONFIG_NON_INTERACTIVE */
+			for (;;) {
+			    grub_printf("\nNo menu entries found. Giving up.\n");
+			    reboot();
+			}
+#endif /* CONFIG_NON_INTERACTIVE */
 		} else {
 			/* Run menu interface.  */
 			run_menu(menu_entries, config_entries, num_entries, menu_entries + menu_len, default_entry);
