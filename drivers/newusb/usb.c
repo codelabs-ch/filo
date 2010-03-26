@@ -69,7 +69,7 @@ int usb_new_probe(int drive)
 int usb_new_read(const int drive, const sector_t sector, const int size, void *buffer)
 {
 	if (count < drive) return -1;
-	int result = -readwrite_blocks(devs[drive], sector, size, cbw_direction_data_in, buffer);
+	int result = -readwrite_blocks_512(devs[drive], sector, size, cbw_direction_data_in, buffer);
 	return result;
 }
 #endif
