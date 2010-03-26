@@ -148,7 +148,7 @@ void platform_poweroff(void)
 	outw(PWRBTN_STS, pmbase + PM1_STS);
 
         /* PMBASE + 4, Bit 10-12, Sleeping Type,
-	 * set to 110 -> S5, soft_off */
+	 * set to 111 -> S5, soft_off */
 
 	reg32 = inl(pmbase + PM1_CNT);
 
