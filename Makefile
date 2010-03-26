@@ -44,8 +44,8 @@ endif
 CC = gcc
 HOSTCC = gcc
 HOSTCXX = g++
-HOSTCFLAGS := -I$(srck) -I$(objk)
-HOSTCXXFLAGS := -I$(srck) -I$(objk)
+HOSTCFLAGS := -I$(srck) -I$(objk) -pipe
+HOSTCXXFLAGS := -I$(srck) -I$(objk) -pipe
 
 STRIP ?= strip
 NM ?= nm
@@ -93,7 +93,7 @@ STACKPROTECT += $(call cc-option, -fno-stack-protector,)
 
 GCCINCDIR = $(shell $(CC) -print-search-dirs | head -n 1 | cut -d' ' -f2)include
 CPPFLAGS = -nostdinc -imacros $(obj)/config.h -Iinclude -I$(GCCINCDIR) -MD
-CFLAGS += $(STACKPROTECT) $(INCLUDES) -Wall -Os -fomit-frame-pointer -fno-common -ffreestanding -fno-strict-aliasing -Wshadow
+CFLAGS += $(STACKPROTECT) $(INCLUDES) -Wall -Os -fomit-frame-pointer -fno-common -ffreestanding -fno-strict-aliasing -Wshadow -pipe
 
 TARGET  = $(obj)/filo.elf
 
