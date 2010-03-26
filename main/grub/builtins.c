@@ -87,7 +87,6 @@ void init_builtins(void)
 /* Initialize the data for the configuration file.  */
 void init_config(void)
 {
-	default_entry = 0;
 	password = NULL;
 	fallback_entryno = -1;
 	fallback_entries[0] = -1;
