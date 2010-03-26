@@ -39,13 +39,13 @@ REQUIREMENTS
 
 INSTALL
 
-  First, you need to compile libpayload (included via svn:externals in FILO):
+  First, you need to compile libpayload (included in coreboot):
 
-    $ cd libpayload
+    $ cd ../coreboot/payloads/libpayload
     $ make defconfig
     $ make
-    $ make DESTDIR=../build install
-    $ cd ..
+    $ make DESTDIR=../../../filo/build install
+    $ cd ../../../filo
 
   Configure FILO using the Kconfig interface:
 
