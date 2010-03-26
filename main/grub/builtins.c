@@ -2,7 +2,7 @@
  * This file is part of FILO.
  *
  *  Copyright (C) 1999,2000,2001,2002,2004  Free Software Foundation, Inc.
- *  Copyright (C) 2005-2008 coresystems GmbH
+ *  Copyright (C) 2005-2010 coresystems GmbH
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,8 @@
 
 #include <libpayload-config.h>
 #include <libpayload.h>
+#include <getopt.h>
+
 #include <config.h>
 #include <fs.h>
 #include <lib.h>
@@ -45,7 +47,6 @@ unsigned long saved_mem_upper;
 // other..
 unsigned long install_partition = 0x20000;
 unsigned long boot_drive = 0;
-int saved_entryno = 0;
 char config_file[128] = "\0";
 
 kernel_t kernel_type;
@@ -336,6 +337,15 @@ static struct builtin builtin_configfile = {
 /* default */
 static int default_func(char *arg, int flags)
 {
+	unsigned char buf[1];
+	if (get_option(buf, "boot_default"))
+		buf[0] = 0xff;
+	
+	if ((unsigned char)buf[0] != 0xff) {
+		printf("Default override by CMOS.\n");
+		return 0;
+	}
+
 	if (!safe_parse_maxint(&arg, &default_entry))
 		return 1;
 
@@ -354,7 +364,47 @@ static struct builtin builtin_default = {
 };
 
 #if CONFIG_DEVELOPER_TOOLS
-/* default */
+/* dumpmem */
+static int dumpmem_func(char *arg, int flags)
+{
+	int ret = string_to_args("dumpmem", arg);
+	unsigned int mem_base, mem_len;
+	void *i;
+
+	if(ret || (string_argc != 3)) {
+		errnum = ERR_BAD_ARGUMENT;
+		return 1;
+	}
+
+	// FIXME
+	if (!safe_parse_maxint(&string_argv[1], &mem_base))
+		return 1;
+	if (!safe_parse_maxint(&string_argv[2], &mem_len))
+		return 1;
+
+	grub_printf("Dumping memory at 0x%08x (0x%x bytes)\n",
+			mem_base, mem_len);
+
+	for (i=phys_to_virt(mem_base); i<phys_to_virt(mem_base + mem_len); i++) {
+		if (((unsigned long)i & 0x0f) == 0)
+			grub_printf("\n%08x:", i);
+		unsigned char val = *((unsigned char *)i);
+		grub_printf(" %02x", val);
+	}
+	grub_printf("\n");
+
+	return 0;
+}
+
+static struct builtin builtin_dumpmem = {
+	"dumpmem",
+	dumpmem_func,
+	BUILTIN_CMDLINE | BUILTIN_HELP_LIST,
+	"dumpmem",
+	"Dump memory"
+};
+
+/* dumppm */
 static int dumppm_func(char *arg, int flags)
 {
 	u16 pmbase;
@@ -651,9 +701,16 @@ void copy_path_to_filo_bootline(char *arg, char *path, int use_rootdev)
 	}
 
 	if (disk == -1) {
-		/* The user did specify a FILO name already */
-		// grub_printf("No drive.\n");
-		len = 0;	// just copy the drive name
+		int cnt = 0;
+		len = 0;
+		while ((arg[cnt] != 0) && (arg[cnt+1] != 0)) {
+			if (arg[cnt] == ':' && arg[cnt+1] == '/') {
+				/* The user did specify a FILO name already */
+				len = cnt;
+				break;
+			}
+			cnt++;
+		}
 	} else {
 		if (part == -1) {	// No partition
 			sprintf(devicename, "%s%c:", drivername, disk + 'a');
@@ -895,7 +952,7 @@ static void lspci_scan_bus(int bus)
 
 			for (i=0; i<lspci_indent; i++)
 				grub_printf("|  ");
-			grub_printf("|- %x:%x.%x [%x:%x]\n", bus, slot, func,
+			grub_printf("|- %02x:%02x.%x [%04x:%04x]\n", bus, slot, func,
 					val & 0xffff, val >> 16);
 
 			/* If this is a bridge, then follow it. */
@@ -1704,6 +1761,7 @@ struct builtin *builtin_table[] = {
 	&builtin_configfile,
 	&builtin_default,
 #ifdef CONFIG_DEVELOPER_TOOLS
+	&builtin_dumpmem,
 	&builtin_dumppm,
 #endif
 #ifdef CONFIG_EXPERIMENTAL

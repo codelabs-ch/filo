@@ -132,7 +132,6 @@ typedef enum
   MAX_ERR_NUM
 } grub_error_t;
 
-extern int saved_entryno;
 extern char config_file[];
 
 /* GUI interface variables. */

@@ -32,6 +32,9 @@ extern char config_file[];
 char PASSWORD_BUF[PASSWORD_BUFLEN]; /* The buffer for the password.  */
 char DEFAULT_FILE_BUF[DEFAULT_FILE_BUFLEN]; /* THe buffer for the filename of "/boot/grub/default".  */
 char CMDLINE_BUF[CMDLINE_BUFLEN]; /* The buffer for the command-line.  */
+#ifdef CONFIG_ISOLINUX_PARSER
+char CMDLINE_TMP[CMDLINE_BUFLEN]; /* The buffer for the command-line.  */
+#endif
 char HISTORY_BUF[HISTORY_BUFLEN]; /* The history buffer for the command-line. */
 char COMPLETION_BUF[COMPLETION_BUFLEN]; /* The buffer for the completion.  */
 char UNIQUE_BUF[UNIQUE_BUFLEN]; /* The buffer for the unique string.  */
@@ -173,6 +176,12 @@ void grub_menulst(void)
 				return;
 			if (probe_menulst(bootdevice, "/boot/menu.lst"))
 				return;
+#ifdef CONFIG_ISOLINUX_PARSER
+			if (probe_menulst(bootdevice, "/boot/isolinux/isolinux.cfg"))
+				return;
+			if (probe_menulst(bootdevice, "/isolinux/isolinux.cfg"))
+				return;
+#endif
 		}
 	} while (bootdevice);
 
@@ -871,6 +880,88 @@ static int get_line_from_config(char *cmdline, int maxlen, int read_from_file)
 	return pos;
 }
 
+#ifdef CONFIG_ISOLINUX_PARSER
+static int rewrite_isolinux_config(void)
+{
+	/* TODO implement "default" */
+	/* TODO implement "timeout" */
+	if (!memcmp(CMDLINE_BUF, "LABEL ", 6) ||
+	    !memcmp(CMDLINE_BUF, "label ", 6)) {
+		strcpy(CMDLINE_TMP, "title ");
+		strlcat(CMDLINE_TMP, CMDLINE_BUF + 6, NEW_HEAPSIZE - 6);
+		memcpy(CMDLINE_BUF, CMDLINE_TMP, NEW_HEAPSIZE);
+	} else
+	if (!memcmp(CMDLINE_BUF, "KERNEL ", 7) ||
+	    !memcmp(CMDLINE_BUF, "kernel ", 7)) {
+		char *spos;
+		int pstart = 7, plen = 0;
+		strcpy(CMDLINE_TMP, "kernel ");
+
+		/* Find path of kernel */
+		if (strstr(CMDLINE_BUF, " /")) {
+			// Our kernel has an absolute path, so
+			// we only grab the device portion of the
+			// config file
+			
+			// (hd0,0)/configfile.cfg or hda1:/configfile.cfg
+			spos = strchr(config_file, '/');
+			if (!spos) {
+				// (hd0,0)configfile.cfg
+				spos = strchr(config_file, ')');
+				if (spos) spos++;
+			}
+			if (!spos) {
+				// hda1:configfile.cfg
+				spos = strchr(config_file, ':');
+				if (spos) spos++;
+			}
+		} else {
+			spos = strrchr(config_file, '/');
+			if (spos) spos++;
+		}
+
+		if (spos) {
+			char sback = spos[0];
+			spos[0]=0;
+			strlcat(CMDLINE_TMP, config_file, NEW_HEAPSIZE);
+			plen = strlen(CMDLINE_TMP) - pstart; // path name len
+			spos[0]=sback;
+		}
+
+		/* copy kernel name */
+		strlcat(CMDLINE_TMP, CMDLINE_BUF + 7, NEW_HEAPSIZE);
+
+		/* recalculate the new kernel path length,
+		 * we're going to need this for initrd
+		 */
+		plen = strrchr(CMDLINE_TMP, '/') - (CMDLINE_TMP + 7) + 1;
+
+		/* read APPEND line */
+		get_line_from_config(CMDLINE_BUF, NEW_HEAPSIZE, 1);
+		if (!memcmp(CMDLINE_BUF, "APPEND ", 7) ||
+		    !memcmp(CMDLINE_BUF, "append ", 7)) {
+			/* append APPEND line */
+			strlcat(CMDLINE_TMP, " ", NEW_HEAPSIZE);
+			strlcat(CMDLINE_TMP, CMDLINE_BUF + 7, NEW_HEAPSIZE);
+			spos = strstr(CMDLINE_TMP, "initrd=") + 7;
+			if (spos && plen) {
+				strncpy(spos, CMDLINE_TMP + pstart, plen);
+				spos[plen] = 0;
+				spos = strstr(CMDLINE_BUF, "initrd=") + 7;
+				strlcat(CMDLINE_TMP, spos, NEW_HEAPSIZE);
+			}
+		}
+
+		/* copy temp string to real string */
+		memcpy(CMDLINE_BUF, CMDLINE_TMP, NEW_HEAPSIZE);
+	} else {
+		// printf("skip: %s\n", CMDLINE_BUF);
+		return 1;
+	}
+	return 0;
+}
+#endif
+
 int is_opened = 0, is_preset = 0;
 
 /* This is the starting function in C.  */
@@ -912,6 +1003,7 @@ void grub_main(void)
 
 	/* Never return.  */
 	for (;;) {
+		char buf[10];	/* This is good enough.  */
 		char *default_file = (char *) DEFAULT_FILE_BUF;
 		int i;
 
@@ -920,34 +1012,41 @@ void grub_main(void)
 		/* Here load the configuration file.  */
 
 		/* Get a saved default entry if possible.  */
-		saved_entryno = 0;
 		*default_file = 0;
 
-		strncat(default_file, config_file, DEFAULT_FILE_BUFLEN);
-		for (i = strlen(default_file); i >= 0; i--)
-			if (default_file[i] == '/') {
-				i++;
-				break;
-			}
-		default_file[i] = 0;
-		strncat(default_file + i, "default", DEFAULT_FILE_BUFLEN - i);
-		if (file_open(default_file)) {
-			char buf[10];	/* This is good enough.  */
-			char *p = buf;
-			int len;
+		/* Look into CMOS first */
+		if (!get_option(buf, "boot_default")) {
+			default_entry = ((unsigned char)buf[0] != 0xff) ?
+				(unsigned char)buf[0] : 0;
+		} else {
+			strncat(default_file, config_file, DEFAULT_FILE_BUFLEN);
+			for (i = strlen(default_file); i >= 0; i--)
+				if (default_file[i] == '/') {
+					i++;
+					break;
+				}
+			default_file[i] = 0;
+			strncat(default_file + i, "default", DEFAULT_FILE_BUFLEN - i);
+			if (file_open(default_file)) {
+				char *p = buf;
+				int len;
 
-			len = file_read(buf, sizeof(buf));
-			if (len > 0) {
-				buf[sizeof(buf) - 1] = 0;
-				safe_parse_maxint(&p, &saved_entryno);
-			}
+				len = file_read(buf, sizeof(buf));
+				if (len > 0) {
+					buf[sizeof(buf) - 1] = 0;
+					safe_parse_maxint(&p, &default_entry);
+				}
 
-			file_close();
+				file_close();
+			}
 		}
 
 		errnum = ERR_NONE;
 
 		do {
+#ifdef CONFIG_ISOLINUX_PARSER
+			int isolinux_cfg = 0;
+#endif
 			/* STATE 0:  Before any title command.
 			   STATE 1:  In a title command.
 			   STATE >1: In a entry after a title command.  */
@@ -960,6 +1059,12 @@ void grub_main(void)
 			if (!is_opened) {
 				is_opened = file_open(config_file);
 				errnum = ERR_NONE;
+#ifdef CONFIG_ISOLINUX_PARSER
+				if (strstr(config_file, "isolinux.cfg")) {
+					printf("detected isolinux.cfg\n");
+					isolinux_cfg = 1;
+				}
+#endif
 			}
 
 			if (!is_opened) {
@@ -975,6 +1080,12 @@ void grub_main(void)
 			cmdline = (char *) CMDLINE_BUF;
 			while (get_line_from_config(cmdline, NEW_HEAPSIZE, !is_preset)) {
 				struct builtin *builtin;
+#ifdef CONFIG_ISOLINUX_PARSER
+				if (isolinux_cfg) {
+					if (rewrite_isolinux_config())
+						continue;
+				}
+#endif
 
 				/* Get the pointer to the builtin structure.  */
 				builtin = find_command(cmdline);

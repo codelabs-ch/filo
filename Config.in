@@ -79,6 +79,14 @@ config AUTOBOOT_DELAY
 	help
 	  Time in second before booting AUTOBOOT_FILE
 
+config ISOLINUX_PARSER
+	bool "Support for parsing isolinux.cfg config files"
+	default n
+	depends on USE_GRUB
+	help
+	  If you enable this function, FILO will be able to parse isolinux.cfg
+	  config files in addition to filo.lst/menu.lst files.
+
 endmenu
 
 menu "Drivers"
