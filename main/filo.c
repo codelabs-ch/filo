@@ -45,13 +45,25 @@ struct sys_info sys_info;
 
 void relocate(void);
 
+void filo_reset_handler(void)
+{
+	void __attribute__((weak)) platform_reboot(void);
+
+	if (platform_reboot)
+		platform_reboot();
+	else
+		printf("Rebooting not supported.\n");
+
+}
+
+
 static void init(void)
 {
-    /* Set up the consoles. */
-    console_init();
-
     /* Gather system information, and implicitly sets up timers */
     lib_get_sysinfo();
+
+    /* Set up the consoles. */
+    console_init();
 
     printf("%s version %s\n", program_name, program_version);
     collect_sys_info(&sys_info);
@@ -68,8 +80,9 @@ static void init(void)
     printf("No USB stack in libpayload.\n");
 #endif
 #endif
-
-
+#if defined(CONFIG_PC_KEYBOARD) || defined(CONFIG_USB_HID)
+    add_reset_handler(filo_reset_handler);
+#endif
 #ifdef CONFIG_SUPPORT_SOUND
     sound_init();
 #endif
@@ -125,17 +138,6 @@ out:
     return ret;
 }
 
-void reset_handler(void)
-{
-	void __attribute__((weak)) platform_reboot(void);
-
-	if (platform_reboot)
-		platform_reboot();
-	else
-		printf("Rebooting not supported.\n");
-
-}
-
 #if CONFIG_USE_GRUB
 /* The main routine */
 int main(void)
@@ -145,9 +147,6 @@ int main(void)
     
     /* Initialize */
     init();
-#ifdef CONFIG_PC_KEYBOARD
-    keyboard_add_reset_handler(reset_handler);
-#endif
     grub_menulst();
     grub_main();
     return 0;   
