@@ -27,6 +27,7 @@
 
 #include <libpayload.h>
 #include <libpayload-config.h>
+#include <coreboot_tables.h>
 #include <config.h>
 #include <fs.h>
 #include "context.h"
@@ -295,6 +296,33 @@ set_memory_size(struct linux_params *params)
     else
 	params->ext_mem_k = params->alt_mem_k;
     debug("ext_mem_k=%d, alt_mem_k=%d\n", params->ext_mem_k, params->alt_mem_k);
+}
+
+/* Video mode */
+static void
+set_video_mode(struct linux_params *params)
+{
+#if CONFIG_COREBOOT_VIDEO_CONSOLE
+	/* Are we running on a framebuffer console? */
+	if (!lib_sysinfo.framebuffer)
+		return;
+
+	params->lfb_width = lib_sysinfo.framebuffer->x_resolution;
+	params->lfb_height = lib_sysinfo.framebuffer->y_resolution;
+	params->lfb_depth = lib_sysinfo.framebuffer->bits_per_pixel;
+	params->lfb_linelength = lib_sysinfo.framebuffer->bytes_per_line;
+	params->lfb_base = lib_sysinfo.framebuffer->physical_address;
+	// prolly not enough for the boot splash?!
+	params->lfb_size = (params->lfb_linelength * params->lfb_height + 65535 ) >> 16;
+	params->red_size = lib_sysinfo.framebuffer->red_mask_size;
+	params->red_pos = lib_sysinfo.framebuffer->red_mask_pos;
+	params->green_size = lib_sysinfo.framebuffer->green_mask_size;
+	params->green_pos = lib_sysinfo.framebuffer->green_mask_pos;
+	params->blue_size = lib_sysinfo.framebuffer->blue_mask_size;
+	params->blue_pos = lib_sysinfo.framebuffer->blue_mask_pos;
+	params->rsvd_size = lib_sysinfo.framebuffer->reserved_mask_size;
+	params->rsvd_pos = lib_sysinfo.framebuffer->reserved_mask_pos;
+#endif
 }
 
 /*
@@ -667,6 +695,7 @@ int linux_load(const char *file, const char *cmdline)
     params = phys_to_virt(LINUX_PARAM_LOC);
     init_linux_params(params, &hdr);
     set_memory_size(params);
+    set_video_mode(params);
     initrd_file = parse_command_line(cmdline, phys_to_virt(COMMAND_LINE_LOC));
     set_command_line_loc(params, &hdr);
 
