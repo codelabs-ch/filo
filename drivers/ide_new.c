@@ -3,7 +3,7 @@
  *   
  *   Copyright (C) 2004 Jens Axboe <axboe@suse.de>
  *   Copyright (C) 2005 Stefan Reinauer <stepan@openbios.org>
- *   Copyright (C) 2009 coresystems GmbH
+ *   Copyright (C) 2009-2010 coresystems GmbH
  *
  *   Credit goes to Hale Landis for his excellent ata demo software
  *
@@ -164,14 +164,15 @@ ob_ide_error(struct ide_drive *drive, unsigned char stat, char *msg)
 	if (!stat)
 		stat = ob_ide_pio_readb(drive, IDEREG_STATUS);
 
-	printf("ob_ide_error drive<%d>: %s:\n", drive->nr, msg);
-	printf("    cmd=%x, stat=%x", chan->ata_cmd.command, stat);
+	debug("ob_ide_error ");
+	printf("drive<%d>: %s:\n", drive->nr, msg);
+	debug("    cmd=%x, stat=%x", chan->ata_cmd.command, stat);
 
 	if ((stat & (BUSY_STAT | ERR_STAT)) == ERR_STAT) {
 		err = ob_ide_pio_readb(drive, IDEREG_ERROR);
-		printf(", err=%x", err);
+		debug(", err=%x", err);
 	}
-	printf("\n");
+	debug("\n");
 
 	/*
 	 * see if sense is valid and dump that
@@ -183,19 +184,19 @@ ob_ide_error(struct ide_drive *drive, unsigned char stat, char *msg)
 		if (cmd->cdb[0] == ATAPI_REQ_SENSE) {
 			old_cdb = cmd->old_cdb;
 
-			printf("    atapi opcode=%02x", old_cdb);
+			debug("    atapi opcode=%02x", old_cdb);
 		} else {
 			int i;
 
-			printf("    cdb: ");
+			debug("    cdb: ");
 			for (i = 0; i < sizeof(cmd->cdb); i++)
-				printf("%02x ", cmd->cdb[i]);
+				debug("%02x ", cmd->cdb[i]);
 		}
 		if (cmd->sense_valid)
-			printf(", sense: %02x/%02x/%02x", cmd->sense.sense_key, cmd->sense.asc, cmd->sense.ascq);
+			debug(", sense: %02x/%02x/%02x", cmd->sense.sense_key, cmd->sense.asc, cmd->sense.ascq);
 		else
-			printf(", no sense");
-		printf("\n");
+			debug(", no sense");
+		debug("\n");
 	}
 }
 
@@ -567,10 +568,15 @@ ob_ide_atapi_packet(struct ide_drive *drive, struct atapi_command *cmd)
 		/*
 		 * ... except 'medium not present'
 		 */
-		if (cmd->sense.asc == 0x3a)
+		if (cmd->sense.asc == 0x3a) {
+			/* 'medium not present' is not an error */
+			ret = 0;
+			/* force reevaluation */
+			drive->channel->present = 0;
 			break;
+		}
 
-		udelay(1000000);
+		mdelay(1000);
 	} while (retries--);
 
 	if (ret)
@@ -613,10 +619,23 @@ ob_ide_atapi_drive_ready(struct ide_drive *drive)
 {
 	struct atapi_command *cmd = &drive->channel->atapi_cmd;
 	struct atapi_capacity cap;
+	int i;
 
 	/*
 	 * Test Unit Ready is like a ping
+	 * But wait a bit, as the drive might take a while
 	 */
+	i = 30;
+	while (i-- != 0) {
+		memset(cmd, 0, sizeof(*cmd));
+		cmd->cdb[0] = ATAPI_TUR;
+
+		if (!ob_ide_atapi_packet(drive,cmd)) break;
+
+		/* Give the drive some time to breathe */
+		mdelay(500);
+	}
+
 	memset(cmd, 0, sizeof(*cmd));
 	cmd->cdb[0] = ATAPI_TUR;
 
@@ -671,7 +690,7 @@ ob_ide_read_atapi(struct ide_drive *drive, unsigned long long block, unsigned ch
 	struct atapi_command *cmd = &drive->channel->atapi_cmd;
 
 	if (ob_ide_atapi_drive_ready(drive))
-		return 1;
+		return RETURN_NO_MEDIUM;
 
 	if (drive->bs == 2048) {
 		if (((block & 3) != 0) || ((sectors & 3) != 0)) {
@@ -1149,7 +1168,9 @@ static int pci_find_ata_device_on_bus(int bus, pcidev_t * dev, int *index, int s
 			    val == 0x0000ffff || val == 0xffff0000)
 				continue;
 
-			if (val == 0xac8f104c) {
+			// skip TI bridges on Rocky (ac8f) and Getac (803b)
+			// There must be a better way to do this...
+			if (val == 0xac8f104c || val == 0x803b104c) {
 				debug("Skipping TI bridge\n");
 				continue;
 			}

@@ -5,6 +5,14 @@
 #include "hdreg.h"
 
 /*
+ * Return values
+ */
+
+#define RETURN_OK		0x00
+#define RETURN_ERROR		0x01
+#define RETURN_NO_MEDIUM	0x02
+
+/*
  * legacy ide ports
  */
 #define IDEREG_DATA	0x00
