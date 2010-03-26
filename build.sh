@@ -10,7 +10,7 @@ for make in make gmake gnumake; do
 done
 
 GCCPREFIX=invalid
-for gccprefixes in `pwd`/../crossgcc/xgcc/bin/i386-elf- i386-elf- ""; do
+for gccprefixes in `pwd`/../coreboot/util/crossgcc/xgcc/bin/i386-elf- i386-elf- ""; do
 	TMP=`mktemp /tmp/temp.XXXX`
 	echo "mov %eax, %eax" > ${TMP}.s
 	printf "\x7fELF" > ${TMP}.compare
@@ -50,13 +50,13 @@ $MAKE distclean
 cp configs/$CONFIG ./.config
 $MAKE oldconfig
 
-cd libpayload
+cd ../coreboot/payloads/libpayload
 $MAKE distclean
 cp configs/$CONFIG .config
 $MAKE oldconfig
 eval $MAKE $MAKEFLAGS
-eval $MAKE $MAKEFLAGS DESTDIR=../build install 
-cd ..
+eval $MAKE $MAKEFLAGS DESTDIR=../../../filo/build install 
+cd ../../../filo
 
 eval $MAKE $MAKEFLAGS
 
