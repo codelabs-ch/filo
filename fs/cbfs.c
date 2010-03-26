@@ -85,7 +85,7 @@ struct cbfs_file *cbfs_find(const char *name)
 
 	if (header == NULL)
 		return NULL;
-	offset = phys_to_virt(0 - ntohl(header->romsize) + ntohl(header->offset));
+	offset = (unsigned long) phys_to_virt(0 - ntohl(header->romsize) + ntohl(header->offset));
 
 	int align= ntohl(header->align);
 
@@ -105,7 +105,7 @@ struct cbfs_file *cbfs_find(const char *name)
 		printk_spew("%p\n", (void *)offset);
 		if (virt_to_phys(offset) <= virt_to_phys(oldoffset)) return NULL;
 
-		if (offset < phys_to_virt(0xFFFFFFFF - ntohl(header->romsize)))
+		if (offset < (unsigned long)phys_to_virt(0xFFFFFFFF - ntohl(header->romsize)))
 			return NULL;
 	}
 }

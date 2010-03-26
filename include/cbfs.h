@@ -157,7 +157,6 @@ struct cbfs_optionrom {
 #define CBFS_NAME(_c) (((char *) (_c)) + sizeof(struct cbfs_file))
 #define CBFS_SUBHEADER(_p) ( (void *) ((((u8 *) (_p)) + ntohl((_p)->offset))) )
 
-void * cbfs_load_payload(struct lb_memory *lb_mem, const char *name);
 void * cbfs_load_stage(const char *name);
 int cbfs_execute_stage(const char *name);
 void * cbfs_get_file(const char *name);
