@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # FILO version: 0.6.0
-# Fri Aug 28 00:51:59 2009
+# Fri Mar 26 12:50:23 2010
 #
 CONFIG_TARGET_I386=y
 # CONFIG_REVIEW is not set
@@ -14,6 +14,7 @@ CONFIG_PROMPT="filo"
 CONFIG_MENULST_FILE="hda3:/boot/filo/menu.lst"
 CONFIG_MENULST_TIMEOUT=0
 CONFIG_USE_MD5_PASSWORDS=y
+CONFIG_ISOLINUX_PARSER=y
 
 #
 # Drivers
