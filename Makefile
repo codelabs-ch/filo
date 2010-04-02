@@ -41,14 +41,16 @@ ifneq ($(V),1)
 Q := @
 endif
 
-CC = gcc
+CROSS_PREFIX =
+CC = $(CROSS_PREFIX)gcc -m32
+AS = $(CROSS_PREFIX)as --32
+LD = $(CROSS_PREFIX)ld -belf32-i386
+STRIP = $(CROSS_PREFIX)strip
+NM = $(CROSS_PREFIX)nm
 HOSTCC = gcc
 HOSTCXX = g++
 HOSTCFLAGS := -I$(srck) -I$(objk) -pipe
 HOSTCXXFLAGS := -I$(srck) -I$(objk) -pipe
-
-STRIP ?= strip
-NM ?= nm
 
 ifeq ($(strip $(HAVE_DOTCONFIG)),)
 
