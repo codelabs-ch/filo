@@ -18,7 +18,6 @@
 
 
 #include <lib.h>
-#include "shared.h"
 #include "squashfs_zlib.h"
 
 
