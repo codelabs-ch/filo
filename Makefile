@@ -99,9 +99,13 @@ CFLAGS += $(STACKPROTECT) $(INCLUDES) -Wall -Os -fomit-frame-pointer -fno-common
 
 TARGET  = $(obj)/filo.elf
 
-include $(src)/.config
-
+HAVE_LIBPAYLOAD := $(wildcard $(LIBPAYLOAD))
+ifeq ($(strip $(HAVE_LIBPAYLOAD)),)
+all:
+	@printf "\nError: libpayload is not installed!\nexpected: $(LIBPAYLOAD).\n"
+else
 all: prepare $(obj)/version.h $(TARGET)
+endif
 
 $(obj)/filo: $(src)/.config $(OBJS)
 	$(Q)printf "  LD      $(subst $(shell pwd)/,,$(@))\n"
