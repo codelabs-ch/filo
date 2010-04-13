@@ -55,6 +55,7 @@ extern char COMPLETION_BUF[];
 #define COMPLETION_BUFLEN	MAX_CMDLINE
 
 /* The buffer for the unique string.  */
+extern char UNIQUE_BUF[];
 #define UNIQUE_BUFLEN		MAX_CMDLINE
 
 /* The buffer for the menu entries.  */
