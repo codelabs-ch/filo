@@ -9,10 +9,6 @@ config TARGET_I386
 	bool
 	default y
 
-config REVIEW
-	bool
-	default n
-
 menu "Interface Options"
 
 config USE_GRUB

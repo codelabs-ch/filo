@@ -4,7 +4,6 @@
 # Fri Mar 26 12:50:23 2010
 #
 CONFIG_TARGET_I386=y
-# CONFIG_REVIEW is not set
 
 #
 # Interface Options
@@ -52,7 +51,7 @@ CONFIG_LINUX_LOADER=y
 #
 # Debugging & Experimental
 #
-# CONFIG_EXPERIMENTAL is not set
+CONFIG_EXPERIMENTAL=y
 # CONFIG_DEBUG_ALL is not set
 # CONFIG_DEBUG_ELFBOOT is not set
 # CONFIG_DEBUG_ELFNOTE is not set
