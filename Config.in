@@ -261,7 +261,6 @@ config EXPERIMENTAL
 config DEBUG_ALL
 	bool "DEBUG_ALL"
 	select DEBUG_ELFBOOT
-	select DEBUG_ELFNOTE
 	select DEBUG_SEGMENT
 	select DEBUG_SYS_INFO
 	select DEBUG_BLOCKDEV
@@ -279,10 +278,6 @@ config DEBUG_ALL
 
 config DEBUG_ELFBOOT
 	bool "DEBUG_ELFBOOT"
-	default n
-
-config DEBUG_ELFNOTE
-	bool "DEBUG_ELFNOTE"
 	default n
 
 config DEBUG_SEGMENT

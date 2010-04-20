@@ -31,6 +31,4 @@ void collect_sys_info(struct sys_info *info)
     debug("boot eax = %#lx\n", info->boot_type);
     debug("boot ebx = %#lx\n", info->boot_data);
     debug("boot arg = %#lx\n", info->boot_arg);
-
-    collect_elfboot_info(info);
 }

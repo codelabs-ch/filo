@@ -17,6 +17,6 @@
 #
 
 TARGETS-y += main/filo.o main/strtox.o
-TARGETS-y += main/elfload.o main/elfnote.o main/ipchecksum.o 
+TARGETS-y += main/elfload.o main/ipchecksum.o 
 TARGETS-$(CONFIG_SUPPORT_SOUND) += main/sound.o
 

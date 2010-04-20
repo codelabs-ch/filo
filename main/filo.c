@@ -30,6 +30,9 @@ PAYLOAD_INFO(name, PROGRAM_NAME " " PROGRAM_VERSION);
 PAYLOAD_INFO(listname, PROGRAM_NAME);
 PAYLOAD_INFO(desc, "Bootloader");
 
+const char const *program_name = PROGRAM_NAME;
+const char const *program_version = PROGRAM_VERSION_FULL;
+
 #define ENTER '\r'
 #define ESCAPE '\x1b'
 

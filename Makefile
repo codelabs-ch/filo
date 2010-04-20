@@ -114,20 +114,17 @@ $(obj)/filo: $(src)/.config $(OBJS)
 	$(Q)printf "  LD      $(subst $(shell pwd)/,,$(@))\n"
 	$(Q)$(LD) -N -T $(ARCHDIR-y)/ldscript -o $@ $(OBJS) $(LIBPAYLOAD) $(LIBGCC)
 
-$(TARGET): $(obj)/filo $(obj)/util/ebchecksum
+$(TARGET): $(obj)/filo
 	$(Q)cp $(obj)/filo $@
 	$(Q)$(NM) $(obj)/filo | sort > $(obj)/filo.map
 	$(Q)printf "  STRIP   $(subst $(shell pwd)/,,$(@))\n"
 	$(Q)$(STRIP) -s $@
-	$(Q)printf "  EBCHECK $(subst $(shell pwd)/,,$(@))\n"
-	$(Q)$(obj)/util/ebchecksum -w $@
 
 include util/kconfig/Makefile
-include util/Makefile.inc
 
 $(obj)/%.o: $(src)/%.c
 	$(Q)printf "  CC      $(subst $(shell pwd)/,,$(@))\n"
-	$(Q)$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
+	$(Q)$(CC) -MMD $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
 
 $(obj)/%.S.o: $(src)/%.S
 	$(Q)printf "  AS      $(subst $(shell pwd)/,,$(@))\n"
