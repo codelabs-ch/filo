@@ -41,12 +41,15 @@ ifneq ($(V),1)
 Q := @
 endif
 
+$(if $(wildcard .xcompile),,$(eval $(shell bash util/xcompile/xcompile > .xcompile)))
+include .xcompile
+
 CROSS_PREFIX =
-CC = $(CROSS_PREFIX)gcc -m32
-AS = $(CROSS_PREFIX)as --32
-LD = $(CROSS_PREFIX)ld -belf32-i386
-STRIP = $(CROSS_PREFIX)strip
-NM = $(CROSS_PREFIX)nm
+CC ?= $(CROSS_PREFIX)gcc -m32
+AS ?= $(CROSS_PREFIX)as --32
+LD ?= $(CROSS_PREFIX)ld -belf32-i386
+STRIP ?= $(CROSS_PREFIX)strip
+NM ?= $(CROSS_PREFIX)nm
 HOSTCC = gcc
 HOSTCXX = g++
 HOSTCFLAGS := -I$(srck) -I$(objk) -pipe
