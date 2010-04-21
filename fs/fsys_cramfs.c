@@ -117,8 +117,8 @@ static struct cramfs_buf *cramfs_buf;
 #define CRAMFS_ROOT_INO (sizeof(struct cramfs_super) - sizeof(struct cramfs_inode))
 
 #ifndef STAGE1_5
-#define cramfs_memcmp grub_memcmp
-#define cramfs_strlen grub_strlen
+#define cramfs_memcmp memcmp
+#define cramfs_strlen strlen
 #else
 int
 cramfs_memcmp (const char *s1, const char *s2, int n)

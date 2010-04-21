@@ -29,7 +29,7 @@
 static unsigned char huffman_order[] = {16, 17, 18,  0,  8,  7,  9,  6, 10,  5,
 					11,  4, 12,  3, 13,  2, 14,  1, 15};
 	
-inline void cramfs_memset(int *s, const int c, size n)
+inline void cramfs_memset(int *s, const int c, size_t n)
 {
 	n--;
 	for (;n > 0; n--) s[n] = c;
