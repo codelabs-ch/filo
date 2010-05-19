@@ -18,12 +18,12 @@
 
 /* Segment indexes. Must match the gdt definition in segment.c. */
 enum {
-    NULL_SEG,
-    FLAT_CODE,
-    FLAT_DATA,
-    RELOC_CODE,
-    RELOC_DATA,
-    NUM_SEG,
+	NULL_SEG,
+	FLAT_CODE,
+	FLAT_DATA,
+	RELOC_CODE,
+	RELOC_DATA,
+	NUM_SEG,
 };
 
 /* Values for segment selector register */
@@ -34,12 +34,12 @@ enum {
 
 /* i386 segment descriptor */
 struct segment_desc {
-    unsigned short limit_0;
-    unsigned short base_0;
-    unsigned char base_16;
-    unsigned char types;
-    unsigned char flags;
-    unsigned char base_24;
+	unsigned short limit_0;
+	unsigned short base_0;
+	unsigned char base_16;
+	unsigned char types;
+	unsigned char flags;
+	unsigned char base_24;
 };
 
 extern struct segment_desc gdt[NUM_SEG];

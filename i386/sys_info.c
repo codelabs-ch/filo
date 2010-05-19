@@ -24,11 +24,11 @@
 
 void collect_sys_info(struct sys_info *info)
 {
-    /* Pick up paramters given by bootloader to us */
-    info->boot_type = boot_ctx->eax;
-    info->boot_data = boot_ctx->ebx;
-    info->boot_arg = boot_ctx->param[0];
-    debug("boot eax = %#lx\n", info->boot_type);
-    debug("boot ebx = %#lx\n", info->boot_data);
-    debug("boot arg = %#lx\n", info->boot_arg);
+	/* Pick up paramters given by bootloader to us */
+	info->boot_type = boot_ctx->eax;
+	info->boot_data = boot_ctx->ebx;
+	info->boot_arg = boot_ctx->param[0];
+	debug("boot EAX = %#lx\n", info->boot_type);
+	debug("boot EBX = %#lx\n", info->boot_data);
+	debug("boot arg = %#lx\n", info->boot_arg);
 }

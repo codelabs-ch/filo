@@ -20,39 +20,38 @@
 #define i386_CONTEXT_H
 
 struct context {
-    /* Stack Segment, placed here because of the alignment issue... */
-    u16 ss;
-    /* Used with sgdt/lgdt */
-    u16 gdt_limit;
-    u32 gdt_base;
-    /* General registers, accessed with pushal/popal */
-    u32 edi;
-    u32 esi;
-    u32 ebp;
-    u32 esp; /* points just below eax */
-    u32 ebx;
-    u32 edx;
-    u32 ecx;
-    u32 eax;
+	/* Stack Segment, placed here because of the alignment issue... */
+	u16 ss;
+	/* Used with sgdt/lgdt */
+	u16 gdt_limit;
+	u32 gdt_base;
+	/* General registers, accessed with pushal/popal */
+	u32 edi;
+	u32 esi;
+	u32 ebp;
+	u32 esp;		/* points just below eax */
+	u32 ebx;
+	u32 edx;
+	u32 ecx;
+	u32 eax;
 #define ESP_LOC(ctx) (&(ctx)->gs)
-    /* Segment registers */
-    u32 gs;
-    u32 fs;
-    u32 es;
-    u32 ds;
-    /* Flags */
-    u32 eflags;
-    /* Code segment:offset */
-    u32 eip;
-    u32 cs;
-    /* Optional stack contents */
-    u32 return_addr;
-    u32 param[0];
+	/* Segment registers */
+	u32 gs;
+	u32 fs;
+	u32 es;
+	u32 ds;
+	/* Flags */
+	u32 eflags;
+	/* Code segment:offset */
+	u32 eip;
+	u32 cs;
+	/* Optional stack contents */
+	u32 return_addr;
+	u32 param[0];
 };
 
 /* Create a new context in the given stack */
-struct context *
-init_context(u8 *stack, u32 stack_size, int num_param);
+struct context *init_context(u8 * stack, u32 stack_size, int num_param);
 
 /* Switch context */
 struct context *switch_to(struct context *);
@@ -63,4 +62,4 @@ extern unsigned long __boot_ctx;
 /* This can always be safely used to refer to the boot context */
 #define boot_ctx ((struct context *) phys_to_virt(__boot_ctx))
 
-#endif /* i386_CONTEXT_H */
+#endif				/* i386_CONTEXT_H */
