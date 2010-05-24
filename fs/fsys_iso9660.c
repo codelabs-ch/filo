@@ -164,8 +164,8 @@ iso9660_dir (char *dirname)
 	      rr_ptr.ptr = ((unsigned char *)idr + idr->name_len.l
 			    + sizeof(struct iso_directory_record)
 			    - sizeof(idr->name));
-	      if (rr_ptr.i & 1)
-		rr_ptr.i++, rr_len--;
+	      if (rr_len & 1)
+		rr_ptr.ptr++, rr_len--;
 	      ce_ptr = NULL;
 	      rr_flag = RR_FLAG_NM | RR_FLAG_PX;
 
