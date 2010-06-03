@@ -191,7 +191,7 @@ int file_open(const char *filename)
 	filepos = 0;
 	errnum = 0;
 	if (!fsys->dir_func((char *) path)) {
-		printf("File not found.\n");
+		printf("File not found '%s'.\n", filename);
 		goto out;
 	}
 	retval = 1;
