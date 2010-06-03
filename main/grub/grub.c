@@ -43,6 +43,10 @@ char KILL_BUF[KILL_BUFLEN]; /* The kill buffer for the command-line.  */
 char MENU_BUF[MENU_BUFLEN]; /* The buffer for the menu entries.  */
 static char configs[16384];
 
+#ifdef CONFIG_FLASHROM_LOCKDOWN
+int flashrom_lockdown = 1;
+#endif
+
 int using_grub_interface = 0;
 
 #define ENTER '\r'
@@ -836,6 +840,11 @@ static void run_menu(char *menu_entries, char *config_entries, int num_entries, 
 
 		if (!cur_entry)
 			cur_entry = get_entry(config_entries, first_entry + entryno, 1);
+
+#ifdef CONFIG_FLASHROM_LOCKDOWN
+		/* per default we want flash ROM lockdown */
+		flashrom_lockdown = 1;
+#endif
 
 		/* Set CURRENT_ENTRYNO for the command "savedefault".  */
 		current_entryno = first_entry + entryno;

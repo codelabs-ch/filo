@@ -676,6 +676,19 @@ static void hardware_setup(void)
 
 	outb(0xFF, 0xA1);	/* mask off all interrupts for now */
 	outb(0xFB, 0x21);	/* mask all irq's but irq2 which is cascaded */
+
+#ifdef CONFIG_FLASHROM_LOCKDOWN
+	/* lockdown flashROM */
+	extern int flashrom_lockdown;
+	extern void intel_lockdown_flash();
+
+	if (flashrom_lockdown) {
+		printf("Locking system flash memory...\n");
+		intel_lockdown_flash();
+	} else {
+		printf("Leaving system flash memory unlocked...\n");
+	}
+#endif
 }
 
 /* Start Linux */
