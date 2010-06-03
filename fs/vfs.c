@@ -240,3 +240,71 @@ void file_close(void)
 {
 	devclose();
 }
+
+int dir(char *dirname)
+{
+	char *dev = 0;
+	const char *path;
+	int len;
+	int retval = 0;
+	int reopen;
+
+	path = strchr(dirname, ':');
+	if (path) {
+		len = path - dirname;
+		path++;
+		dev = malloc(len + 1);
+		memcpy(dev, dirname, len);
+		dev[len] = '\0';
+	} else {
+		/* No colon is given. Is this device or dirname? */
+		if (dirname[0] == '/') {
+			/* Anything starts with '/' must be a dirname */
+			dev = 0;
+			path = dirname;
+		} else {
+			dev = strdup(dirname);
+			path = 0;
+		}
+	}
+	debug("dev=%s, path=%s\n", dev, path);
+
+	if (dev && dev[0]) {
+		if (!devopen(dev, &reopen)) {
+			fsys = 0;
+			goto out;
+		}
+		if (!reopen)
+			fsys = 0;
+	}
+
+	if (path) {
+		if (!fsys || fsys == &nullfs) {
+			if (!mount_fs())
+				goto out;
+		}
+		using_devsize = 0;
+		if (!path[0]) {
+			printf("No dirname is given.\n");
+			goto out;
+		}
+	} else {
+		fsys = &nullfs;
+	}
+
+	filepos = 0;
+	errnum = 0;
+
+	/* set "dir" function to list completions */
+	print_possibilities = 1;
+
+	retval = fsys->dir_func((char *) path);
+
+out:
+	if (dev)
+		free(dev);
+
+	return retval;
+}
+
+
