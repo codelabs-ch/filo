@@ -1093,6 +1093,70 @@ static struct builtin builtin_md5crypt = {
 };
 #endif				/* CONFIG_USE_MD5_PASSWORDS */
 
+#if CONFIG_DEVELOPER_TOOLS
+/* nvram */
+static int nvram_func(char *arg, int flags)
+{
+#define RTC_BOOT_BYTE 48 // Hard coded in coreboot
+	u8 rtc_boot_byte;
+	// bit len  name
+	//  0   1   boot_option
+	//  1   1   last_boot
+	//  4   4   reboot_bits
+
+	rtc_boot_byte = nvram_read(RTC_BOOT_BYTE);
+
+	if (memcmp(arg, "normal", 6) == 0) {
+		rtc_boot_byte &= 0x03;	// drop reboot_bits
+		rtc_boot_byte |= 1;	// normal
+		nvram_write(rtc_boot_byte, RTC_BOOT_BYTE);
+		return 0;
+	}
+
+	if (memcmp(arg, "fallback", 8) == 0) {
+		rtc_boot_byte &= 0x03;	// drop reboot_bits
+		rtc_boot_byte &= ~1;	// fallback
+		nvram_write(rtc_boot_byte, RTC_BOOT_BYTE);
+		return 0;
+	}
+
+	// TODO not really default, but rather "null everything out and fix the
+	// checksum"
+	if (memcmp(arg, "default", 7) == 0) {
+		int i;
+		int range_start = lib_sysinfo.cmos_range_start / 8;
+		int range_end = lib_sysinfo.cmos_range_end / 8;
+		for (i= range_start; i<range_end; i++)
+			nvram_write(0, i);
+		fix_options_checksum();
+		return 0;
+	}
+
+
+	if (!strlen(arg)) {
+		grub_printf("NVRAM Settings:\n");
+		grub_printf("  boot option: %s\n",
+			(rtc_boot_byte & (1 << 0)) ? "Normal" : "Fallback");
+		grub_printf("  last boot:   %s\n",
+			(rtc_boot_byte & (1 << 1)) ? "Normal" : "Fallback");
+		grub_printf("  reboot_bits: %d\n", (rtc_boot_byte >> 4));
+		return 0;
+	}
+
+	errnum = ERR_BAD_ARGUMENT;
+	return 1;
+}
+
+static struct builtin builtin_nvram = {
+	"nvram",
+	nvram_func,
+	BUILTIN_MENU | BUILTIN_CMDLINE | BUILTIN_NO_ECHO,
+	"nvram [normal|fallback]",
+	"Change the coreboot nvram to boot the normal or fallback"
+	    "image on the next boot."
+};
+#endif
+
 /* password */
 static int password_func(char *arg, int flags)
 {
@@ -1780,6 +1844,9 @@ struct builtin *builtin_table[] = {
 #endif
 #ifdef CONFIG_USE_MD5_PASSWORDS
 	&builtin_md5crypt,
+#endif
+#ifdef CONFIG_DEVELOPER_TOOLS
+	&builtin_nvram,
 #endif
 	&builtin_password,
 	&builtin_pause,
