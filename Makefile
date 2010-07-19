@@ -24,6 +24,7 @@ export srctree := $(src)
 export srck := $(src)/util/kconfig
 export obj := $(src)/build
 export objk := $(src)/build/util/kconfig
+export LIBCONFIG_PATH := $(src)/../libpayload
 
 export KERNELVERSION      := $(PROGRAM_VERSION)
 export KCONFIG_AUTOHEADER := $(obj)/config.h
@@ -102,19 +103,29 @@ CFLAGS += $(STACKPROTECT) $(INCLUDES) -Wall -Os -fomit-frame-pointer -fno-common
 
 TARGET  = $(obj)/filo.elf
 
-HAVE_LIBPAYLOAD := $(wildcard $(LIBPAYLOAD))
-ifeq ($(strip $(HAVE_LIBPAYLOAD)),)
-all:
-	@printf "\nError: libpayload is not installed!\nexpected: $(LIBPAYLOAD).\n"
-else
+HAVE_LIBCONFIG := $(wildcard $(LIBCONFIG_PATH))
+
 all: prepare $(obj)/version.h $(TARGET)
+
+
+HAVE_LIBPAYLOAD := $(wildcard $(LIBPAYLOAD))
+ifneq ($(strip $(HAVE_LIBPAYLOAD)),)
+libpayload:
+	@printf "Found Libpayload $(LIBPAYLOAD).\n"
+else
+libpayload: $(src)/$(LIB_CONFIG)
+	$(Q)printf "building libpayload.\n"
+	$(Q)make -C $(LIBCONFIG_PATH) distclean
+	$(Q)cp lib.config $(LIBCONFIG_PATH)/.config
+	$(Q)make -C $(LIBCONFIG_PATH) oldconfig
+	$(Q)make -C $(LIBCONFIG_PATH) DESTDIR=$(src)/build install
 endif
 
-$(obj)/filo: $(src)/.config $(OBJS)
+$(obj)/filo: $(src)/.config $(OBJS)  libpayload
 	$(Q)printf "  LD      $(subst $(shell pwd)/,,$(@))\n"
 	$(Q)$(LD) -N -T $(ARCHDIR-y)/ldscript -o $@ $(OBJS) $(LIBPAYLOAD) $(LIBGCC)
 
-$(TARGET): $(obj)/filo
+$(TARGET): $(obj)/filo libpayload
 	$(Q)cp $(obj)/filo $@
 	$(Q)$(NM) $(obj)/filo | sort > $(obj)/filo.map
 	$(Q)printf "  STRIP   $(subst $(shell pwd)/,,$(@))\n"
@@ -122,7 +133,7 @@ $(TARGET): $(obj)/filo
 
 include util/kconfig/Makefile
 
-$(obj)/%.o: $(src)/%.c
+$(obj)/%.o: $(src)/%.c libpayload
 	$(Q)printf "  CC      $(subst $(shell pwd)/,,$(@))\n"
 	$(Q)$(CC) -MMD $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
 
@@ -148,7 +159,7 @@ clean:
 
 distclean: clean
 	$(Q)rm -rf build
-	$(Q)rm -f .config .config.old ..config.tmp .kconfig.d .tmpconfig*
+	$(Q)rm -f .config lib.config .config.old ..config.tmp .kconfig.d .tmpconfig*
 
 FORCE:
 

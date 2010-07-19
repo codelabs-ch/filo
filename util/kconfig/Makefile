@@ -12,23 +12,161 @@ endif
 
 Kconfig := Config.in
 
+FILO_CONFIG := $(src)/.config
+LIB_CONFIG  := $(src)/lib.config
+HAVE_FILO_CONFIG := $(wildcard $(FILO_CONFIG))
+HAVE_LIB_CONFIG := $(wildcard $(LIB_CONFIG))
+
+ifneq ($(strip $(HAVE_FILO_CONFIG)),)
+ifneq ($(strip $(HAVE_LIB_CONFIG)),)
 xconfig: prepare $(objk)/qconf
+	$(Q)printf "Libpayload config for FILO.\n"
+	$(Q)mv $(FILO_CONFIG) $(FILO_CONFIG)."temp"
+	$(Q)mv $(LIB_CONFIG) $(FILO_CONFIG)
+	$(Q)$(objk)/qconf $(LIBCONFIG_PATH)/Config.in
+	$(Q)mv $(FILO_CONFIG) $(LIB_CONFIG)
+	$(Q)printf "Libpayload config done.\n"
+	$(Q)mv $(FILO_CONFIG)."temp" $(FILO_CONFIG)
 	$(Q)$(objk)/qconf $(Kconfig)
+else
+xconfig: prepare $(objk)/qconf
+	$(Q)printf "Lost libpayload config file.\n"
+	$(Q)rm -f $(FILO_CONFIG)
+endif
+else
+xconfig: prepare $(objk)/qconf
+	$(Q)printf "Libpayload config for FILO.\n"
+	$(Q)$(objk)/qconf $(LIBCONFIG_PATH)/Config.in
+	$(Q)mv $(FILO_CONFIG) $(LIB_CONFIG)
+	$(Q)printf "Libpayload config done.\n"
+	$(Q)$(objk)/qconf $(Kconfig)
+endif
 
+ifneq ($(strip $(HAVE_FILO_CONFIG)),)
+ifneq ($(strip $(HAVE_LIB_CONFIG)),)
 gconfig: prepare $(objk)/gconf
+	$(Q)printf "Libpayload config for FILO.\n"
+	$(Q)mv $(FILO_CONFIG) $(FILO_CONFIG)."temp"
+	$(Q)mv $(LIB_CONFIG) $(FILO_CONFIG)
+	$(Q)$(objk)/gconf $(LIBCONFIG_PATH)/Config.in
+	$(Q)mv $(FILO_CONFIG) $(LIB_CONFIG)
+	$(Q)printf "Libpayload config done.\n"
+	$(Q)mv $(FILO_CONFIG)."temp" $(FILO_CONFIG)
 	$(Q)$(objk)/gconf $(Kconfig)
+else
+gconfig: prepare $(objk)/gconf
+	$(Q)printf "Lost libpayload config file.\n"
+	$(Q)rm -f $(FILO_CONFIG)
+endif
+else
+gconfig: prepare $(objk)/gconf
+	$(Q)printf "Libpayload config for FILO.\n"
+	$(Q)$(objk)/gconf $(LIBCONFIG_PATH)/Config.in
+	$(Q)mv $(FILO_CONFIG) $(LIB_CONFIG)
+	$(Q)printf "Libpayload config done.\n"
+	$(Q)$(objk)/gconf $(Kconfig)
+endif
 
+ifneq ($(strip $(HAVE_FILO_CONFIG)),)
+ifneq ($(strip $(HAVE_LIB_CONFIG)),)
 menuconfig: prepare $(objk)/mconf
+	$(Q)printf "Libpayload config for FILO.\n"
+	$(Q)mv $(FILO_CONFIG) $(FILO_CONFIG)."temp"
+	$(Q)mv $(LIB_CONFIG) $(FILO_CONFIG)
+	$(Q)$(objk)/mconf $(LIBCONFIG_PATH)/Config.in
+	$(Q)mv $(FILO_CONFIG) $(LIB_CONFIG)
+	$(Q)printf "Libpayload config done.\n"
+	$(Q)mv $(FILO_CONFIG)."temp" $(FILO_CONFIG)
 	$(Q)$(objk)/mconf $(Kconfig)
+else
+menuconfig: prepare $(objk)/mconf
+	$(Q)printf "Lost libpayload config file.\n"
+	$(Q)rm -f $(FILO_CONFIG)
+endif
+else
+menuconfig: prepare $(objk)/mconf
+	$(Q)printf "Libpayload config for FILO.\n"
+	$(Q)$(objk)/mconf $(LIBCONFIG_PATH)/Config.in
+	$(Q)mv $(FILO_CONFIG) $(LIB_CONFIG)
+	$(Q)printf "Libpayload config done.\n"
+	$(Q)$(objk)/mconf $(Kconfig)
+endif
 
+ifneq ($(strip $(HAVE_FILO_CONFIG)),)
+ifneq ($(strip $(HAVE_LIB_CONFIG)),)
 config: prepare $(objk)/conf
+	$(Q)printf "Libpayload config for FILO.\n"
+	$(Q)mv $(FILO_CONFIG) $(FILO_CONFIG)."temp"
+	$(Q)mv $(LIB_CONFIG) $(FILO_CONFIG)
+	$(Q)$(objk)/conf $(LIBCONFIG_PATH)/Config.in
+	$(Q)mv $(FILO_CONFIG) $(LIB_CONFIG)
+	$(Q)printf "Libpayload config done.\n"
+	$(Q)mv $(FILO_CONFIG)."temp" $(FILO_CONFIG)
 	$(Q)$(objk)/conf $(Kconfig)
+else
+config: prepare $(objk)/conf
+	$(Q)printf "Lost libpayload config file.\n"
+	$(Q)rm -f $(FILO_CONFIG)
+endif
+else
+config: prepare $(objk)/conf
+	$(Q)printf "Libpayload config for FILO.\n"
+	$(Q)$(objk)/conf $(LIBCONFIG_PATH)/Config.in
+	$(Q)mv $(FILO_CONFIG) $(LIB_CONFIG)
+	$(Q)printf "Libpayload config done.\n"
+	$(Q)$(objk)/conf $(Kconfig)
+endif
 
+ifneq ($(strip $(HAVE_FILO_CONFIG)),)
+ifneq ($(strip $(HAVE_LIB_CONFIG)),)
 oldconfig: prepare $(objk)/conf
+	$(Q)printf "Libpayload config for FILO.\n"
+	$(Q)mv $(FILO_CONFIG) $(FILO_CONFIG)."temp"
+	$(Q)mv $(LIB_CONFIG) $(FILO_CONFIG)
+	$(Q)$(objk)/conf -o $(LIBCONFIG_PATH)/Config.in
+	$(Q)mv $(FILO_CONFIG) $(LIB_CONFIG)
+	$(Q)printf "Libpayload config done.\n"
+	$(Q)mv $(FILO_CONFIG)."temp" $(FILO_CONFIG)
 	$(Q)$(objk)/conf -o $(Kconfig)
+else
+oldconfig: prepare $(objk)/conf
+	$(Q)printf "Lost libpayload config file.\n"
+	$(Q)rm -f $(FILO_CONFIG)
+endif
+else
+oldconfig: prepare $(objk)/conf
+	$(Q)printf "Libpayload config for FILO.\n"
+	$(Q)$(objk)/conf -o $(LIBCONFIG_PATH)/Config.in
+	$(Q)mv .config $(LIB_CONFIG)
+	$(Q)printf "Libpayload config done.\n"
+	$(Q)$(objk)/conf -o $(Kconfig)
+endif
 
+ifneq ($(strip $(HAVE_FILO_CONFIG)),)
+ifneq ($(strip $(HAVE_LIB_CONFIG)),)
 silentoldconfig: prepare $(objk)/conf
+	$(Q)printf "Libpayload config for FILO.\n"
+	$(Q)mv $(FILO_CONFIG) $(FILO_CONFIG)."temp"
+	$(Q)mv $(LIB_CONFIG) $(FILO_CONFIG)
+	$(Q)$(objk)/conf -s $(LIBCONFIG_PATH)/Config.in
+	$(Q)mv $(FILO_CONFIG) $(LIB_CONFIG)
+	$(Q)printf "Libpayload config done.\n"
+	$(Q)mv $(FILO_CONFIG)."temp" $(FILO_CONFIG)
 	$(Q)$(objk)/conf -s $(Kconfig)
+else
+silentoldconfig: prepare $(objk)/conf
+	$(Q)printf "Lost libpayload config file.\n"
+	$(Q)rm -f $(FILO_CONFIG)
+endif
+else
+silentoldconfig: prepare $(objk)/conf
+	$(Q)printf "Libpayload config for FILO.\n"
+	$(Q)$(objk)/conf -s $(LIBCONFIG_PATH)/Config.in
+	$(Q)mv .config $(LIB_CONFIG)
+	$(Q)printf "Libpayload config done.\n"
+	$(Q)$(objk)/conf -s $(Kconfig)
+
+endif
 
 # --- UNUSED, ignore ----------------------------------------------------------
 # Create new linux.pot file
