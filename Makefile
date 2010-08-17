@@ -159,7 +159,7 @@ clean:
 
 distclean: clean
 	$(Q)rm -rf build
-	$(Q)rm -f .config lib.config .config.old ..config.tmp .kconfig.d .tmpconfig*
+	$(Q)rm -f .config lib.config .config.old .xcompile ..config.tmp .kconfig.d .tmpconfig*
 
 FORCE:
 
