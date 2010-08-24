@@ -658,6 +658,19 @@ ob_ide_atapi_drive_ready(struct ide_drive *drive)
 		return 1;
 	}
 
+	/* clear Persistent Prevent State */
+	memset (cmd, 0, sizeof(*cmd));
+	cmd->cdb[0] = ATAPI_PREVENT_ALLOW_MEDIUM_REMOVAL;
+	cmd->cdb[2] = 2;
+	if (ob_ide_atapi_packet(drive, cmd))
+		printf("could not persistently unlock device\n");
+
+	/* clear Prevent State */
+	memset (cmd, 0, sizeof(*cmd));
+	cmd->cdb[0] = ATAPI_PREVENT_ALLOW_MEDIUM_REMOVAL;
+	if (ob_ide_atapi_packet(drive, cmd))
+		printf("could not unlock device\n");
+
 	/*
 	 * finally, get capacity and block size
 	 */
