@@ -72,7 +72,7 @@ TARGETS-y :=
 
 BUILD-y := main/Makefile.inc main/grub/Makefile.inc fs/Makefile.inc 
 BUILD-y += drivers/Makefile.inc
-BUILD-y += drivers/usb/Makefile.inc drivers/newusb/Makefile.inc drivers/flash/Makefile.inc
+BUILD-y += drivers/flash/Makefile.inc
 
 include $(PLATFORM-y) $(BUILD-y)
 
@@ -151,7 +151,7 @@ $(obj)/version.h: FORCE
 
 prepare:
 	$(Q)mkdir -p $(obj)/util/kconfig/lxdialog
-	$(Q)mkdir -p $(obj)/i386 $(obj)/fs $(obj)/drivers/flash $(obj)/drivers/usb $(obj)/drivers/newusb
+	$(Q)mkdir -p $(obj)/i386 $(obj)/fs $(obj)/drivers/flash
 	$(Q)mkdir -p $(obj)/main/grub
 
 clean:

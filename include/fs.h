@@ -40,12 +40,7 @@ int ide_read_blocks(const int drive, const sector_t sector, const int size, void
 
 #ifdef CONFIG_USB_DISK
 int usb_probe(int drive);
-int usb_read(int drive, sector_t sector, void *buffer);
-#endif
-
-#ifdef CONFIG_USB_NEW_DISK
-int usb_new_probe(int drive);
-int usb_new_read(const int drive, const sector_t sector, const int size, void *buffer);
+int usb_read(const int drive, const sector_t sector, const int size, void *buffer);
 #endif
 
 #ifdef CONFIG_FLASH_DISK
@@ -58,7 +53,6 @@ int NAND_close(void);
 #define DISK_MEM 2
 #define DISK_USB 3
 #define DISK_FLASH 4
-#define DISK_NEW_USB 5
 
 int devopen(const char *name, int *reopen);
 void devclose(void);

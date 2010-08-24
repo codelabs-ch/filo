@@ -129,16 +129,9 @@ config IDE_NEW_DISK
 	help
 	  Jens Axboe's fine IDE driver
 
-config USB_NEW_DISK
+config USB_DISK
 	bool "USB Stack"
 	default y
-	help
-	  Driver for USB Storage
-
-config USB_DISK
-	bool "Old USB Stack (obsolete?)"
-	default n
-	depends on !USB_NEW_DISK
 	help
 	  Driver for USB Storage
 

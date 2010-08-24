@@ -73,9 +73,6 @@ static void init(void)
     relocate();
 
 #if defined(CONFIG_USB_DISK)
-    usb_initialize();
-#endif
-#if defined(CONFIG_USB_NEW_DISK)
 #if defined(CONFIG_USB)
     /* libpayload USB stack is there */
     usb_initialize();

@@ -54,7 +54,7 @@ void usbdisk_remove (usbdev_t* dev)
 	}
 }
 
-int usb_new_probe(int drive)
+int usb_probe(int drive)
 {
 	/* FIXME: need a place to periodically poll usb_poll().
 	   or at least at sensible times.
@@ -66,7 +66,7 @@ int usb_new_probe(int drive)
 	return -1;
 }
 
-int usb_new_read(const int drive, const sector_t sector, const int size, void *buffer)
+int usb_read(const int drive, const sector_t sector, const int size, void *buffer)
 {
 	if (count < drive) return -1;
 	int result = -readwrite_blocks_512(devs[drive], sector, size, cbw_direction_data_in, buffer);

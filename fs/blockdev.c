@@ -166,7 +166,7 @@ static int parse_device_name(const char *name, int *type, int *drive,
 		*drive = *name - 'a';
 		name++;
 	} else if (memcmp(name, "ud", 2) == 0) {
-		*type = DISK_NEW_USB;
+		*type = DISK_USB;
 		name += 2;
 		if (*name < 'a' || *name > 'z') {
 			printf("Invalid drive\n");
@@ -256,16 +256,6 @@ int devopen(const char *name, int *reopen)
 		disk_size = (uint32_t) - 1;	/* FIXME */
 		break;
 #endif
-#if defined(CONFIG_USB_NEW_DISK) && defined(CONFIG_USB)
-	case DISK_NEW_USB:
-		if (usb_new_probe(drive) != 0) {
-			debug("Failed to open USB.\n");
-			return 0;
-		}
-		disk_size = (uint32_t) - 1;	/* FIXME */
-		break;
-#endif
-
 #ifdef CONFIG_USB_DISK
 	case DISK_USB:
 		if (usb_probe(drive) != 0) {
@@ -406,23 +396,17 @@ static void *read_sector(unsigned long sector)
 			break;
 		}
 #endif
-#if defined(CONFIG_USB_NEW_DISK) && defined(CONFIG_USB)
-		case DISK_NEW_USB:
+#ifdef CONFIG_USB_DISK
+		case DISK_USB:
 		{
 			int count = (NUM_CACHE-hash>8)?8:(NUM_CACHE-hash);
-			if (usb_new_read(dev_drive, sector, count, buf) != 0)
+			if (usb_read(dev_drive, sector, count, buf) != 0)
 				goto readerr;
 			while (--count>0) {
 				cache_sect[hash+count] = sector + count;
 			}
 			break;
 		}
-#endif
-#ifdef CONFIG_USB_DISK
-		case DISK_USB:
-			if (usb_read(dev_drive, sector, buf) != 0)
-				goto readerr;
-			break;
 #endif
 
 #ifdef CONFIG_FLASH_DISK
