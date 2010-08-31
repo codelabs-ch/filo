@@ -277,7 +277,7 @@ static void set_memory_size(struct linux_params *params)
 			linux_map->addr = filo_map->base;
 			linux_map->size = filo_map->size;
 			linux_map->type = filo_map->type;
-			debug("%016Lx - %016Lx (%d)\n", linux_map->addr,
+			debug("%016llx - %016llx (%d)\n", linux_map->addr,
 			      linux_map->addr + linux_map->size,
 			      linux_map->type);
 			params->e820_map_nr = i + 1;
@@ -311,22 +311,25 @@ static void set_video_mode(struct linux_params *params)
 	if (!lib_sysinfo.framebuffer)
 		return;
 
-	params->lfb_width = lib_sysinfo.framebuffer->x_resolution;
-	params->lfb_height = lib_sysinfo.framebuffer->y_resolution;
-	params->lfb_depth = lib_sysinfo.framebuffer->bits_per_pixel;
-	params->lfb_linelength = lib_sysinfo.framebuffer->bytes_per_line;
-	params->lfb_base = lib_sysinfo.framebuffer->physical_address;
+	struct cb_framebuffer *fb = phys_to_virt(lib_sysinfo.framebuffer);
+
+	params->lfb_width = fb->x_resolution;
+	params->lfb_height = fb->y_resolution;
+	params->lfb_depth = fb->bits_per_pixel;
+	params->lfb_linelength = fb->bytes_per_line;
+	params->lfb_base = fb->physical_address;
+
 	// prolly not enough for the boot splash?!
 	params->lfb_size =
 	    (params->lfb_linelength * params->lfb_height + 65535) >> 16;
-	params->red_size = lib_sysinfo.framebuffer->red_mask_size;
-	params->red_pos = lib_sysinfo.framebuffer->red_mask_pos;
-	params->green_size = lib_sysinfo.framebuffer->green_mask_size;
-	params->green_pos = lib_sysinfo.framebuffer->green_mask_pos;
-	params->blue_size = lib_sysinfo.framebuffer->blue_mask_size;
-	params->blue_pos = lib_sysinfo.framebuffer->blue_mask_pos;
-	params->rsvd_size = lib_sysinfo.framebuffer->reserved_mask_size;
-	params->rsvd_pos = lib_sysinfo.framebuffer->reserved_mask_pos;
+	params->red_size = fb->red_mask_size;
+	params->red_pos = fb->red_mask_pos;
+	params->green_size = fb->green_mask_size;
+	params->green_pos = fb->green_mask_pos;
+	params->blue_size = fb->blue_mask_size;
+	params->blue_pos = fb->blue_mask_pos;
+	params->rsvd_size = fb->reserved_mask_size;
+	params->rsvd_pos = fb->reserved_mask_pos;
 #endif
 }
 
