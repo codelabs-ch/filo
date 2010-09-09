@@ -23,6 +23,7 @@
 #include <config.h>
 #include <grub/shared.h>
 #define current_slice 0
+#define IS_PC_SLICE_TYPE_BSD(type) 0
 
 static int do_completion;
 static int unique;
