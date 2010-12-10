@@ -57,7 +57,8 @@ struct linux_header {
 	u8 reserved1[0x1f1];	/* 0x000 */
 	u8 setup_sects;		/* 0x1f1 */
 	u16 root_flags;		/* 0x1f2 */
-	u8 reserved2[6];	/* 0x1f4 */
+	u32 syssize;		/* 0x1f4 (2.04+) */
+	u8 reserved2[2];	/* 0x1f8 */
 	u16 vid_mode;		/* 0x1fa */
 	u16 root_dev;		/* 0x1fc */
 	u16 boot_sector_magic;	/* 0x1fe */
@@ -82,6 +83,24 @@ struct linux_header {
 	u32 cmd_line_ptr;	/* 0x228 */
 	/* 2.03+ */
 	u32 initrd_addr_max;	/* 0x22c */
+	/* 2.05+ */
+	u32 kernel_alignment;	/* 0x230 */
+	u8 relocatable_kernel;	/* 0x234 */
+	u8 min_alignment;	/* 0x235 (2.10+) */
+	u8 reserved6[2];	/* 0x236 */
+	/* 2.06+ */
+	u32 cmdline_size;	/* 0x238 */
+	/* 2.07+ */
+	u32 hardware_subarch;	/* 0x23c */
+	u64 hardware_subarch_data;/* 0x240 */
+	/* 2.08+ */
+	u32 payload_offset;	/* 0x248 */
+	u32 payload_length;	/* 0x24c */
+	/* 2.09+ */
+	u64 setup_data;		/* 0x250 */
+	/* 2.10+ */
+	u64 pref_address;	/* 0x258 */
+	u32 init_size;		/* 0x260 */
 } __attribute__ ((packed));
 
 /* Paramters passed to 32-bit part of Linux
@@ -160,7 +179,10 @@ struct linux_params {
 	u32 initrd_size;	/* 0x21c */
 	u8 reserved12_5[8];	/* 0x220 */
 	u32 cmd_line_ptr;	/* 0x228 */
-	u8 reserved13[164];	/* 0x22c */
+	u32 initrd_addr_max;	/* 0x22c */
+	u32 kernel_alignment;	/* 0x230 */
+	u8 relocatable_kernel;	/* 0x234 */
+	u8 reserved13[155];		/* 0x22c */
 	struct e820entry e820_map[E820MAX];	/* 0x2d0 */
 	u8 reserved16[688];	/* 0x550 */
 #define COMMAND_LINE_SIZE 256
@@ -176,8 +198,8 @@ u64 forced_memsize;
 /* Load the first part the file and check if it's Linux */
 static u32 load_linux_header(struct linux_header *hdr)
 {
+	u32 kern_addr = 0;
 	int load_high;
-	u32 kern_addr;
 
 	if (file_read(hdr, sizeof *hdr) != sizeof *hdr) {
 		printf("Can't read Linux header\n");
@@ -221,12 +243,28 @@ static u32 load_linux_header(struct linux_header *hdr)
 		debug(" (loadflags %#x)", hdr->loadflags);
 		load_high = hdr->loadflags & 1;
 	}
+
+	/* determine kernel load address */
+	if (hdr->protocol_version >= 0x20a) {
+		if (hdr->pref_address >> 32) {
+			debug(" (ignoring 64bit pref_address)");
+		} else {
+			kern_addr = hdr->pref_address;
+		}
+	}
+
+	if (hdr->protocol_version >= 0x205 && hdr->relocatable_kernel) {
+		printf(" relocatable");
+	}
+
 	if (load_high) {
 		printf(" bzImage");
-		kern_addr = 0x100000;
+		if (kern_addr == 0)
+			kern_addr = 0x100000;
 	} else {
 		printf(" zImage or Image");
-		kern_addr = 0x1000;
+		if (kern_addr == 0)
+			kern_addr = 0x1000;
 	}
 
 	printf(".\n");
@@ -257,6 +295,12 @@ init_linux_params(struct linux_params *params, struct linux_header *hdr)
 	params->orig_video_points = 16;
 
 	params->loader_type = 0xff;	/* Unregistered Linux loader */
+
+	/* copy alignment fields for relocatable kernels */
+	if (hdr->protocol_version >= 0x205) {
+		params->relocatable_kernel = hdr->relocatable_kernel;
+		params->kernel_alignment = hdr->kernel_alignment;
+	}
 }
 
 /* Memory map */
@@ -675,6 +719,9 @@ static int start_linux(u32 kern_addr, struct linux_params *params)
 
 	/* Entry point */
 	ctx->eip = kern_addr;
+
+	/* set this field in any case to support relocatable kernels */
+	params->kernel_start = kern_addr;
 
 	debug("EIP=%#x\n", kern_addr);
 	printf("Jumping to entry point...\n");
