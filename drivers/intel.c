@@ -44,7 +44,7 @@
 #define RCBA32(x) *((volatile u32 *)(DEFAULT_RCBA + x))
 
 
-void intel_lockdown_flash(void)
+int intel_lockdown_flash(void)
 {
 	u8 reg8;
 	u32 reg32;
@@ -58,7 +58,7 @@ void intel_lockdown_flash(void)
 		break;
 	default:
 		debug("Not an ICH7 southbridge\n");
-		return;
+		return -1;
 	}
 
 	/* Now try this: */
@@ -79,6 +79,7 @@ void intel_lockdown_flash(void)
 
 	debug("BIOS hard locked until next full reset.\n");
 
+	return 0;
 }
 
 

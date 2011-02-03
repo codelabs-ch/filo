@@ -680,11 +680,19 @@ static void hardware_setup(void)
 #ifdef CONFIG_FLASHROM_LOCKDOWN
 	/* lockdown flashROM */
 	extern int flashrom_lockdown;
-	extern void intel_lockdown_flash();
+	extern int intel_lockdown_flash(void);
+	extern int amd_lockdown_flash(void);
 
 	if (flashrom_lockdown) {
 		printf("Locking system flash memory...\n");
-		intel_lockdown_flash();
+		if (intel_lockdown_flash() == 0) {
+			printf("done (Intel)\n");
+		} else if (amd_lockdown_flash() == 0) {
+			printf("done (AMD)\n");
+		} else {
+			printf("FAILED!\n");
+			delay(5);
+		}
 	} else {
 		printf("Leaving system flash memory unlocked...\n");
 	}

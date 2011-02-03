@@ -23,3 +23,4 @@ TARGETS-$(CONFIG_IDE_NEW_DISK) += drivers/ide_new.o
 TARGETS-$(CONFIG_VIA_SOUND) += drivers/via-sound.o
 TARGETS-$(CONFIG_USB_DISK) += drivers/usb.o
 TARGETS-$(CONFIG_TARGET_I386) += drivers/intel.o
+TARGETS-$(CONFIG_TARGET_I386) += drivers/amd.o drivers/sb600.o
