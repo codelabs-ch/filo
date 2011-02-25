@@ -86,6 +86,7 @@ substring (const char *s1, const char *s2)
 /* Ditto */
 #define current_slice 0
 
+extern char dev_name[256];
 extern unsigned long part_start;
 extern unsigned long part_length;
 extern int filepos;

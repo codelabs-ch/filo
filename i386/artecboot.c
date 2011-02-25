@@ -107,8 +107,8 @@ int artecboot_load(const char *file, const char *cmdline)
 			else
 			{
 				// we are using a 'fake' filesystem, so use the image offset
-				sprintf(initrdParam, " initrd=flashb@0x%x,0x%x", 
-						bootHdr.initrdStart, bootHdr.initrdSize);
+				sprintf(initrdParam, " initrd=%s@0x%x,0x%x",
+						dev_name, bootHdr.initrdStart, bootHdr.initrdSize);
 			}			
 
 			debug("adding initrd parameter: %s\n", initrdParam); 

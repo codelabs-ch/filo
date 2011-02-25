@@ -31,8 +31,7 @@
 static unsigned char buf_cache[NUM_CACHE][DEV_SECTOR_SIZE];
 static unsigned long cache_sect[NUM_CACHE];
 
-static char dev_name[256];
-
+char dev_name[256];
 int dev_type = -1;
 int dev_drive = -1;
 unsigned long part_start;
