@@ -126,6 +126,7 @@ int artecboot_load(const char *file, const char *cmdline)
 			part_start = bootHdr.kernelStart >> DEV_SECTOR_BITS;	
 			part_length = ((bootHdr.kernelSize-1) >> DEV_SECTOR_BITS) + 1;
 			filemax = bootHdr.kernelSize;
+			using_devsize = 0;
 			linux_load(file, bootHdr.cmdLine);
 		}
 	
