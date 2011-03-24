@@ -303,8 +303,7 @@ static int configfile_func(char *arg, int flags)
 	extern int is_opened, keep_cmdline_running;
 
 	/* Check if the file ARG is present.  */
-	temp_space[0]=0;
-	copy_path_to_filo_bootline(arg, temp_space, 1);
+	copy_path_to_filo_bootline(arg, temp_space, 1, 0);
 	if (temp_space[0]==0) {
 		return help_func("configfile",0);
 	}
@@ -316,8 +315,7 @@ static int configfile_func(char *arg, int flags)
 	file_close();
 
 	/* Copy ARG to CONFIG_FILE.  */
-	memset(config_file, 0, 128);
-	copy_path_to_filo_bootline(arg, config_file, 1);
+	copy_path_to_filo_bootline(arg, config_file, 1, 0);
 
 	/* Force to load the configuration file.  */
 	is_opened = 0;
@@ -632,114 +630,140 @@ static struct builtin builtin_hiddenmenu = {
 };
 
 /**
+ * @param arg         linux style driver specifier
+ * @param drivername  driver name (out)
+ * @param disk        disk number (out)
+ * @return length of parsed string
+ */
+static
+int parse_linux_style_driver(char *arg, char *drivername, int *disk)
+{
+	int i = 0;
+
+	*disk = -1;
+	drivername[0] = '\0';
+	while ((i < 16) && (isalpha(arg[i]))) {
+		drivername[i] = arg[i];
+		i++;
+	}
+
+	if (i > 0) {
+		drivername[--i] = '\0';
+		*disk = arg[i]-'a';
+		i++;
+	}
+	return i;
+}
+
+/**
  * @param arg  source pointer with grub device names
  * @param path destination pointer (will be filled with filo device names)
  * @param use_rootdev values other than zero mean the root device set by the "root"
  * command is taken into regard here. This has to be zero when calling from root_func.
  */
 
-void copy_path_to_filo_bootline(char *arg, char *path, int use_rootdev)
+void copy_path_to_filo_bootline(char *arg, char *path, int use_rootdev, int append)
 {
 	char devicename[16];
 	char drivername[16];
 	int disk, part;
+	unsigned long addr;
 	int i, len;
 
-
-	/* Clean up */
 	memset(devicename, 0, 16);
 	memset(drivername, 0, 16);
+	disk = -1;
+	part = -1;
+	addr = -1;
 
-	/* Copy over the driver name: "hd", "ud", "sd" ... */
 	if (arg[0] == '(') {
+		// grub style device specifier
 		i = 1;
 		/* Read until we encounter a number, a comma or a closing
 		 * bracket
 		 */
-		while ((i <= 16) && (arg[i]) && (!isdigit(arg[i])) && (arg[i] != ',')
-		       && (arg[i] != ')')) {
+		while ((i <= 16) && (isalpha(arg[i]))) {
 			drivername[i - 1] = arg[i];
 			i++;
 		}
+
+		if (isdigit(arg[i])) {
+			char *postnum;
+			disk = strtoul(arg+i, &postnum, 10);
+			i = postnum - arg;
+		}
+
+		if (arg[i] == ',') {
+			char *postnum;
+			part = strtoul(arg+i+1, &postnum, 10) + 1;
+			i = postnum - arg;
+		}
+
+		if (arg[i] == '@') {
+			char *postnum;
+			addr = strtoul(arg+i+1, &postnum, 0);
+			i = postnum - arg;
+		}
+
+		if (arg[i] == ')') i++;
+
+		arg += i;
+	} else if ((use_rootdev == 0) || (strchr(arg, ':') != NULL)) {
+		// linux-style device specifier or
+		// leading device name required (assume it's linux-style then)
+		i = parse_linux_style_driver(arg, drivername, &disk);
+
+		if (isdigit(arg[i])) {
+			char *postnum;
+			part = strtoul(arg+i, &postnum, 10);
+			i = postnum - arg;
+		}
+
+		if (arg[i] == '@') {
+			char *postnum;
+			addr = strtoul(arg+i+1, &postnum, 0);
+			i = postnum - arg;
+		}
+
+		if (arg[i] == ':') i++;
+		arg += i;
 	}
 
-	disk = -1;
-	part = -1;
-
-	len = strlen(drivername);
-	if (len) {		/* We have a driver. No idea if it exists though */
-		// The driver should decide this:
-		len++;		// skip driver name + opening bracket
-
-		// XXX put @ handling in here, too for flash@addr and mem@addr
-
-		if (isdigit(arg[len])) {
-			disk = arg[len] - '0';
-			len++;
-			if (isdigit(arg[len])) {	/* More than 9 drives? */
-				/* ok, get one more number. No more than 99 drives */
-				disk *= 10;
-				disk += arg[len] - '0';
-				len++;
-			}
-		}
-		if (arg[len] == ',') {
-			len++;
-			part = arg[len] - '0';
-			len++;
-			if (isdigit(arg[len])) {	/* More than 9 partitions? */
-				/* ok, get one more number. No more than 99
-				 * partitions */
-				part *= 10;
-				part += arg[len] - '0';
-				len++;
-			}
-		}
-		if (arg[len] != ')') {
-			grub_printf("Drive Error.\n");
-			// set len = 0 --> just copy the drive name 
-			len = 0;
-		} else {
-			len++;	// skip closing bracket
-		}
+	if ((disk == -1) && (part != -1) && (strlen(drivername) == 0)) {
+		// special case for partition-only identifiers:
+		// take driver and disk number from root_device
+		i = parse_linux_style_driver(root_device, drivername, &disk);
 	}
 
-	if (disk == -1) {
-		int cnt = 0;
-		len = 0;
-		while ((arg[cnt] != 0) && (arg[cnt+1] != 0)) {
-			if (arg[cnt] == ':' && arg[cnt+1] == '/') {
-				/* The user did specify a FILO name already */
-				len = cnt;
-				break;
-			}
-			cnt++;
-		}
+	if (!append) path[0] = 0;
+	if ((use_rootdev == 1) && (strlen(drivername) == 0)) {
+		strlcat(path, root_device, BOOT_LINE_LENGTH);
 	} else {
-		if (part == -1) {	// No partition
-			sprintf(devicename, "%s%c:", drivername, disk + 'a');
-		} else {	// both disk and partition
-			sprintf(devicename, "%s%c%d:", drivername, disk + 'a', part + 1);
+		char buffer[32];
+		strlcat(path, drivername, BOOT_LINE_LENGTH);
+		if (disk != -1) {
+			snprintf(buffer, 31, "%c", 'a'+disk);
+			strlcat(path, buffer, BOOT_LINE_LENGTH);
 		}
-		strncat(path, devicename, BOOT_LINE_LENGTH);
-		arg += len;	// skip original drive name
-	}
-
-	if (use_rootdev && !len) {	// No drive was explicitly specified
-		if (strlen(root_device)) {	// But someone set a root device
-			strncat(path, root_device, BOOT_LINE_LENGTH);
+		if (part != -1) {
+			snprintf(buffer, 31, "%d", part);
+			strlcat(path, buffer, BOOT_LINE_LENGTH);
 		}
+		if (addr != -1) {
+			snprintf(buffer, 31, "@0x%x", addr);
+			strlcat(path, buffer, BOOT_LINE_LENGTH);
+		}
+		buffer[0]=':';
+		buffer[1]='\0';
+		strlcat(path, buffer, BOOT_LINE_LENGTH);
 	}
-
-	/* Copy the rest over */
-	strncat(path, arg, BOOT_LINE_LENGTH);
+	strlcat(path, arg, BOOT_LINE_LENGTH);
 }
 
 /* initrd */
 static int initrd_func(char *arg, int flags)
 {
-	initrd_space[0]=0; // Erase string
-	copy_path_to_filo_bootline(arg, initrd_space, 1);
+	copy_path_to_filo_bootline(arg, initrd_space, 1, 0);
 	if (!file_open(initrd_space)) {
 		initrd_space[0]=0; // Erase string
 		errnum = ERR_FILE_NOT_FOUND;
@@ -877,12 +901,8 @@ static int kernel_func(char *arg, int flags)
 
 	kernel_type = KERNEL_TYPE_NONE;
 
-	/* clear out boot_line. Kernel is the first thing */
-	boot_line[0] = 0;  // Erase string
-
 	/* Get the real boot line and extract the kernel name */
-	temp_space[0] = 0; // Erase string
-	copy_path_to_filo_bootline(arg, temp_space, 1);
+	copy_path_to_filo_bootline(arg, temp_space, 1, 0);
 	i=0; while ((temp_space[i] != 0) && (temp_space[i]!=' ')) i++;
 	temp_space[i] = 0;
 
@@ -897,7 +917,7 @@ static int kernel_func(char *arg, int flags)
 	/* Needed to pass grub checks */
 	kernel_type = KERNEL_TYPE_LINUX;
 
-	copy_path_to_filo_bootline(arg, boot_line, 1);
+	copy_path_to_filo_bootline(arg, boot_line, 1, 0);
 
 	return 0;
 }
@@ -1319,8 +1339,7 @@ static int root_func(char *arg, int flags)
 {
 	int len;
 
-	root_device[0] = 0; /* Clear root device */
-	copy_path_to_filo_bootline(arg, root_device, 0);
+	copy_path_to_filo_bootline(arg, root_device, 0, 0);
 
 	/* The following code handles an extra case
 	 * where the user specifies "root hde1" without
@@ -1790,8 +1809,7 @@ static int cat_func(char *arg, int flags)
 	char buf[4096];
 	int len;
 
-	temp_space[0]=0;
-	copy_path_to_filo_bootline(arg, temp_space, 1);
+	copy_path_to_filo_bootline(arg, temp_space, 1, 0);
 	if (temp_space[0]==0) {
 		return help_func("cat",0);
 	}

@@ -127,7 +127,7 @@ void manual_grub_menulst(void)
 				break;
 
 			if (line[0]) {
-				copy_path_to_filo_bootline(line, config_file, 0);
+				copy_path_to_filo_bootline(line, config_file, 0, 1);
 				break;
 			}
 		}
@@ -143,8 +143,7 @@ int probe_menulst(char *bootdevice, char *filename)
 	strcpy(menulst, bootdevice);
 	strncat(menulst, filename, 256);
 	/* Set string to zero: */
-	config_file[0] = 0;
-	copy_path_to_filo_bootline(menulst, config_file, 0);
+	copy_path_to_filo_bootline(menulst, config_file, 0, 0);
 	if (file_open(config_file)) {
 		/* We found a config file. Bail out */
 		/* The valid config file name stays in config_file[] */
