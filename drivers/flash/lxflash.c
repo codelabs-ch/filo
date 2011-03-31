@@ -586,6 +586,7 @@ int NAND_initChip(int chipNum)
 		break;
 
 	case ST_NAND_128MB:
+	case HY_NAND_128MB:
 
 		g_flashInfo.numBlocks = 1024;
 		g_flashInfo.pagesPerBlock = 64;

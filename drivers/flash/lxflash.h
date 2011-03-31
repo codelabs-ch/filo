@@ -140,6 +140,7 @@ typedef struct _FLASH_INFO
 #define ST_NAND_64MB				0x76207620
 #define ST_NAND_512MB				0x9580dc20
 #define ST_NAND_128MB				0x1d80f120
+#define HY_NAND_128MB				0x1d80f1ad
 
 #define ERROR_SUCCESS				0
 #define ERROR_BAD_PARAMS			-1
