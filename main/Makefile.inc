@@ -16,6 +16,7 @@
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
+TARGETS-$(CONFIG_MULTIBOOT_IMAGE) += main/mb_hdr.o
 TARGETS-y += main/filo.o main/strtox.o
 TARGETS-y += main/elfload.o main/ipchecksum.o 
 TARGETS-$(CONFIG_SUPPORT_SOUND) += main/sound.o

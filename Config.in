@@ -9,6 +9,13 @@ config TARGET_I386
 	bool
 	default y
 
+config MULTIBOOT_IMAGE
+	bool "Include a MultiBoot header"
+	default y
+	help
+	  Including a MultiBoot header makes FILO chainloadable by MultiBoot
+	  compliant boot loaders like GRUB.
+
 menu "Interface Options"
 
 config USE_GRUB

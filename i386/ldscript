@@ -40,7 +40,7 @@ SECTIONS
     /* Start of the program. 
      * Now the version string is in the note, we must include it
      * in the program. Otherwise we lose the string after relocation. */
-    . = ALIGN(16);
+    . = ALIGN(4096);
     _start = .;
 
     /* Putting ELF notes near beginning of file might help bootloaders.
