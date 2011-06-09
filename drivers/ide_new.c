@@ -123,7 +123,7 @@ ob_ide_pio_insw(struct ide_drive *drive, unsigned int offset,
 	struct ide_channel *chan = drive->channel;
 
 	if (len & 1) {
-		printf("%d: command not word aligned\n", drive->nr);
+		debug("hd%c: command not word aligned\n", drive->nr + 'a');
 		return;
 	}
 
@@ -137,7 +137,7 @@ ob_ide_pio_outsw(struct ide_drive *drive, unsigned int offset,
 	struct ide_channel *chan = drive->channel;
 
 	if (len & 1) {
-		printf("%d: command not word aligned\n", drive->nr);
+		debug("hd%c: command not word aligned\n", drive->nr + 'a');
 		return;
 	}
 
@@ -165,7 +165,7 @@ ob_ide_error(struct ide_drive *drive, unsigned char stat, char *msg)
 		stat = ob_ide_pio_readb(drive, IDEREG_STATUS);
 
 	debug("ob_ide_error ");
-	printf("drive<%d>: %s:\n", drive->nr, msg);
+	printf("hd%c: %s:\n", drive->nr + 'a', msg);
 	debug("    cmd=%x, stat=%x", chan->ata_cmd.command, stat);
 
 	if ((stat & (BUSY_STAT | ERR_STAT)) == ERR_STAT) {
@@ -239,7 +239,7 @@ ob_ide_select_drive(struct ide_drive *drive)
 	unsigned char control = IDEHEAD_DEV0;
 
 	if (ob_ide_wait_stat(drive, 0, BUSY_STAT, NULL)) {
-		printf("select_drive: timed out\n");
+		debug("select_drive: timed out\n");
 		return 1;
 	}
 
@@ -257,7 +257,7 @@ ob_ide_select_drive(struct ide_drive *drive)
 	ob_ide_400ns_delay(drive);
 
 	if (ob_ide_wait_stat(drive, 0, BUSY_STAT, NULL)) {
-		printf("select_drive: timed out\n");
+		debug("select_drive: timed out\n");
 		return 1;
 	}
 
@@ -403,7 +403,7 @@ ob_ide_pio_data_in(struct ide_drive *drive, struct ata_command *cmd)
 	} while (bytes);
 
 	if (bytes)
-		printf("bytes=%d, stat=%x\n", bytes, stat);
+		debug("bytes=%d, stat=%x\n", bytes, stat);
 
 	return bytes ? 1 : 0;
 }
@@ -423,7 +423,7 @@ ob_ide_pio_packet(struct ide_drive *drive, struct atapi_command *cmd)
 		return 1;
 
 	if (cmd->buflen && cmd->data_direction == atapi_ddir_none)
-		printf("non-zero buflen but no data direction\n");
+		debug("non-zero buflen but no data direction\n");
 
 	memset(acmd, 0, sizeof(*acmd));
 	acmd->lcyl = cmd->buflen & 0xff;
@@ -455,7 +455,7 @@ ob_ide_pio_packet(struct ide_drive *drive, struct atapi_command *cmd)
 		 * we are doing a sense, ERR_STAT == CHECK_CONDITION
 		 */
 		if (cmd->cdb[0] != ATAPI_REQ_SENSE) {
-			printf("odd, drive didn't want to transfer %x\n", stat);
+			debug("odd, drive didn't want to transfer %x\n", stat);
 			return 1;
 		}
 	}
@@ -524,7 +524,7 @@ ob_ide_pio_packet(struct ide_drive *drive, struct atapi_command *cmd)
 		(void) ob_ide_wait_stat(drive, 0, BUSY_STAT, &stat);
 
 	if (bytes)
-		printf("cdb failed, bytes=%d, stat=%x\n", bytes, stat);
+		debug("cdb failed, bytes=%d, stat=%x\n", bytes, stat);
 
 	return (stat & ERR_STAT) || bytes;
 }
@@ -640,7 +640,7 @@ ob_ide_atapi_drive_ready(struct ide_drive *drive)
 	cmd->cdb[0] = ATAPI_TUR;
 
 	if (ob_ide_atapi_packet(drive, cmd)) {
-		printf("%d: TUR failed\n", drive->nr);
+		printf("hd%c: TUR failed\n", drive->nr + 'a');
 		return 1;
 	}
 
@@ -654,7 +654,7 @@ ob_ide_atapi_drive_ready(struct ide_drive *drive)
 	cmd->cdb[4] = 0x01;
 
 	if (ob_ide_atapi_packet(drive, cmd)) {
-		printf("%d: START_STOP unit failed\n", drive->nr);
+		printf("hd%c: START_STOP unit failed\n", drive->nr + 'a');
 		return 1;
 	}
 
@@ -663,13 +663,13 @@ ob_ide_atapi_drive_ready(struct ide_drive *drive)
 	cmd->cdb[0] = ATAPI_PREVENT_ALLOW_MEDIUM_REMOVAL;
 	cmd->cdb[2] = 2;
 	if (ob_ide_atapi_packet(drive, cmd))
-		printf("could not persistently unlock device\n");
+		printf("hd%c: could not persistently unlock device\n", drive->nr + 'a');
 
 	/* clear Prevent State */
 	memset (cmd, 0, sizeof(*cmd));
 	cmd->cdb[0] = ATAPI_PREVENT_ALLOW_MEDIUM_REMOVAL;
 	if (ob_ide_atapi_packet(drive, cmd))
-		printf("could not unlock device\n");
+		printf("hd%c: could not unlock device\n", drive->nr + 'a');
 
 	/*
 	 * finally, get capacity and block size
@@ -707,7 +707,7 @@ ob_ide_read_atapi(struct ide_drive *drive, unsigned long long block, unsigned ch
 
 	if (drive->bs == 2048) {
 		if (((block & 3) != 0) || ((sectors & 3) != 0)) {
-			printf("ob_ide_read_atapi: unaligned atapi access: %x blocks, starting from %x\n", sectors, block);
+			debug("ob_ide_read_atapi: unaligned atapi access: %x blocks, starting from %x\n", sectors, block);
 		}
 		block >>= 2;
 		sectors >>= 2;
@@ -854,9 +854,7 @@ ob_ide_read_sectors(struct ide_drive *drive, unsigned long long block,
 	if (block + sectors > (drive->sectors * (drive->bs / 512)))
 		return 1;
 
-#ifdef CONFIG_DEBUG_IDE
-		printf("ob_ide_read_sectors: block=%ld sectors=%u\n", (unsigned long) block, sectors);
-#endif
+	debug("ob_ide_read_sectors: block=%ld sectors=%u\n", (unsigned long) block, sectors);
 
 	if (drive->type == ide_type_ata)
 		return ob_ide_read_ata(drive, block, buf, sectors);
@@ -924,7 +922,7 @@ ob_ide_identify_drive(struct ide_drive *drive)
 	else if (drive->type == ide_type_atapi)
 		cmd->command = WIN_IDENTIFY_PACKET;
 	else {
-		printf("%s: called with bad device type %d\n", __FUNCTION__, drive->type);
+		debug("%s: called with bad device type %d\n", __FUNCTION__, drive->type);
 		return 1;
 	}
 
@@ -1348,7 +1346,7 @@ int ob_ide_init(int driveno)
 	int chan_index;
 
 	if (driveno >= IDE_MAX_DRIVES) {
-		printf("Unsupported drive number\n");
+		debug("Unsupported drive number\n");
 		return -1;
 	}
 
@@ -1392,28 +1390,29 @@ int ob_ide_init(int driveno)
 
 		ob_ide_identify_drives(chan);
 
-		printf("ata-%d: [io ports 0x%x-0x%x,0x%x]\n", chan_index,
+		printf("ATA-%d: [io ports 0x%x-0x%x,0x%x]\n", chan_index,
 				chan->io_regs[0], chan->io_regs[0] + 7,
 				chan->io_regs[8]);
 
 		for (j = 0; j < 2; j++) {
 			struct ide_drive *drive = &chan->drives[j];
-			char *media = "UNKNOWN";
+			const char *media = "UNKNOWN";
 			if (!drive->present)
 				continue;
-			printf("    drive%d [ATA%s ", j, drive->type == ide_type_atapi ? "PI" : "");
+			printf("* hd%c [ATA%s ", chan_index * 2 + j + 'a',
+			       drive->type == ide_type_atapi ? "PI" : "");
 			switch (drive->media) {
 			case ide_media_floppy:
-				media = "floppy";
+				media = "Floppy";
 				break;
 			case ide_media_cdrom:
-				media = "cdrom";
+				media = "CD-ROM";
 				break;
 			case ide_media_optical:
-				media = "mo";
+				media = "MO";
 				break;
 			case ide_media_disk:
-				media = "disk";
+				media = "Disk";
 				break;
 			}
 			printf("%s]: %s\n", media, drive->model);
