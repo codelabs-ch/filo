@@ -24,6 +24,7 @@
 #include <config.h>
 #include <fs.h>
 #include "filesys.h"
+#include <dirent.h>
 
 #define DEBUG_THIS CONFIG_DEBUG_VFS
 #include <debug.h>
@@ -241,7 +242,7 @@ void file_close(void)
 	devclose();
 }
 
-int dir(char *dirname)
+int dir(const char *dirname)
 {
 	char *dev = 0;
 	const char *path;
@@ -300,6 +301,8 @@ int dir(char *dirname)
 
 	retval = fsys->dir_func((char *) path);
 
+	print_possibilities = 0;
+
 out:
 	if (dev)
 		free(dev);
@@ -307,4 +310,117 @@ out:
 	return retval;
 }
 
+/* The following functions are BSD-L, Copyright 2011 secunet AG
+ * licensing is chosen to simplify migration to libpayload at some point */
+
+struct dirent **opendir_s;
+int opendir_ssize, opendir_selem;
+
+void print_a_completion(char *name)
+{
+	opendir_s[opendir_selem] = malloc(sizeof(struct dirent));
+	opendir_s[opendir_selem]->d_name = strdup(name);
+	opendir_selem++;
+	if (opendir_selem == opendir_ssize) {
+		opendir_ssize *= 2;
+		opendir_s = realloc(opendir_s, sizeof(struct dirent*)*opendir_ssize);
+	}
+	opendir_s[opendir_selem] = 0;
+}
+
+DIR *opendir(const char *path)
+{
+	DIR *p = malloc(sizeof(DIR));
+
+	if (opendir_s) free(opendir_s);
+	opendir_ssize = 32;
+	opendir_selem = 0;
+	opendir_s = malloc(sizeof(struct dirent*)*opendir_ssize);
+	dir(path);
+	p->items = opendir_s;
+	p->cur = opendir_s;
+	return p;
+}
+
+struct dirent *readdir(DIR *dirp)
+{
+	if (NULL == *dirp->cur) return NULL;
+
+	return *(dirp->cur++);
+}
+
+int closedir(DIR *dirp)
+{
+	if (!dirp) return -1;
+
+	struct dirent **cur = dirp->items;
+	while (*cur) {
+		free(*cur);
+		cur++;
+	}
+	free(dirp->items);
+	free(dirp);
+
+	return 0;
+}
+
+static int (*metafilter_flt)(const struct dirent *);
+static int (*metafilter_cmp)(const struct dirent **, const struct dirent **);
+
+static int metafilter(const struct dirent **a, const struct dirent **b)
+{
+	/* make sure that filtered out entries end up at the end, for simple elimination */
+	if ((metafilter_flt(*a) == 0) && (metafilter_flt(*b) == 0))
+		return 0;
+	if (metafilter_flt(*a) == 0)
+		return 1;
+	if (metafilter_flt(*b) == 0)
+		return -1;
+	return metafilter_cmp(a, b);
+}
+
+int scandir(const char *path, struct dirent ***namelist,
+	int (*filter)(const struct dirent *),
+	int (*compar)(const struct dirent **, const struct dirent **))
+{
+	DIR *dirp = opendir(path);
+
+	struct dirent **e = dirp->items;
+	int nelem = 0;
+	while (*e) {
+		nelem++;
+		e++;
+	}
+
+	if (filter) {
+		metafilter_flt = filter;
+		metafilter_cmp = compar;
+		compar = metafilter;
+	}
+
+	*namelist = malloc(sizeof(struct dirent*)*nelem);
+	memcpy(*namelist, dirp->items, sizeof(struct dirent*)*nelem);
+	qsort(*namelist, nelem, sizeof(struct dirent*), (int(*)(const void*, const void*))compar);
+
+	// if things were filtered, truncate them away
+	if (filter) {
+		int nelem2;
+		e = *namelist;
+		nelem2 = 0;
+		while ((nelem > nelem2) && filter(*e)) {
+			nelem2++;
+			e++;
+		}
+		realloc(namelist, sizeof(struct dirent**)*nelem2);
+	}
+
+	return nelem;
+}
+
+int alphasort(const struct dirent **a, const struct dirent **b)
+{
+	const struct dirent *a1 = *(const struct dirent **)(a);
+	const struct dirent *b1 = *(const struct dirent **)(b);
+	return strcmp(a1->d_name, b1->d_name);
+}
 

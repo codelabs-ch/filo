@@ -64,33 +64,6 @@ set_device (char *device)
 	return 0;
 }
 
-/* If DO_COMPLETION is true, just print NAME. Otherwise save the unique
-   part into UNIQUE_STRING.  */
-void print_a_completion(char *name)
-{
-	/* If NAME is "." or "..", do not count it.  */
-	if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0)
-		return;
-
-	if (do_completion) {
-		char *buf = unique_string;
-
-		if (!unique)
-			while ((*buf++ = *name++));
-		else {
-			while (*buf && (*buf == *name)) {
-				buf++;
-				name++;
-			}
-			/* mismatch, strip it.  */
-			*buf = '\0';
-		}
-	} else
-		grub_printf(" %s", name);
-
-	unique++;
-}
-
 /*
  *  This lists the possible completions of a device string, filename, or
  *  any sane combination of the two.

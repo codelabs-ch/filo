@@ -295,7 +295,7 @@ void grub_putstr (const char *str);
 
 /* List the contents of the directory that was opened with GRUB_OPEN,
    printing all completions. */
-int dir (char *dirname);
+int dir (const char *dirname);
 
 /* Display device and filename completions. */
 void print_a_completion (char *filename);
