@@ -551,7 +551,7 @@ static struct builtin builtin_find = {
 };
 #endif
 
-#ifdef CONFIG_FLASHROM_LOCKDOWN
+#ifdef CONFIG_FLASHROM_UNLOCK
 /* flashrom_unlock */
 /* Disable lockdown of flash memory on boot */
 static int flashrom_unlock_func(char *arg, int flags)
@@ -567,6 +567,18 @@ static struct builtin builtin_flashrom_unlock = {
 	BUILTIN_CMDLINE | BUILTIN_HELP_LIST,
 	"flashrom_unlock"
 	"Disable lockdown of flash ROM on boot."
+};
+#endif
+
+#ifdef CONFIG_FLASHUPDATE
+int flashupdate_func(char *arg, int flags);
+
+static struct builtin builtin_flashupdate = {
+	"flashupdate",
+	flashupdate_func,
+	BUILTIN_CMDLINE | BUILTIN_HELP_LIST,
+	"flashupdate DEVICE",
+	"Update flash ROM from a file loaded from DEVICE (selected by the user)."
 };
 #endif
 
@@ -1936,8 +1948,11 @@ struct builtin *builtin_table[] = {
 #ifdef CONFIG_EXPERIMENTAL
 	&builtin_find,
 #endif
-#ifdef CONFIG_FLASHROM_LOCKDOWN
+#ifdef CONFIG_FLASHROM_UNLOCK
 	&builtin_flashrom_unlock,
+#endif
+#ifdef CONFIG_FLASHUPDATE
+	&builtin_flashupdate,
 #endif
 	&builtin_help,
 	&builtin_hiddenmenu,

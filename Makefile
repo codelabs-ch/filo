@@ -119,6 +119,7 @@ CFLAGS += $(call cc-option, -fno-stack-protector,)
 
 LIBS := $(LIBPAYLOAD) $(LIBGCC)
 
+SUBDIRS-$(CONFIG_USE_GRUB) += flashupdate
 SUBDIRS-y += main fs drivers $(ARCHDIR-y)
 
 $(foreach subdir,$(SUBDIRS-y),$(eval include $(subdir)/Makefile.inc))
