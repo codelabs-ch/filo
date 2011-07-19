@@ -237,9 +237,4 @@ int main(void)
     return 0;
 }
 
-void print_a_completion (char *name)
-{
-	// Nothing yet.
-}
-
 #endif /* CONFIG_USE_GRUB */
