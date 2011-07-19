@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # FILO version: 0.6.0
-# Fri Mar 26 12:50:23 2010
+# Thu Jul  7 11:47:53 2011
 #
 CONFIG_TARGET_I386=y
 
@@ -62,5 +62,6 @@ CONFIG_EXPERIMENTAL=y
 # CONFIG_DEBUG_PCI is not set
 # CONFIG_DEBUG_LINUXLOAD is not set
 # CONFIG_DEBUG_IDE is not set
+# CONFIG_DEBUG_USB is not set
 # CONFIG_DEBUG_ELTORITO is not set
 CONFIG_DEVELOPER_TOOLS=y
