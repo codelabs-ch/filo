@@ -31,5 +31,3 @@ TARGETS-$(CONFIG_FSYS_SQUASHFS) += fs/fsys_squashfs.o
 TARGETS-$(CONFIG_FSYS_SQUASHFS) += fs/squashfs_zlib.o
 TARGETS-$(CONFIG_ARTEC_BOOT) += fs/fsys_aboot.o
 TARGETS-$(CONFIG_FSYS_CBFS) += fs/fsys_cbfs.o
-TARGETS-$(CONFIG_FSYS_CBFS) += fs/cbfs.o
-TARGETS-$(CONFIG_FSYS_CBFS) += fs/lzma.o

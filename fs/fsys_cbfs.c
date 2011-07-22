@@ -31,7 +31,7 @@ cbfs_mount (void)
     return 0;
 
   /* CBFS? */
-  if (!cbfs_master_header())
+  if (get_cbfs_header() == (void*)0xffffffff)
     return 0;
 
   return 1;
