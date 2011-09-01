@@ -35,7 +35,7 @@ for make in make gmake gnumake; do
 done
 
 GCCPREFIX=invalid
-TMPFILE=`mktemp /tmp/temp.XXXX 2>/dev/null || echo /tmp/temp.78gOIUGz`
+TMPFILE=`mktemp /tmp/temp.XXXXXX 2>/dev/null || echo /tmp/temp.78gOIUGz`
 touch $TMPFILE
 
 # This should be a loop over all supported architectures
