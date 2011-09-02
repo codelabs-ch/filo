@@ -38,8 +38,11 @@ HAVE_DOTCONFIG := $(wildcard .config)
 BUILD_INFO = ($(shell whoami)@$(shell hostname)) $(shell LANG=C date)
 
 # Make is silent per default, but 'make V=1' will show all compiler calls.
+Q=@
 ifneq ($(V),1)
-Q := @
+ifneq ($(Q),)
+.SILENT:
+endif
 endif
 
 $(if $(wildcard .xcompile),,$(eval $(shell bash util/xcompile/xcompile > .xcompile)))
@@ -114,52 +117,53 @@ libpayload:
 	@printf "Found Libpayload $(LIBPAYLOAD).\n"
 else
 libpayload: $(src)/$(LIB_CONFIG)
-	$(Q)printf "building libpayload.\n"
-	$(Q)make -C $(LIBCONFIG_PATH) distclean
-	$(Q)cp lib.config $(LIBCONFIG_PATH)/.config
-	$(Q)make -C $(LIBCONFIG_PATH) oldconfig
-	$(Q)make -C $(LIBCONFIG_PATH) DESTDIR=$(src)/build install
+	printf "building libpayload.\n"
+	$(MAKE) -C $(LIBCONFIG_PATH) obj=$(obj)/libpayload-build distclean
+	cp lib.config $(LIBCONFIG_PATH)/.config
+	mkdir -p $(LIBCONFIG_PATH)/build
+	$(MAKE) -C $(LIBCONFIG_PATH) obj=$(obj)/libpayload-build oldconfig
+	$(MAKE) -C $(LIBCONFIG_PATH) obj=$(obj)/libpayload-build DESTDIR=$(src)/build install
 endif
 
 $(obj)/filo: $(src)/.config $(OBJS)  libpayload
-	$(Q)printf "  LD      $(subst $(shell pwd)/,,$(@))\n"
-	$(Q)$(LD) -N -T $(ARCHDIR-y)/ldscript -o $@ $(OBJS) $(LIBPAYLOAD) $(LIBGCC)
+	printf "  LD      $(subst $(shell pwd)/,,$(@))\n"
+	$(LD) -N -T $(ARCHDIR-y)/ldscript -o $@ $(OBJS) $(LIBPAYLOAD) $(LIBGCC)
 
 $(TARGET): $(obj)/filo libpayload
-	$(Q)cp $(obj)/filo $@
-	$(Q)$(NM) $(obj)/filo | sort > $(obj)/filo.map
-	$(Q)printf "  STRIP   $(subst $(shell pwd)/,,$(@))\n"
-	$(Q)$(STRIP) -s $@
+	cp $(obj)/filo $@
+	$(NM) $(obj)/filo | sort > $(obj)/filo.map
+	printf "  STRIP   $(subst $(shell pwd)/,,$(@))\n"
+	$(STRIP) -s $@
 
 include util/kconfig/Makefile
 
 $(obj)/%.o: $(src)/%.c libpayload
-	$(Q)printf "  CC      $(subst $(shell pwd)/,,$(@))\n"
-	$(Q)$(CC) -MMD $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
+	printf "  CC      $(subst $(shell pwd)/,,$(@))\n"
+	$(CC) -MMD $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
 
 $(obj)/%.S.o: $(src)/%.S
-	$(Q)printf "  AS      $(subst $(shell pwd)/,,$(@))\n"
-	$(Q)$(AS) $(ASFLAGS) -o $@ $<
+	printf "  AS      $(subst $(shell pwd)/,,$(@))\n"
+	$(AS) $(ASFLAGS) -o $@ $<
 
 endif
 
 $(obj)/version.h: FORCE
-	$(Q)echo '#define PROGRAM_NAME "$(PROGRAM_NAME)"' > $@
-	$(Q)echo '#define PROGRAM_VERSION "$(PROGRAM_VERSION)"' >> $@
-	$(Q)echo '#define PROGRAM_VERSION_FULL "$(PROGRAM_VERSION) $(BUILD_INFO)"' >> $@
-	$(Q)echo '#define BUILD_INFO "$(BUILD_INFO)"' >> $@
+	echo '#define PROGRAM_NAME "$(PROGRAM_NAME)"' > $@
+	echo '#define PROGRAM_VERSION "$(PROGRAM_VERSION)"' >> $@
+	echo '#define PROGRAM_VERSION_FULL "$(PROGRAM_VERSION) $(BUILD_INFO)"' >> $@
+	echo '#define BUILD_INFO "$(BUILD_INFO)"' >> $@
 
 prepare:
-	$(Q)mkdir -p $(obj)/util/kconfig/lxdialog
-	$(Q)mkdir -p $(obj)/i386 $(obj)/fs $(obj)/drivers/flash
-	$(Q)mkdir -p $(obj)/main/grub
+	mkdir -p $(obj)/util/kconfig/lxdialog
+	mkdir -p $(obj)/i386 $(obj)/fs $(obj)/drivers/flash
+	mkdir -p $(obj)/main/grub
 
 clean:
-	$(Q)rm -rf $(obj)/i386 $(obj)/fs $(obj)/drivers $(obj)/main $(obj)/util
+	rm -rf $(obj)/i386 $(obj)/fs $(obj)/drivers $(obj)/main $(obj)/util
 
 distclean: clean
-	$(Q)rm -rf build
-	$(Q)rm -f .config lib.config .config.old .xcompile ..config.tmp .kconfig.d .tmpconfig*
+	rm -rf build
+	rm -f .config lib.config .config.old .xcompile ..config.tmp .kconfig.d .tmpconfig*
 
 FORCE:
 

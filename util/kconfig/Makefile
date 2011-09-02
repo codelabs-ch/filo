@@ -2,7 +2,8 @@
 # Kernel configuration targets
 # These targets are used from top-level makefile
 
-PHONY += oldconfig xconfig gconfig menuconfig config silentoldconfig update-po-config
+PHONY += oldconfig xconfig gconfig menuconfig config silentoldconfig
+PHONY += randconfig allyesconfig allnoconfig allmodconfig defconfig
 
 _OS=$(shell uname -s |cut -c-7)
 regex-objs=
@@ -17,206 +18,108 @@ LIB_CONFIG  := $(src)/lib.config
 HAVE_FILO_CONFIG := $(wildcard $(FILO_CONFIG))
 HAVE_LIB_CONFIG := $(wildcard $(LIB_CONFIG))
 
-ifneq ($(strip $(HAVE_FILO_CONFIG)),)
-ifneq ($(strip $(HAVE_LIB_CONFIG)),)
+# We don't know how to cope with FILO config being present and
+# libpayload config not.
+$(if $(and $(HAVE_FILO_CONFIG),$(filter 0,$(words $(LIB_CONFIG)))), \
+  FATAL:=1, \
+  FATAL:=0)
+
+LIBPAYLOAD_CONFIG_PRE := echo "Libpayload config for FILO." \
+    $(if $(HAVE_FILO_CONFIG),; mv $(FILO_CONFIG) $(FILO_CONFIG).temp) \
+    $(if $(HAVE_LIB_CONFIG),; mv $(LIB_CONFIG) $(FILO_CONFIG))
+
+LIBPAYLOAD_CONFIG_POST := mv $(FILO_CONFIG) $(LIB_CONFIG) \
+        ; echo "Libpayload config done." \
+        $(if $(HAVE_FILO_CONFIG),; mv $(FILO_CONFIG).temp $(FILO_CONFIG))
+
+ifeq ($(FATAL),1)
+xconfig gconfig menuconfig config oldconfig silentoldconfig:
+	echo "Lost libpayload config file."
+	rm -f $(FILO_CONFIG)
+else
 xconfig: prepare $(objk)/qconf
-	$(Q)printf "Libpayload config for FILO.\n"
-	$(Q)mv $(FILO_CONFIG) $(FILO_CONFIG)."temp"
-	$(Q)mv $(LIB_CONFIG) $(FILO_CONFIG)
-	$(Q)$(objk)/qconf $(LIBCONFIG_PATH)/Config.in
-	$(Q)mv $(FILO_CONFIG) $(LIB_CONFIG)
-	$(Q)printf "Libpayload config done.\n"
-	$(Q)mv $(FILO_CONFIG)."temp" $(FILO_CONFIG)
-	$(Q)$(objk)/qconf $(Kconfig)
-else
-xconfig: prepare $(objk)/qconf
-	$(Q)printf "Lost libpayload config file.\n"
-	$(Q)rm -f $(FILO_CONFIG)
-endif
-else
-xconfig: prepare $(objk)/qconf
-	$(Q)printf "Libpayload config for FILO.\n"
-	$(Q)$(objk)/qconf $(LIBCONFIG_PATH)/Config.in
-	$(Q)mv $(FILO_CONFIG) $(LIB_CONFIG)
-	$(Q)printf "Libpayload config done.\n"
-	$(Q)$(objk)/qconf $(Kconfig)
-endif
+	$(LIBPAYLOAD_CONFIG_PRE)
+	$(objk)/qconf $(LIBCONFIG_PATH)/Config.in
+	$(LIBPAYLOAD_CONFIG_POST)
+	$(objk)/qconf $(Kconfig)
 
-ifneq ($(strip $(HAVE_FILO_CONFIG)),)
-ifneq ($(strip $(HAVE_LIB_CONFIG)),)
 gconfig: prepare $(objk)/gconf
-	$(Q)printf "Libpayload config for FILO.\n"
-	$(Q)mv $(FILO_CONFIG) $(FILO_CONFIG)."temp"
-	$(Q)mv $(LIB_CONFIG) $(FILO_CONFIG)
-	$(Q)$(objk)/gconf $(LIBCONFIG_PATH)/Config.in
-	$(Q)mv $(FILO_CONFIG) $(LIB_CONFIG)
-	$(Q)printf "Libpayload config done.\n"
-	$(Q)mv $(FILO_CONFIG)."temp" $(FILO_CONFIG)
-	$(Q)$(objk)/gconf $(Kconfig)
-else
-gconfig: prepare $(objk)/gconf
-	$(Q)printf "Lost libpayload config file.\n"
-	$(Q)rm -f $(FILO_CONFIG)
-endif
-else
-gconfig: prepare $(objk)/gconf
-	$(Q)printf "Libpayload config for FILO.\n"
-	$(Q)$(objk)/gconf $(LIBCONFIG_PATH)/Config.in
-	$(Q)mv $(FILO_CONFIG) $(LIB_CONFIG)
-	$(Q)printf "Libpayload config done.\n"
-	$(Q)$(objk)/gconf $(Kconfig)
-endif
+	$(LIBPAYLOAD_CONFIG_PRE)
+	$(objk)/gconf $(LIBCONFIG_PATH)/Config.in
+	$(LIBPAYLOAD_CONFIG_POST)
+	$(objk)/gconf $(Kconfig)
 
-ifneq ($(strip $(HAVE_FILO_CONFIG)),)
-ifneq ($(strip $(HAVE_LIB_CONFIG)),)
 menuconfig: prepare $(objk)/mconf
-	$(Q)printf "Libpayload config for FILO.\n"
-	$(Q)mv $(FILO_CONFIG) $(FILO_CONFIG)."temp"
-	$(Q)mv $(LIB_CONFIG) $(FILO_CONFIG)
-	$(Q)$(objk)/mconf $(LIBCONFIG_PATH)/Config.in
-	$(Q)mv $(FILO_CONFIG) $(LIB_CONFIG)
-	$(Q)printf "Libpayload config done.\n"
-	$(Q)mv $(FILO_CONFIG)."temp" $(FILO_CONFIG)
-	$(Q)$(objk)/mconf $(Kconfig)
-else
-menuconfig: prepare $(objk)/mconf
-	$(Q)printf "Lost libpayload config file.\n"
-	$(Q)rm -f $(FILO_CONFIG)
-endif
-else
-menuconfig: prepare $(objk)/mconf
-	$(Q)printf "Libpayload config for FILO.\n"
-	$(Q)$(objk)/mconf $(LIBCONFIG_PATH)/Config.in
-	$(Q)mv $(FILO_CONFIG) $(LIB_CONFIG)
-	$(Q)printf "Libpayload config done.\n"
-	$(Q)$(objk)/mconf $(Kconfig)
-endif
+	$(LIBPAYLOAD_CONFIG_PRE)
+	$(objk)/mconf $(LIBCONFIG_PATH)/Config.in
+	$(LIBPAYLOAD_CONFIG_POST)
+	$(objk)/mconf $(Kconfig)
 
-ifneq ($(strip $(HAVE_FILO_CONFIG)),)
-ifneq ($(strip $(HAVE_LIB_CONFIG)),)
 config: prepare $(objk)/conf
-	$(Q)printf "Libpayload config for FILO.\n"
-	$(Q)mv $(FILO_CONFIG) $(FILO_CONFIG)."temp"
-	$(Q)mv $(LIB_CONFIG) $(FILO_CONFIG)
-	$(Q)$(objk)/conf $(LIBCONFIG_PATH)/Config.in
-	$(Q)mv $(FILO_CONFIG) $(LIB_CONFIG)
-	$(Q)printf "Libpayload config done.\n"
-	$(Q)mv $(FILO_CONFIG)."temp" $(FILO_CONFIG)
-	$(Q)$(objk)/conf $(Kconfig)
-else
-config: prepare $(objk)/conf
-	$(Q)printf "Lost libpayload config file.\n"
-	$(Q)rm -f $(FILO_CONFIG)
-endif
-else
-config: prepare $(objk)/conf
-	$(Q)printf "Libpayload config for FILO.\n"
-	$(Q)$(objk)/conf $(LIBCONFIG_PATH)/Config.in
-	$(Q)mv $(FILO_CONFIG) $(LIB_CONFIG)
-	$(Q)printf "Libpayload config done.\n"
-	$(Q)$(objk)/conf $(Kconfig)
-endif
+	$(LIBPAYLOAD_CONFIG_PRE)
+	$(objk)/conf $(LIBCONFIG_PATH)/Config.in
+	$(LIBPAYLOAD_CONFIG_POST)
+	$(objk)/conf $(Kconfig)
 
-ifneq ($(strip $(HAVE_FILO_CONFIG)),)
-ifneq ($(strip $(HAVE_LIB_CONFIG)),)
 oldconfig: prepare $(objk)/conf
-	$(Q)printf "Libpayload config for FILO.\n"
-	$(Q)mv $(FILO_CONFIG) $(FILO_CONFIG)."temp"
-	$(Q)mv $(LIB_CONFIG) $(FILO_CONFIG)
-	$(Q)$(objk)/conf -o $(LIBCONFIG_PATH)/Config.in
-	$(Q)mv $(FILO_CONFIG) $(LIB_CONFIG)
-	$(Q)printf "Libpayload config done.\n"
-	$(Q)mv $(FILO_CONFIG)."temp" $(FILO_CONFIG)
-	$(Q)$(objk)/conf -o $(Kconfig)
-else
-oldconfig: prepare $(objk)/conf
-	$(Q)printf "Lost libpayload config file.\n"
-	$(Q)rm -f $(FILO_CONFIG)
-endif
-else
-oldconfig: prepare $(objk)/conf
-	$(Q)printf "Libpayload config for FILO.\n"
-	$(Q)$(objk)/conf -o $(LIBCONFIG_PATH)/Config.in
-	$(Q)mv .config $(LIB_CONFIG)
-	$(Q)printf "Libpayload config done.\n"
-	$(Q)$(objk)/conf -o $(Kconfig)
-endif
+	$(LIBPAYLOAD_CONFIG_PRE)
+	$(objk)/conf -o $(LIBCONFIG_PATH)/Config.in
+	$(LIBPAYLOAD_CONFIG_POST)
+	$(objk)/conf -o $(Kconfig)
 
-ifneq ($(strip $(HAVE_FILO_CONFIG)),)
-ifneq ($(strip $(HAVE_LIB_CONFIG)),)
 silentoldconfig: prepare $(objk)/conf
-	$(Q)printf "Libpayload config for FILO.\n"
-	$(Q)mv $(FILO_CONFIG) $(FILO_CONFIG)."temp"
-	$(Q)mv $(LIB_CONFIG) $(FILO_CONFIG)
-	$(Q)$(objk)/conf -s $(LIBCONFIG_PATH)/Config.in
-	$(Q)mv $(FILO_CONFIG) $(LIB_CONFIG)
-	$(Q)printf "Libpayload config done.\n"
-	$(Q)mv $(FILO_CONFIG)."temp" $(FILO_CONFIG)
-	$(Q)$(objk)/conf -s $(Kconfig)
-else
-silentoldconfig: prepare $(objk)/conf
-	$(Q)printf "Lost libpayload config file.\n"
-	$(Q)rm -f $(FILO_CONFIG)
-endif
-else
-silentoldconfig: prepare $(objk)/conf
-	$(Q)printf "Libpayload config for FILO.\n"
-	$(Q)$(objk)/conf -s $(LIBCONFIG_PATH)/Config.in
-	$(Q)mv .config $(LIB_CONFIG)
-	$(Q)printf "Libpayload config done.\n"
-	$(Q)$(objk)/conf -s $(Kconfig)
-
-endif
-
-# --- UNUSED, ignore ----------------------------------------------------------
-# Create new linux.pot file
-# Adjust charset to UTF-8 in .po file to accept UTF-8 in Kconfig files
-# The symlink is used to repair a deficiency in arch/um
-update-po-config: $(obj)/kxgettext $(obj)/gconf.glade.h
-	$(Q)echo "  GEN config"
-	$(Q)xgettext --default-domain=linux              \
-	    --add-comments --keyword=_ --keyword=N_      \
-	    --from-code=UTF-8                            \
-	    --files-from=scripts/kconfig/POTFILES.in     \
-	    --output $(obj)/config.pot
-	$(Q)sed -i s/CHARSET/UTF-8/ $(obj)/config.pot
-	$(Q)ln -fs Kconfig.i386 arch/um/Kconfig.arch
-	$(Q)(for i in `ls arch/`;                        \
-	    do                                           \
-		echo "  GEN $$i";                        \
-		$(obj)/kxgettext arch/$$i/Kconfig        \
-		     >> $(obj)/config.pot;               \
-	    done )
-	$(Q)msguniq --sort-by-file --to-code=UTF-8 $(obj)/config.pot \
-	    --output $(obj)/linux.pot
-	$(Q)rm -f arch/um/Kconfig.arch
-	$(Q)rm -f $(obj)/config.pot
-# --- UNUSED, ignore ----------------------------------------------------------
-
-PHONY += randconfig allyesconfig allnoconfig allmodconfig defconfig
+	$(LIBPAYLOAD_CONFIG_PRE)
+	$(objk)/conf -s $(LIBCONFIG_PATH)/Config.in
+	$(LIBPAYLOAD_CONFIG_POST)
+	$(objk)/conf -s $(Kconfig)
 
 randconfig: prepare $(objk)/conf
-	$(Q)$(objk)/conf -r $(Kconfig)
+	$(LIBPAYLOAD_CONFIG_PRE)
+	$(objk)/conf -r $(LIBCONFIG_PATH)/Config.in
+	$(LIBPAYLOAD_CONFIG_POST)
+	$(objk)/conf -r $(Kconfig)
 
 allyesconfig: prepare $(objk)/conf
-	$(Q)$(objk)/conf -y $(Kconfig)
+	$(LIBPAYLOAD_CONFIG_PRE)
+	$(objk)/conf -y $(LIBCONFIG_PATH)/Config.in
+	$(LIBPAYLOAD_CONFIG_POST)
+	$(objk)/conf -y $(Kconfig)
 
 allnoconfig: prepare $(objk)/conf
-	$(Q)$(objk)/conf -n $(Kconfig)
+	$(LIBPAYLOAD_CONFIG_PRE)
+	$(objk)/conf -n $(LIBCONFIG_PATH)/Config.in
+	$(LIBPAYLOAD_CONFIG_POST)
+	$(objk)/conf -n $(Kconfig)
 
 allmodconfig: prepare $(objk)/conf
-	$(Q)$(objk)/conf -m $(Kconfig)
+	$(LIBPAYLOAD_CONFIG_PRE)
+	$(objk)/conf -m $(LIBCONFIG_PATH)/Config.in
+	$(LIBPAYLOAD_CONFIG_POST)
+	$(objk)/conf -m $(Kconfig)
 
 defconfig: prepare $(objk)/conf
+	$(LIBPAYLOAD_CONFIG_PRE)
 ifeq ($(KBUILD_DEFCONFIG),)
-	$(Q)$(objk)/conf -d $(Kconfig)
+	$(objk)/conf -D $(LIBCONFIG_PATH)/configs/defconfig $(LIBCONFIG_PATH)/Config.in
 else
 	@echo "*** Default configuration is based on '$(KBUILD_DEFCONFIG)'"
-	$(Q)$(objk)/conf -D $(KBUILD_DEFCONFIG) $(Kconfig)
+	$(objk)/conf -D $(LIBCONFIG_PATH)/$(KBUILD_DEFCONFIG) $(LIBCONFIG_PATH)/Config.in
+endif
+	$(LIBPAYLOAD_CONFIG_POST)
+ifeq ($(KBUILD_DEFCONFIG),)
+	$(objk)/conf -d $(Kconfig)
+else
+	@echo "*** Default configuration is based on '$(KBUILD_DEFCONFIG)'"
+	$(objk)/conf -D $(KBUILD_DEFCONFIG) $(Kconfig)
 endif
 
 %_defconfig: prepare $(objk)/conf
-	$(Q)$(objk)/conf -D configs/$@ $(Kconfig)
+	$(LIBPAYLOAD_CONFIG_PRE)
+	$(objk)/conf -D $(LIBCONFIG_PATH)/configs/$@ $(LIBCONFIG_PATH)/Config.in
+	$(LIBPAYLOAD_CONFIG_POST)
+	$(objk)/conf -D configs/$@ $(Kconfig)
+
+endif # "FATAL"
 
 # Help text used by make help
 help:
@@ -293,7 +196,7 @@ clean-files     += config.pot coreinfo.pot
 PHONY += $(objk)/dochecklxdialog
 $(addprefix $(obj)/,$(lxdialog)): $(objk)/dochecklxdialog
 $(objk)/dochecklxdialog:
-	$(Q)$(CONFIG_SHELL) $(check-lxdialog) -check $(HOSTCC) $(HOST_EXTRACFLAGS) $(HOST_LOADLIBES)
+	$(CONFIG_SHELL) $(check-lxdialog) -check $(HOSTCC) $(HOST_EXTRACFLAGS) $(HOST_LOADLIBES)
 
 always := dochecklxdialog
 
@@ -438,46 +341,46 @@ endif
 
 $(objk)/qconf: $(patsubst %,$(objk)/%,$(qconf-cxxobjs)) \
 	       $(patsubst %,$(objk)/%,$(qconf-objs))
-	$(Q)$(HOSTCXX) $(HOSTCXXFLAGS) $(HOSTLOADLIBES_qconf) -o $@ $^
+	$(HOSTCXX) $(HOSTCXXFLAGS) $(HOSTLOADLIBES_qconf) -o $@ $^
 $(objk)/gconf: $(patsubst %,$(objk)/%,$(gconf-objs))
-	$(Q)$(HOSTCC) $(HOSTCFLAGS) $(HOSTLOADLIBES_gconf) -o $@ $^
+	$(HOSTCC) $(HOSTCFLAGS) $(HOSTLOADLIBES_gconf) -o $@ $^
 $(objk)/mconf: $(patsubst %,$(objk)/%,$(mconf-objs))
-	$(Q)$(HOSTCC) $(HOSTCFLAGS) $(HOST_EXTRACFLAGS) $(HOST_LOADLIBES) -o $@ $^
+	$(HOSTCC) $(HOSTCFLAGS) $(HOST_EXTRACFLAGS) $(HOST_LOADLIBES) -o $@ $^
 $(objk)/conf: $(patsubst %,$(objk)/%,$(conf-objs))
-	$(Q)$(HOSTCC) $(HOSTCFLAGS) $(HOST_EXTRACFLAGS) -o $@ $^
+	$(HOSTCC) $(HOSTCFLAGS) $(HOST_EXTRACFLAGS) -o $@ $^
 
 $(objk)/mconf.o: $(srck)/mconf.c
-	$(Q)$(HOSTCC) $(HOSTCFLAGS) $(HOST_EXTRACFLAGS) -c -o $@ $<
+	$(HOSTCC) $(HOSTCFLAGS) $(HOST_EXTRACFLAGS) -c -o $@ $<
 $(objk)/conf.o: $(srck)/conf.c
-	$(Q)$(HOSTCC) $(HOSTCFLAGS) $(HOST_EXTRACFLAGS) -c -o $@ $<
+	$(HOSTCC) $(HOSTCFLAGS) $(HOST_EXTRACFLAGS) -c -o $@ $<
 $(objk)/regex.o: $(srck)/regex.c
 	$(HOSTCC) $(HOSTCFLAGS) $(HOST_EXTRACFLAGS) -DHAVE_STRING_H -c -o $@ $<
 
 $(objk)/zconf.tab.o: $(objk)/zconf.tab.c $(objk)/lex.zconf.c \
 		     $(objk)/zconf.hash.c
-	$(Q)$(HOSTCC) $(HOSTCFLAGS) $(HOST_EXTRACFLAGS) -c -o $@ $(objk)/zconf.tab.c
+	$(HOSTCC) $(HOSTCFLAGS) $(HOST_EXTRACFLAGS) -c -o $@ $(objk)/zconf.tab.c
 $(objk)/kconfig_load.o: $(srck)/kconfig_load.c $(objk)/lkc_defs.h
-	$(Q)$(HOSTCC) $(HOSTCFLAGS) -c -o $@ $<
+	$(HOSTCC) $(HOSTCFLAGS) -c -o $@ $<
 $(objk)/qconf.o: $(srck)/qconf.cc $(objk)/qconf.moc $(objk)/lkc_defs.h
-	$(Q)$(HOSTCXX) $(HOSTCXXFLAGS) $(HOSTCXXFLAGS_qconf.o) -c -o $@ $<
+	$(HOSTCXX) $(HOSTCXXFLAGS) $(HOSTCXXFLAGS_qconf.o) -c -o $@ $<
 $(objk)/gconf.o: $(srck)/gconf.c $(objk)/lkc_defs.h
-	$(Q)$(HOSTCC) $(HOSTCFLAGS) $(HOSTCFLAGS_gconf.o) -c -o $@ $<
+	$(HOSTCC) $(HOSTCFLAGS) $(HOSTCFLAGS_gconf.o) -c -o $@ $<
 $(objk)/%.moc: $(srck)/%.h
-	$(Q)$(KC_QT_MOC) -i $< -o $@
+	$(KC_QT_MOC) -i $< -o $@
 $(objk)/lkc_defs.h: $(srck)/lkc_proto.h
-	$(Q)sed < $< > $@ 's/P(\([^,]*\),.*/#define \1 (\*\1_p)/'
+	sed < $< > $@ 's/P(\([^,]*\),.*/#define \1 (\*\1_p)/'
 
 $(objk)/lex.zconf.c: $(srck)/lex.zconf.c_shipped
-	$(Q)cp $< $@
+	cp $< $@
 $(objk)/zconf.hash.c: $(srck)/zconf.hash.c_shipped
-	$(Q)cp $< $@
+	cp $< $@
 $(objk)/zconf.tab.c: $(srck)/zconf.tab.c_shipped
-	$(Q)cp $< $@
+	cp $< $@
 
 $(objk)/lxdialog/lxdialog: $(objk)/dochecklxdialog \
 			   $(patsubst %,$(objk)/lxdialog/%,$(lxdialog))
-	$(Q)$(HOSTCC) $(HOSTCFLAGS) $(HOST_EXTRACFLAGS) $(HOST_LOADLIBES) \
+	$(HOSTCC) $(HOSTCFLAGS) $(HOST_EXTRACFLAGS) $(HOST_LOADLIBES) \
 		$(patsubst %,$(objk)/lxdialog/%,$(lxdialog)) -o $@
 $(objk)/lxdialog/%.o: $(srck)/lxdialog/%.c
-	$(Q)$(HOSTCC) $(HOSTCFLAGS) $(HOST_EXTRACFLAGS) $^ -c -o $@
+	$(HOSTCC) $(HOSTCFLAGS) $(HOST_EXTRACFLAGS) $^ -c -o $@
 
