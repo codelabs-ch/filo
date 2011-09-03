@@ -18,94 +18,42 @@ LIB_CONFIG  := $(src)/lib.config
 HAVE_FILO_CONFIG := $(wildcard $(FILO_CONFIG))
 HAVE_LIB_CONFIG := $(wildcard $(LIB_CONFIG))
 
-# We don't know how to cope with FILO config being present and
-# libpayload config not.
-$(if $(and $(HAVE_FILO_CONFIG),$(filter 0,$(words $(LIB_CONFIG)))), \
-  FATAL:=1, \
-  FATAL:=0)
+libpayload_config_%:
+	echo "Libpayload config for FILO."
+	$(MAKE) -C $(LIBCONFIG_PATH) KCONFIG_CONFIG=$(LIB_CONFIG) $(patsubst libpayload_config_%,%,$@)
+	echo "Libpayload config done."
 
-LIBPAYLOAD_CONFIG_PRE := echo "Libpayload config for FILO." \
-    $(if $(HAVE_FILO_CONFIG),; mv $(FILO_CONFIG) $(FILO_CONFIG).temp) \
-    $(if $(HAVE_LIB_CONFIG),; mv $(LIB_CONFIG) $(FILO_CONFIG))
-
-LIBPAYLOAD_CONFIG_POST := mv $(FILO_CONFIG) $(LIB_CONFIG) \
-        ; echo "Libpayload config done." \
-        $(if $(HAVE_FILO_CONFIG),; mv $(FILO_CONFIG).temp $(FILO_CONFIG))
-
-ifeq ($(FATAL),1)
-xconfig gconfig menuconfig config oldconfig silentoldconfig:
-	echo "Lost libpayload config file."
-	rm -f $(FILO_CONFIG)
-else
-xconfig: prepare $(objk)/qconf
-	$(LIBPAYLOAD_CONFIG_PRE)
-	$(objk)/qconf $(LIBCONFIG_PATH)/Config.in
-	$(LIBPAYLOAD_CONFIG_POST)
+xconfig: prepare $(objk)/qconf libpayload_config_xconfig
 	$(objk)/qconf $(Kconfig)
 
-gconfig: prepare $(objk)/gconf
-	$(LIBPAYLOAD_CONFIG_PRE)
-	$(objk)/gconf $(LIBCONFIG_PATH)/Config.in
-	$(LIBPAYLOAD_CONFIG_POST)
+gconfig: prepare $(objk)/gconf libpayload_config_gconfig
 	$(objk)/gconf $(Kconfig)
 
-menuconfig: prepare $(objk)/mconf
-	$(LIBPAYLOAD_CONFIG_PRE)
-	$(objk)/mconf $(LIBCONFIG_PATH)/Config.in
-	$(LIBPAYLOAD_CONFIG_POST)
+menuconfig: prepare $(objk)/mconf libpayload_config_menuconfig
 	$(objk)/mconf $(Kconfig)
 
-config: prepare $(objk)/conf
-	$(LIBPAYLOAD_CONFIG_PRE)
-	$(objk)/conf $(LIBCONFIG_PATH)/Config.in
-	$(LIBPAYLOAD_CONFIG_POST)
+config: prepare $(objk)/conf libpayload_config_config
 	$(objk)/conf $(Kconfig)
 
-oldconfig: prepare $(objk)/conf
-	$(LIBPAYLOAD_CONFIG_PRE)
-	$(objk)/conf -o $(LIBCONFIG_PATH)/Config.in
-	$(LIBPAYLOAD_CONFIG_POST)
+oldconfig: prepare $(objk)/conf libpayload_config_oldconfig
 	$(objk)/conf -o $(Kconfig)
 
-silentoldconfig: prepare $(objk)/conf
-	$(LIBPAYLOAD_CONFIG_PRE)
-	$(objk)/conf -s $(LIBCONFIG_PATH)/Config.in
-	$(LIBPAYLOAD_CONFIG_POST)
+silentoldconfig: prepare $(objk)/conf libpayload_config_silentoldconfig
 	$(objk)/conf -s $(Kconfig)
 
-randconfig: prepare $(objk)/conf
-	$(LIBPAYLOAD_CONFIG_PRE)
-	$(objk)/conf -r $(LIBCONFIG_PATH)/Config.in
-	$(LIBPAYLOAD_CONFIG_POST)
+randconfig: prepare $(objk)/conf libpayload_config_randconfig
 	$(objk)/conf -r $(Kconfig)
 
-allyesconfig: prepare $(objk)/conf
-	$(LIBPAYLOAD_CONFIG_PRE)
-	$(objk)/conf -y $(LIBCONFIG_PATH)/Config.in
-	$(LIBPAYLOAD_CONFIG_POST)
+allyesconfig: prepare $(objk)/conf libpayload_config_allyesconfig
 	$(objk)/conf -y $(Kconfig)
 
-allnoconfig: prepare $(objk)/conf
-	$(LIBPAYLOAD_CONFIG_PRE)
-	$(objk)/conf -n $(LIBCONFIG_PATH)/Config.in
-	$(LIBPAYLOAD_CONFIG_POST)
+allnoconfig: prepare $(objk)/conf libpayload_config_allnoconfig
 	$(objk)/conf -n $(Kconfig)
 
-allmodconfig: prepare $(objk)/conf
-	$(LIBPAYLOAD_CONFIG_PRE)
-	$(objk)/conf -m $(LIBCONFIG_PATH)/Config.in
-	$(LIBPAYLOAD_CONFIG_POST)
+allmodconfig: prepare $(objk)/conf libpayload_config_allmodconfig
 	$(objk)/conf -m $(Kconfig)
 
-defconfig: prepare $(objk)/conf
-	$(LIBPAYLOAD_CONFIG_PRE)
-ifeq ($(KBUILD_DEFCONFIG),)
-	$(objk)/conf -D $(LIBCONFIG_PATH)/configs/defconfig $(LIBCONFIG_PATH)/Config.in
-else
-	@echo "*** Default configuration is based on '$(KBUILD_DEFCONFIG)'"
-	$(objk)/conf -D $(LIBCONFIG_PATH)/$(KBUILD_DEFCONFIG) $(LIBCONFIG_PATH)/Config.in
-endif
-	$(LIBPAYLOAD_CONFIG_POST)
+defconfig: prepare $(objk)/conf libpayload_config_defconfig
 ifeq ($(KBUILD_DEFCONFIG),)
 	$(objk)/conf -d $(Kconfig)
 else
@@ -113,13 +61,8 @@ else
 	$(objk)/conf -D $(KBUILD_DEFCONFIG) $(Kconfig)
 endif
 
-%_defconfig: prepare $(objk)/conf
-	$(LIBPAYLOAD_CONFIG_PRE)
-	$(objk)/conf -D $(LIBCONFIG_PATH)/configs/$@ $(LIBCONFIG_PATH)/Config.in
-	$(LIBPAYLOAD_CONFIG_POST)
+%_defconfig: prepare $(objk)/conf libpayload_config_%_defconfig
 	$(objk)/conf -D configs/$@ $(Kconfig)
-
-endif # "FATAL"
 
 # Help text used by make help
 help:
@@ -341,11 +284,11 @@ endif
 
 $(objk)/qconf: $(patsubst %,$(objk)/%,$(qconf-cxxobjs)) \
 	       $(patsubst %,$(objk)/%,$(qconf-objs))
-	$(HOSTCXX) $(HOSTCXXFLAGS) $(HOSTLOADLIBES_qconf) -o $@ $^
+	$(HOSTCXX) $(HOSTCXXFLAGS) -o $@ $^ $(HOSTLOADLIBES_qconf)
 $(objk)/gconf: $(patsubst %,$(objk)/%,$(gconf-objs))
-	$(HOSTCC) $(HOSTCFLAGS) $(HOSTLOADLIBES_gconf) -o $@ $^
+	$(HOSTCC) $(HOSTCFLAGS) -o $@ $^ $(HOSTLOADLIBES_gconf)
 $(objk)/mconf: $(patsubst %,$(objk)/%,$(mconf-objs))
-	$(HOSTCC) $(HOSTCFLAGS) $(HOST_EXTRACFLAGS) $(HOST_LOADLIBES) -o $@ $^
+	$(HOSTCC) $(HOSTCFLAGS) $(HOST_EXTRACFLAGS) -o $@ $^ $(HOST_LOADLIBES)
 $(objk)/conf: $(patsubst %,$(objk)/%,$(conf-objs))
 	$(HOSTCC) $(HOSTCFLAGS) $(HOST_EXTRACFLAGS) -o $@ $^
 
