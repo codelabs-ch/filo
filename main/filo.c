@@ -68,6 +68,7 @@ static void init(void)
     /* Set up the consoles. */
     console_init();
 
+    printf("coreboot: %s\n", get_cb_version());
     printf("%s version %s\n", program_name, program_version);
     collect_sys_info(&sys_info);
     relocate();

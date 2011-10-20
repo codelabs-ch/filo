@@ -32,3 +32,11 @@ void collect_sys_info(struct sys_info *info)
 	debug("boot EBX = %#lx\n", info->boot_data);
 	debug("boot arg = %#lx\n", info->boot_arg);
 }
+
+const char *get_cb_version()
+{
+	const char *cb_version = lib_sysinfo.cb_version ?
+		lib_sysinfo.cb_version : "<unknown version>";
+
+	return cb_version;
+}

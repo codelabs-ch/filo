@@ -100,8 +100,8 @@ void init_page(void)
 {
 	color_set(1, NULL);
 	cls();
-	grub_printf("\n                                  %s %s\n",
-			PROGRAM_NAME, PROGRAM_VERSION);
+	grub_printf("\n                     %s %s, coreboot: %s\n",
+			PROGRAM_NAME, PROGRAM_VERSION, get_cb_version());
 	grub_printf("                               root_dev = %s\n",
 			root_device[0] ? root_device : "unset");
 }
