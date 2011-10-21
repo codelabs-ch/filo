@@ -24,7 +24,11 @@ export srctree := $(src)
 export srck := $(src)/util/kconfig
 export obj := $(src)/build
 export objk := $(src)/build/util/kconfig
-export LIBCONFIG_PATH := $(src)/../libpayload
+
+ifndef LIBCONFIG_PATH
+	LIBCONFIG_PATH := $(src)/../libpayload
+endif
+export LIBCONFIG_PATH
 
 export KERNELVERSION      := $(PROGRAM_VERSION)
 export KCONFIG_AUTOHEADER := $(obj)/config.h
