@@ -576,7 +576,7 @@ static int load_initrd(struct linux_header *hdr,
 
 	/* FILO itself is at the top of RAM. (relocated)
 	 * So, try putting initrd just below us. */
-	end = virt_to_phys(_start);
+	end = virt_to_phys(_start - 1);
 	if (end > max)
 		end = max;
 
