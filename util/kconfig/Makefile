@@ -18,10 +18,16 @@ LIB_CONFIG  := $(src)/lib.config
 HAVE_FILO_CONFIG := $(wildcard $(FILO_CONFIG))
 HAVE_LIB_CONFIG := $(wildcard $(LIB_CONFIG))
 
+LIBPAYLOAD ?= $(wildcard $(LIBPAYLOAD_PREFIX)/lib/libpayload.a)
+ifeq ($(LIBPAYLOAD),)
 libpayload_config_%:
 	echo "Libpayload config for FILO."
 	$(MAKE) -C $(LIBCONFIG_PATH) KCONFIG_CONFIG=$(LIB_CONFIG) $(patsubst libpayload_config_%,%,$@)
 	echo "Libpayload config done."
+else
+libpayload_config_%:
+	echo "Using binary libpayload, nothing to configure"
+endif
 
 xconfig: prepare $(objk)/qconf libpayload_config_xconfig
 	$(objk)/qconf $(Kconfig)
