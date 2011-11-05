@@ -792,6 +792,9 @@ int linux_load(const char *file, const char *cmdline)
 	}
 
 	file_close();
+#if defined(CONFIG_USB)
+	usb_exit();
+#endif
 
 	hardware_setup();
 
