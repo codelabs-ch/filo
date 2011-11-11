@@ -1029,6 +1029,7 @@ void grub_main(void)
 
 	/* Initialize TinyCurses */
 	initscr();
+	start_color();
 	cbreak();
 	noecho();
 	nonl();
