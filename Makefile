@@ -49,7 +49,7 @@ ifneq ($(Q),)
 endif
 endif
 
-$(if $(wildcard .xcompile),,$(eval $(shell bash util/xcompile/xcompile > .xcompile)))
+$(if $(wildcard .xcompile),,$(shell bash util/xcompile/xcompile > .xcompile))
 include .xcompile
 
 CROSS_PREFIX =
