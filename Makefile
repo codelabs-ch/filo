@@ -118,18 +118,19 @@ all: prepare $(obj)/version.h $(TARGET)
 HAVE_LIBPAYLOAD := $(wildcard $(LIBPAYLOAD))
 ifneq ($(strip $(HAVE_LIBPAYLOAD)),)
 libpayload:
-	@printf "Found Libpayload $(LIBPAYLOAD).\n"
+	@printf "Found libpayload as $(LIBPAYLOAD)\n"
 else
-libpayload: $(src)/$(LIB_CONFIG)
-	printf "building libpayload.\n"
+libpayload: $(LIBPAYLOAD)
+$(LIBPAYLOAD): $(src)/$(LIB_CONFIG)
+	@printf "Building libpayload...\n"
 	$(MAKE) -C $(LIBCONFIG_PATH) obj=$(obj)/libpayload-build distclean
 	cp lib.config $(LIBCONFIG_PATH)/.config
 	mkdir -p $(LIBCONFIG_PATH)/build
 	$(MAKE) -C $(LIBCONFIG_PATH) obj=$(obj)/libpayload-build oldconfig
-	$(MAKE) -C $(LIBCONFIG_PATH) obj=$(obj)/libpayload-build DESTDIR=$(src)/build install
+	$(MAKE) -C $(LIBCONFIG_PATH) obj=$(obj)/libpayload-build DESTDIR=$(obj) install
 endif
 
-$(obj)/filo: $(OBJS) libpayload
+$(obj)/filo: $(OBJS) $(LIBPAYLOAD)
 	printf "  LD      $(subst $(shell pwd)/,,$(@))\n"
 	$(LD) -N -T $(ARCHDIR-y)/ldscript -o $@ $(OBJS) $(LIBPAYLOAD) $(LIBGCC)
 
@@ -142,7 +143,7 @@ include util/kconfig/Makefile
 $(KCONFIG_AUTOHEADER): $(src)/.config
 	$(MAKE) silentoldconfig
 
-$(OBJS): $(KCONFIG_AUTOHEADER) libpayload
+$(OBJS): $(KCONFIG_AUTOHEADER) | libpayload
 $(obj)/%.o: $(src)/%.c
 	printf "  CC      $(subst $(shell pwd)/,,$(@))\n"
 	$(CC) -MMD $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
@@ -177,5 +178,4 @@ distclean: clean
 
 FORCE:
 
-.PHONY: $(PHONY) prepare clean distclean FORCE
-
+.PHONY: $(PHONY) prepare clean distclean libpayload FORCE
