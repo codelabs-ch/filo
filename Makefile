@@ -112,8 +112,8 @@ TARGET  = $(obj)/filo.elf
 
 HAVE_LIBCONFIG := $(wildcard $(LIBCONFIG_PATH))
 
-all: prepare $(obj)/version.h $(TARGET)
 
+all: prepare $(TARGET)
 
 HAVE_LIBPAYLOAD := $(wildcard $(LIBPAYLOAD))
 ifneq ($(strip $(HAVE_LIBPAYLOAD)),)
@@ -143,7 +143,7 @@ include util/kconfig/Makefile
 $(KCONFIG_AUTOHEADER): $(src)/.config
 	$(MAKE) silentoldconfig
 
-$(OBJS): $(KCONFIG_AUTOHEADER) | libpayload
+$(OBJS): $(KCONFIG_AUTOHEADER) $(obj)/version.h | libpayload
 $(obj)/%.o: $(src)/%.c
 	printf "  CC      $(subst $(shell pwd)/,,$(@))\n"
 	$(CC) -MMD $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
@@ -158,7 +158,8 @@ $(obj)/%.map: $(obj)/%
 
 endif
 
-$(obj)/version.h: FORCE
+$(obj)/version.h: Makefile
+	printf "  GEN     $(subst $(shell pwd)/,,$(@))\n"
 	echo '#define PROGRAM_NAME "$(PROGRAM_NAME)"' > $@
 	echo '#define PROGRAM_VERSION "$(PROGRAM_VERSION)"' >> $@
 	echo '#define PROGRAM_VERSION_FULL "$(PROGRAM_VERSION) $(BUILD_INFO)"' >> $@
@@ -171,6 +172,7 @@ prepare: $(sort $(dir $(OBJS))) $(obj)/util/kconfig/lxdialog/
 
 clean:
 	rm -rf $(sort $(dir $(OBJS))) $(obj)/util
+	rm -rf $(obj)/version.h
 
 distclean: clean
 	rm -rf $(obj)
