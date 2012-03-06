@@ -161,16 +161,16 @@ $(obj)/version.h: FORCE
 	echo '#define PROGRAM_VERSION_FULL "$(PROGRAM_VERSION) $(BUILD_INFO)"' >> $@
 	echo '#define BUILD_INFO "$(BUILD_INFO)"' >> $@
 
-prepare:
-	mkdir -p $(obj)/util/kconfig/lxdialog
-	mkdir -p $(obj)/i386 $(obj)/fs $(obj)/drivers/flash
-	mkdir -p $(obj)/main/grub
+$(obj)/%/:
+	mkdir -p $@
+
+prepare: $(sort $(dir $(OBJS))) $(obj)/util/kconfig/lxdialog/
 
 clean:
-	rm -rf $(obj)/i386 $(obj)/fs $(obj)/drivers $(obj)/main $(obj)/util
+	rm -rf $(sort $(dir $(OBJS))) $(obj)/util
 
 distclean: clean
-	rm -rf build
+	rm -rf $(obj)
 	rm -f .config lib.config .config.old .xcompile ..config.tmp .kconfig.d .tmpconfig*
 
 FORCE:
