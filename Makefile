@@ -133,11 +133,9 @@ $(obj)/filo: $(OBJS) libpayload
 	printf "  LD      $(subst $(shell pwd)/,,$(@))\n"
 	$(LD) -N -T $(ARCHDIR-y)/ldscript -o $@ $(OBJS) $(LIBPAYLOAD) $(LIBGCC)
 
-$(TARGET): $(obj)/filo libpayload
-	cp $(obj)/filo $@
-	$(NM) $(obj)/filo | sort > $(obj)/filo.map
+$(TARGET): $(obj)/filo $(obj)/filo.map
 	printf "  STRIP   $(subst $(shell pwd)/,,$(@))\n"
-	$(STRIP) -s $@
+	$(STRIP) -s $< -o $@
 
 include util/kconfig/Makefile
 
@@ -152,6 +150,10 @@ $(obj)/%.o: $(src)/%.c
 $(obj)/%.S.o: $(src)/%.S
 	printf "  AS      $(subst $(shell pwd)/,,$(@))\n"
 	$(AS) $(ASFLAGS) -o $@ $<
+
+$(obj)/%.map: $(obj)/%
+	printf "  SYMS    $(subst $(shell pwd)/,,$(@))\n"
+	$(NM) -n $< > $@
 
 endif
 
