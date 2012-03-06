@@ -16,9 +16,7 @@
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
-
 TARGETS-$(CONFIG_USE_GRUB) += main/grub/grub.o main/grub/builtins.o
 TARGETS-$(CONFIG_USE_GRUB) += main/grub/cmdline.o main/grub/char_io.o
 TARGETS-$(CONFIG_USE_GRUB) += main/grub/completions.o
 TARGETS-$(CONFIG_USE_MD5_PASSWORDS) += main/grub/md5.o
-

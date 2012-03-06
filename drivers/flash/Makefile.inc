@@ -17,4 +17,3 @@
 #
 
 TARGETS-$(CONFIG_FLASH_DISK) += drivers/flash/lxflash.o
-

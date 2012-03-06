@@ -49,17 +49,27 @@ ifneq ($(Q),)
 endif
 endif
 
+try-run = $(shell set -e;		\
+	TMP=".$$$$.tmp";		\
+	if ($(1)) > /dev/null 2>&1;	\
+	then echo "$(2)";		\
+	else echo "$(3)";		\
+	fi;				\
+	rm -rf "$$TMP")
+
+cc-option = $(call try-run,$(CC) $(1) -S -xc /dev/null -o "$$TMP",$(1),$(2))
+
 $(if $(wildcard .xcompile),,$(shell bash util/xcompile/xcompile > .xcompile))
 include .xcompile
 
-CROSS_PREFIX =
+CROSS_PREFIX ?=
 CC ?= $(CROSS_PREFIX)gcc -m32
 AS ?= $(CROSS_PREFIX)as --32
 LD ?= $(CROSS_PREFIX)ld -belf32-i386
-STRIP ?= $(CROSS_PREFIX)strip
 NM ?= $(CROSS_PREFIX)nm
-HOSTCC = gcc
-HOSTCXX = g++
+STRIP ?= $(CROSS_PREFIX)strip
+HOSTCC ?= gcc
+HOSTCXX ?= g++
 HOSTCFLAGS := -I$(srck) -I$(objk) -pipe
 HOSTCXXFLAGS := -I$(srck) -I$(objk) -pipe
 
@@ -72,45 +82,32 @@ else
 
 include $(src)/.config
 
-ARCHDIR-$(CONFIG_TARGET_I386) := i386
-
-PLATFORM-y += $(ARCHDIR-y)/Makefile.inc
-TARGETS-y :=
-
-BUILD-y := main/Makefile.inc main/grub/Makefile.inc fs/Makefile.inc 
-BUILD-y += drivers/Makefile.inc
-BUILD-y += drivers/flash/Makefile.inc
-
-include $(PLATFORM-y) $(BUILD-y)
-
 LIBPAYLOAD_PREFIX ?= $(obj)/libpayload
 LIBPAYLOAD = $(LIBPAYLOAD_PREFIX)/lib/libpayload.a
 INCPAYLOAD = $(LIBPAYLOAD_PREFIX)/include
 LIBGCC = $(shell $(CC) $(CFLAGS) -print-libgcc-file-name)
-
-OBJS     := $(patsubst %,$(obj)/%,$(TARGETS-y))
-INCLUDES := -I$(INCPAYLOAD) -I$(INCPAYLOAD)/$(ARCHDIR-y) -Iinclude -I$(ARCHDIR-y)/include -Ibuild
-INCLUDES += -I$(GCCINCDIR)
-
-try-run= $(shell set -e; \
-TMP=".$$$$.tmp"; \
-if ($(1)) > /dev/null 2>&1; \
-then echo "$(2)"; \
-else echo "$(3)"; \
-fi; rm -rf "$$TMP")
-
-cc-option= $(call try-run,\
-$(CC) $(1) -S -xc /dev/null -o "$$TMP", $(1), $(2))
-
-STACKPROTECT += $(call cc-option, -fno-stack-protector,)
-
 GCCINCDIR = $(shell $(CC) -print-search-dirs | head -n 1 | cut -d' ' -f2)include
-CPPFLAGS = -nostdinc -imacros $(obj)/config.h -Iinclude -I$(GCCINCDIR) -MD
-CFLAGS += $(STACKPROTECT) $(INCLUDES) -Wall -Os -fomit-frame-pointer -fno-common -ffreestanding -fno-strict-aliasing -Wshadow -pipe
 
-TARGET  = $(obj)/filo.elf
+ARCHDIR-$(CONFIG_TARGET_I386) := i386
 
-HAVE_LIBCONFIG := $(wildcard $(LIBCONFIG_PATH))
+CPPFLAGS := -nostdinc -imacros $(obj)/config.h
+CPPFLAGS += -I$(INCPAYLOAD) -I$(INCPAYLOAD)/$(ARCHDIR-y)
+CPPFLAGS += -I$(ARCHDIR-y)/include -Iinclude -I$(obj)
+CPPFLAGS += -I$(GCCINCDIR)
+
+CFLAGS := -Wall -Wshadow -Os -pipe
+CFLAGS += -fomit-frame-pointer -fno-common -ffreestanding -fno-strict-aliasing
+CFLAGS += $(call cc-option, -fno-stack-protector,)
+
+LIBS := $(LIBPAYLOAD) $(LIBGCC)
+
+SUBDIRS-y += main/ fs/ drivers/
+SUBDIRS-y += $(ARCHDIR-y)/
+
+$(foreach subdir,$(SUBDIRS-y),$(eval include $(subdir)/Makefile.inc))
+
+TARGET := $(obj)/filo.elf
+OBJS := $(patsubst %,$(obj)/%,$(TARGETS-y))
 
 
 all: prepare $(TARGET)
@@ -132,7 +129,7 @@ endif
 
 $(obj)/filo: $(OBJS) $(LIBPAYLOAD)
 	printf "  LD      $(subst $(shell pwd)/,,$(@))\n"
-	$(LD) -N -T $(ARCHDIR-y)/ldscript -o $@ $(OBJS) $(LIBPAYLOAD) $(LIBGCC)
+	$(LD) -N -T $(ARCHDIR-y)/ldscript $(OBJS) --start-group $(LIBS) --end-group -o $@
 
 $(TARGET): $(obj)/filo $(obj)/filo.map
 	printf "  STRIP   $(subst $(shell pwd)/,,$(@))\n"

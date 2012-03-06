@@ -16,9 +16,10 @@
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
+include drivers/flash/Makefile.inc
+
 TARGETS-$(CONFIG_IDE_DISK) += drivers/ide.o
 TARGETS-$(CONFIG_IDE_NEW_DISK) += drivers/ide_new.o
 TARGETS-$(CONFIG_VIA_SOUND) += drivers/via-sound.o
 TARGETS-$(CONFIG_USB_DISK) += drivers/usb.o
-TARGETS-y += drivers/intel.o
-
+TARGETS-$(CONFIG_TARGET_I386) += drivers/intel.o
