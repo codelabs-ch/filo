@@ -201,6 +201,7 @@ old:
 
 }
 
+#ifdef CONFIG_NON_INTERACTIVE
 static void reboot(void) {
 	for (;;) {
 		grub_printf("Press any key to reboot.\n");
@@ -210,6 +211,7 @@ static void reboot(void) {
 		}
 	}
 }
+#endif
 
 /* Define if there is user specified preset menu string */
 /* #undef PRESET_MENU_STRING */

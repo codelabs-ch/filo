@@ -385,8 +385,10 @@ static void *read_sector(unsigned long sector)
 			int count = (NUM_CACHE-hash>8)?8:(NUM_CACHE-hash);
 			int ret;
 			ret = ide_read_blocks(dev_drive, sector, count, buf);
-			if (ret == 2)
-				goto nomedium;
+			if (ret == 2) {
+				printf("No disk in drive.\n");
+				goto err_out;
+			}
 			if (ret != 0)
 				goto readerr;
 			while (--count>0) {
@@ -426,11 +428,9 @@ static void *read_sector(unsigned long sector)
       readerr:
 	printf("Disk read error dev=%d drive=%d sector=%lu\n",
 	       dev_type, dev_drive, sector);
-	flush_cache();
-	dev_name[0] = '\0';	/* force re-open the device next time */
-	return 0;
-      nomedium:
-	printf("No disk in drive.\n");
+#ifdef CONFIG_IDE_NEW_DISK
+      err_out:
+#endif
 	flush_cache();
 	dev_name[0] = '\0';	/* force re-open the device next time */
 	return 0;

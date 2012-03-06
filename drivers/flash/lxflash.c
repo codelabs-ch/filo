@@ -345,16 +345,6 @@ static __inline void NAND_writeByte(u8 b)
 	outb(b, g_baseAddr + IO_NAND_DATA);
 }
 
-static void NAND_writeData(u8 *pData, int nSize)
-{
-	int i;
-	if(nSize > 528) return;	// oversized buffer?
-
-	// write byte by byte, pedestrian way
-	for(i=0; i<nSize; i++)
-		NAND_writeByte(pData[i]);
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 //
 // NAND_getStatus()
@@ -521,7 +511,7 @@ __inline int IsECCWritten(u8 *pECC)
 ////////////////////////////////////////////////////////////////////////////////
 // 
 
-int NAND_close(void)
+void NAND_close(void)
 {
 	if (g_chipID >= 0)
 		wrmsr(MSR_DIVIL_LBAR_FLSH0 + g_chipID, g_orig_flsh);
@@ -650,7 +640,7 @@ int NAND_readPage(u32 pageAddr, u8 *pPageBuff)
 	// sanity check
 	if (pageAddr < (g_flashInfo.numBlocks * g_flashInfo.pagesPerBlock))
 	{
-		u8 bData = 0, bBadBlock = 0, bReserved = 0;
+		u8 bBadBlock = 0, bReserved = 0;
 
 		u8 addr1 = (u8)(pageAddr & 0xff);
 		u8 addr2 = (u8)((pageAddr >> 8) & 0xff);

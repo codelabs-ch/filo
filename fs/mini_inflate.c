@@ -185,7 +185,10 @@ static void decompress_huffman(struct bitstream *stream, unsigned char *dest)
 				dist += (symbol % 2) << ((symbol - 2) >> 1);
 			}
 			stream->decoded += length;
-			for (i = 0; i < length; i++) *(dest++) = dest[-dist];
+			for (i = 0; i < length; i++) {
+				*dest = dest[-dist];
+				dest++;
+			}
 		}
 	} while (symbol != 256); /* 256 is the end of the data block */
 }

@@ -379,9 +379,9 @@ static int dumpmem_func(char *arg, int flags)
 	}
 
 	// FIXME
-	if (!safe_parse_maxint(&string_argv[1], &mem_base))
+	if (!safe_parse_maxint(&string_argv[1], (int *)&mem_base))
 		return 1;
-	if (!safe_parse_maxint(&string_argv[2], &mem_len))
+	if (!safe_parse_maxint(&string_argv[2], (int *)&mem_len))
 		return 1;
 
 	grub_printf("Dumping memory at 0x%08x (0x%x bytes)\n",
@@ -668,7 +668,7 @@ void copy_path_to_filo_bootline(char *arg, char *path, int use_rootdev, int appe
 	char drivername[16];
 	int disk, part;
 	unsigned long addr;
-	int i, len;
+	int i;
 
 	memset(devicename, 0, 16);
 	memset(drivername, 0, 16);

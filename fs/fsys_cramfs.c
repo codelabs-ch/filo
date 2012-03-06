@@ -103,8 +103,8 @@ struct cramfs_buf {
 	struct cramfs_inode inode;
 	char name[NAMELEN_MAX + 1];
 	u32 block_ptrs[CRAMFS_MAX_BLOCKS];
-	char data[CRAMFS_BLOCK * 2];
-	char temp[CRAMFS_BLOCK];
+	unsigned char data[CRAMFS_BLOCK * 2];
+	unsigned char temp[CRAMFS_BLOCK];
 	/* menu.lst is read 1 byte at a time, try to aleviate *
 	 * the performance problem */
 	long cached_block;		/* the uncompressed block in cramfs_buf->data */
@@ -246,7 +246,7 @@ cramfs_read (char *buf, int len)
 				memcpy(buf, cramfs_buf->temp + (filepos % CRAMFS_BLOCK), size);		
 		} else  {
 			/* just another full block read */
-			size = decompress_block(buf, cramfs_buf->data + 2, memcpy);
+			size = decompress_block((unsigned char *)buf, cramfs_buf->data + 2, memcpy);
 		}
 		if (size < 0) {
 			debug_cramfs("error in decomp (error %d)\n", size);

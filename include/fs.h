@@ -46,7 +46,7 @@ int usb_read(const int drive, const sector_t sector, const int size, void *buffe
 #ifdef CONFIG_FLASH_DISK
 int flash_probe(int drive);
 int flash_read(int drive, sector_t sector, void *buffer);
-int NAND_close(void);
+void NAND_close(void);
 #endif
 
 #define DISK_IDE 1

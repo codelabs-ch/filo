@@ -240,7 +240,7 @@ void wince_init_bootarg(u32 entryPoint)
 	g_pBootArgs->dwEdbgBaseAddr = 0;
 
 	// set the KITL device name to something adequate
-	strcpy(g_pBootArgs->szDeviceNameRoot, "FILO");
+	strcpy((char *) g_pBootArgs->szDeviceNameRoot, "FILO");
 
 	g_pBootArgs->dwSig = BOOTARG_SIGNATURE;
 	g_pBootArgs->dwLen = sizeof(BOOT_ARGS);

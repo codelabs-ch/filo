@@ -120,7 +120,7 @@ int print_completions(int is_filename, int is_completion)
 		if (*buf == '(' && (incomplete || ! *ptr)) {
 			if (!part_choice) {
 				/* disk completions */
-				int disk_no, i, j;
+				int i, j;
 
 				if (!is_completion)
 					grub_printf (" Possible disks are: ");
