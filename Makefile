@@ -129,7 +129,7 @@ libpayload: $(src)/$(LIB_CONFIG)
 	$(MAKE) -C $(LIBCONFIG_PATH) obj=$(obj)/libpayload-build DESTDIR=$(src)/build install
 endif
 
-$(obj)/filo: $(src)/.config $(OBJS)  libpayload
+$(obj)/filo: $(OBJS) libpayload
 	printf "  LD      $(subst $(shell pwd)/,,$(@))\n"
 	$(LD) -N -T $(ARCHDIR-y)/ldscript -o $@ $(OBJS) $(LIBPAYLOAD) $(LIBGCC)
 
@@ -141,7 +141,11 @@ $(TARGET): $(obj)/filo libpayload
 
 include util/kconfig/Makefile
 
-$(obj)/%.o: $(src)/%.c libpayload
+$(KCONFIG_AUTOHEADER): $(src)/.config
+	$(MAKE) silentoldconfig
+
+$(OBJS): $(KCONFIG_AUTOHEADER) libpayload
+$(obj)/%.o: $(src)/%.c
 	printf "  CC      $(subst $(shell pwd)/,,$(@))\n"
 	$(CC) -MMD $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
 
