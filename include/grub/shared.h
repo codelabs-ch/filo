@@ -302,6 +302,7 @@ void print_a_completion (char *filename);
 int print_completions (int is_filename, int is_completion);
 
 int check_password(char *entered, char* expected, password_t type);
+int to_argc_argv(char *args, char ***argvp);
 
 /* FILO specific stuff */
 void copy_path_to_filo_bootline(char *arg, char *path, int use_rootdev, int append);

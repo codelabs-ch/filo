@@ -112,6 +112,58 @@ int check_password(char *entered, char *expected, password_t type)
 	}
 }
 
+/* TODO: handle \" */
+int to_argc_argv(char *args, char ***argvp)
+{
+	/* allocate enough space to point to all arguments:
+	 * args only contains the arguments (no command name), so
+	 * - add 1 for argv[0] (= NULL)
+	 * - add strlen(args)/2 + 1 (handles worst case scenario: "a b")
+	 * - add 1 for argv[argc] (= NULL)
+	 */
+	char **argv = malloc(sizeof(char*)*(strlen(args)/2+3));
+	int argc = 0;
+	argv[argc++] = NULL;
+	while (*args) {
+		int skipbytes = 0;
+		int quoted = 0;
+
+		/* register token */
+		argv[argc++] = args;
+
+		/* skip over token */
+		while (*args) {
+			if (!quoted && isblank(*args)) {
+				break;
+			}
+			/* if quote, skip current byte */
+			if (*args == '"') {
+				quoted = !quoted;
+				skipbytes++;
+			} else {
+				/* otherwise, proceed */
+				args++;
+			}
+			/* make up for skipped quotes */
+			*args = args[skipbytes];
+		}
+
+		/* terminate token, but don't skip over trailing NUL */
+		if (*args != '\0') {
+			*args++ = '\0';
+			args += skipbytes;
+		}
+
+		/* skip any whitespace before next token */
+		while ((*args != '\0') && (isblank(*args))) {
+			args++;
+		}
+	}
+	argv[argc] = NULL;
+	*argvp = argv;
+	return argc;
+}
+
 /* boot */
 static int boot_func(char *arg, int flags)
 {
