@@ -192,8 +192,10 @@ ob_ide_error(struct ide_drive *drive, unsigned char stat, char *msg)
 			for (i = 0; i < sizeof(cmd->cdb); i++)
 				debug("%02x ", cmd->cdb[i]);
 		}
-		if (cmd->sense_valid)
-			debug(", sense: %02x/%02x/%02x", cmd->sense.sense_key, cmd->sense.asc, cmd->sense.ascq);
+		if (cmd->sense)
+			debug(", sense: %02x/%02x/%02x",
+					cmd->sense->sense_key,
+					cmd->sense->asc, cmd->sense->ascq);
 		else
 			debug(", no sense");
 		debug("\n");
@@ -535,7 +537,7 @@ ob_ide_pio_packet(struct ide_drive *drive, struct atapi_command *cmd)
 static int
 ob_ide_atapi_packet(struct ide_drive *drive, struct atapi_command *cmd)
 {
-	int retries = 5, ret;
+	int retries = 10, ret;
 
 	if (drive->type != ide_type_atapi)
 		return 1;
@@ -550,33 +552,35 @@ ob_ide_atapi_packet(struct ide_drive *drive, struct atapi_command *cmd)
 		if (!ret)
 			break;
 
-		/*
-		 * request sense failed, bummer
-		 */
-		if (cmd->cdb[0] == ATAPI_REQ_SENSE)
-			break;
-
 		if (ob_ide_atapi_request_sense(drive))
 			break;
 
 		/*
-		 * we know sense is valid. retry if the drive isn't ready,
-		 * otherwise don't bother.
+		 * We know sense is valid. Retry if the unit attention
+		 * condition has been set (media change / reset) or the
+		 * drive isn't ready, otherwise don't bother.
 		 */
-		if (cmd->sense.sense_key != ATAPI_SENSE_NOT_READY)
-			break;
-		/*
-		 * ... except 'medium not present'
-		 */
-		if (cmd->sense.asc == 0x3a) {
-			/* 'medium not present' is not an error */
-			ret = 0;
-			/* force reevaluation */
-			drive->channel->present = 0;
+		if (cmd->sense->sense_key == ATAPI_SENSE_UNIT_ATTENTION) {
+			/* Just retry. */
+		} else if (cmd->sense->sense_key == ATAPI_SENSE_NOT_READY) {
+			if (cmd->sense->asc == 0x04) {
+				/* The drive is becoming ready, give it some
+				 * more time. */
+				mdelay(3000);
+			} else if (cmd->sense->asc == 0x3a) {
+				/*
+				 * 'medium not present' is not an error,
+				 * but we have to report nevertheless
+				 */
+				ret = RETURN_NO_MEDIUM;
+				/* force reevaluation */
+				drive->channel->present = 0;
+				/* Don't retry in this case. */
+				break;
+			}
+		} else {
 			break;
 		}
-
-		mdelay(1000);
 	} while (retries--);
 
 	if (ret)
@@ -588,26 +592,25 @@ ob_ide_atapi_packet(struct ide_drive *drive, struct atapi_command *cmd)
 static int
 ob_ide_atapi_request_sense(struct ide_drive *drive)
 {
-	struct atapi_command *cmd = &drive->channel->atapi_cmd;
-	unsigned char old_cdb;
+	struct atapi_command *orig_cmd = &drive->channel->atapi_cmd;
+	struct atapi_command cmd;
 
+	memset(&cmd, 0, sizeof(cmd));
+
+	cmd.cdb[0] = ATAPI_REQ_SENSE;
+	cmd.cdb[4] = 18;
+	cmd.buffer = (unsigned char *)&drive->channel->atapi_sense;
+	cmd.buflen = 18;
+	cmd.data_direction = atapi_ddir_read;
 	/*
 	 * save old cdb for debug error
 	 */
-	old_cdb = cmd->cdb[0];
+	cmd.old_cdb = orig_cmd->cdb[0];
 
-	memset(cmd, 0, sizeof(*cmd));
-	cmd->cdb[0] = ATAPI_REQ_SENSE;
-	cmd->cdb[4] = 18;
-	cmd->buffer = (unsigned char *) &cmd->sense;
-	cmd->buflen = 18;
-	cmd->data_direction = atapi_ddir_read;
-	cmd->old_cdb = old_cdb;
-
-	if (ob_ide_atapi_packet(drive, cmd))
+	if (ob_ide_pio_packet(drive, &cmd))
 		return 1;
 
-	cmd->sense_valid = 1;
+	orig_cmd->sense = &drive->channel->atapi_sense;
 	return 0;
 }
 
@@ -620,21 +623,6 @@ ob_ide_atapi_drive_ready(struct ide_drive *drive)
 	struct atapi_command *cmd = &drive->channel->atapi_cmd;
 	struct atapi_capacity cap;
 	int i;
-
-	/*
-	 * Test Unit Ready is like a ping
-	 * But wait a bit, as the drive might take a while
-	 */
-	i = 30;
-	while (i-- != 0) {
-		memset(cmd, 0, sizeof(*cmd));
-		cmd->cdb[0] = ATAPI_TUR;
-
-		if (!ob_ide_atapi_packet(drive,cmd)) break;
-
-		/* Give the drive some time to breathe */
-		mdelay(500);
-	}
 
 	memset(cmd, 0, sizeof(*cmd));
 	cmd->cdb[0] = ATAPI_TUR;

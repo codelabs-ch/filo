@@ -77,6 +77,7 @@
  * atapi sense keys
  */
 #define ATAPI_SENSE_NOT_READY	0x02
+#define ATAPI_SENSE_UNIT_ATTENTION	0x06
 
 /*
  * supported device types
@@ -142,8 +143,7 @@ struct atapi_command {
 	unsigned char data_direction;
 
 	unsigned char stat;
-	unsigned char sense_valid;
-	struct request_sense sense;
+	struct request_sense *sense;
 	unsigned char old_cdb;
 };
 
@@ -199,7 +199,7 @@ struct ide_channel {
 	 */
 	struct ata_command ata_cmd;
 	struct atapi_command atapi_cmd;
-	
+	struct request_sense atapi_sense;
 };
 
 enum {
