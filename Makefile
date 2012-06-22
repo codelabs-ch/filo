@@ -131,6 +131,12 @@ $(obj)/filo: $(OBJS) $(LIBPAYLOAD)
 	printf "  LD      $(subst $(shell pwd)/,,$(@))\n"
 	$(LD) -N -T $(ARCHDIR-y)/ldscript $(OBJS) --start-group $(LIBS) --end-group -o $@
 
+$(obj)/filo.bzImage: $(TARGET) $(obj)/i386/linux_head.o
+	$(OBJCOPY) -O binary $(obj)/i386/linux_head.o $@.tmp1
+	$(OBJCOPY) -O binary $< $@.tmp2
+	cat $@.tmp1 $@.tmp2 > $@.tmp
+	mv $@.tmp $@
+
 $(TARGET): $(obj)/filo $(obj)/filo.map
 	printf "  STRIP   $(subst $(shell pwd)/,,$(@))\n"
 	$(STRIP) -s $< -o $@
