@@ -143,6 +143,13 @@ config IDE_NEW_DISK
 	help
 	  Jens Axboe's fine IDE driver
 
+config LIBPAYLOAD_STORAGE
+	bool "Use libpayload's storage drivers"
+	default n
+	help
+	  If selected, libpayloads storage drivers will be used to access
+	  hard disk and optical drives.
+
 config USB_DISK
 	bool "USB Stack"
 	default y

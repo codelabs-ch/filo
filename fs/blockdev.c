@@ -20,6 +20,9 @@
 
 #include <libpayload.h>
 #include <libpayload-config.h>
+#if defined(CONFIG_LIBPAYLOAD_STORAGE) && defined(CONFIG_STORAGE)
+#include <storage/storage.h>
+#endif
 #include <config.h>
 #include <fs.h>
 
@@ -245,14 +248,28 @@ int devopen(const char *name, int *reopen)
 		length = (length + DEV_SECTOR_MASK) & ~DEV_SECTOR_MASK;
 	}
 
+	int tmp_drive = drive;
 	switch (type) {
-#if defined(CONFIG_IDE_DISK) || defined(CONFIG_IDE_NEW_DISK)
+#if (defined(CONFIG_LIBPAYLOAD_STORAGE) && defined(CONFIG_STORAGE)) || \
+		defined(CONFIG_IDE_DISK) || defined(CONFIG_IDE_NEW_DISK)
 	case DISK_IDE:
-		if (ide_probe(drive) != 0) {
+#if defined(CONFIG_LIBPAYLOAD_STORAGE) && defined(CONFIG_STORAGE)
+		if (drive < storage_device_count()) {
+			if (storage_probe(drive) != POLL_MEDIUM_PRESENT)
+				return 0;
+			disk_size = (uint32_t) - 1;	/* FIXME */
+			break;
+		} else {
+			tmp_drive -= storage_device_count();
+		}
+#endif
+#if defined(CONFIG_IDE_DISK) || defined(CONFIG_IDE_NEW_DISK)
+		if (ide_probe(tmp_drive) != 0) {
 			debug("Failed to open IDE.\n");
 			return 0;
 		}
 		disk_size = (uint32_t) - 1;	/* FIXME */
+#endif
 		break;
 #endif
 #ifdef CONFIG_USB_DISK
@@ -373,18 +390,36 @@ static void *read_sector(unsigned long sector)
 	if (cache_sect[hash] != sector) {
 		cache_sect[hash] = (unsigned long) -1;
 		switch (dev_type) {
-#if defined(CONFIG_IDE_DISK) 
-		case DISK_IDE:
-			if (ide_read(dev_drive, sector, buf) != 0)
-				goto readerr;
-			break;
-#endif
-#if defined(CONFIG_IDE_NEW_DISK)
+#if (defined(CONFIG_LIBPAYLOAD_STORAGE) && defined(CONFIG_STORAGE)) || \
+			defined(CONFIG_IDE_DISK) || defined(CONFIG_IDE_NEW_DISK)
 		case DISK_IDE:
 		{
+			int tmp_drive = dev_drive;
+#if defined(CONFIG_LIBPAYLOAD_STORAGE) && defined(CONFIG_STORAGE)
+			if (dev_drive < storage_device_count()) {
+				int count = (NUM_CACHE-hash>8)?8:(NUM_CACHE-hash);
+				if (storage_probe(tmp_drive) == POLL_NO_MEDIUM) {
+					printf("No disk in drive.\n");
+					goto err_out;
+				}
+				if (storage_read_blocks512(tmp_drive,
+							sector, count, buf) != count)
+					goto readerr;
+				while (--count>0) {
+					cache_sect[hash+count] = sector + count;
+				}
+				break;
+			} else {
+				tmp_drive -= storage_device_count();
+			}
+#endif
+#if defined(CONFIG_IDE_DISK)
+			if (ide_read(tmp_drive, sector, buf) != 0)
+				goto readerr;
+#elif defined(CONFIG_IDE_NEW_DISK)
 			int count = (NUM_CACHE-hash>8)?8:(NUM_CACHE-hash);
 			int ret;
-			ret = ide_read_blocks(dev_drive, sector, count, buf);
+			ret = ide_read_blocks(tmp_drive, sector, count, buf);
 			if (ret == 2) {
 				printf("No disk in drive.\n");
 				goto err_out;
@@ -394,6 +429,7 @@ static void *read_sector(unsigned long sector)
 			while (--count>0) {
 				cache_sect[hash+count] = sector + count;
 			}
+#endif
 			break;
 		}
 #endif
@@ -428,7 +464,8 @@ static void *read_sector(unsigned long sector)
       readerr:
 	printf("Disk read error dev=%d drive=%d sector=%lu\n",
 	       dev_type, dev_drive, sector);
-#ifdef CONFIG_IDE_NEW_DISK
+#if defined(CONFIG_IDE_NEW_DISK) || \
+	(defined(CONFIG_LIBPAYLOAD_STORAGE) && defined(CONFIG_STORAGE))
       err_out:
 #endif
 	flush_cache();

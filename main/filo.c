@@ -72,6 +72,10 @@ static void init(void)
     collect_sys_info(&sys_info);
     relocate();
 
+#if defined(CONFIG_LIBPAYLOAD_STORAGE) && defined(CONFIG_STORAGE)
+    /* libpayload storage drivers */
+    storage_initialize();
+#endif
 #if defined(CONFIG_USB_DISK)
 #if defined(CONFIG_USB)
     /* libpayload USB stack is there */
