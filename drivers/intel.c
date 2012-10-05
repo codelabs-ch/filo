@@ -51,13 +51,21 @@ int intel_lockdown_flash(void)
 
 	reg32 = pci_read_config32(PCI_DEV(0,0x1f, 0), 0);
 	switch (reg32) {
+		/* ICH7 */
 	case 0x27b08086:
 	case 0x27b88086:
 	case 0x27b98086:
 	case 0x27bd8086:
+		/* ICH9 */
+	case 0x29128086:
+	case 0x29148086:
+	case 0x29168086:
+	case 0x29178086:
+	case 0x29188086:
+	case 0x29198086:
 		break;
 	default:
-		debug("Not an ICH7 southbridge\n");
+		debug("Not an ICH7 or ICH9 southbridge\n");
 		return -1;
 	}
 
