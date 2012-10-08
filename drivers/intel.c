@@ -43,11 +43,21 @@
 #define RCBA16(x) *((volatile u16 *)(DEFAULT_RCBA + x))
 #define RCBA32(x) *((volatile u32 *)(DEFAULT_RCBA + x))
 
+#define ICH9_SPI_HSFS		0x3804
+#define ICH9_SPI_HSFS_FLOCKDN	(1 << 15);
+#define ICH9_SPI_PREOP		0x3894
+#define ICH9_SPI_OPTYPE		0x3896
+#define ICH9_SPI_OPMENU		0x3898
+
+typedef enum {
+	ICH7, ICH9,
+} ich_t;
 
 int intel_lockdown_flash(void)
 {
 	u8 reg8;
 	u32 reg32;
+	ich_t ich;
 
 	reg32 = pci_read_config32(PCI_DEV(0,0x1f, 0), 0);
 	switch (reg32) {
@@ -56,6 +66,8 @@ int intel_lockdown_flash(void)
 	case 0x27b88086:
 	case 0x27b98086:
 	case 0x27bd8086:
+		ich = ICH7;
+		break;
 		/* ICH9 */
 	case 0x29128086:
 	case 0x29148086:
@@ -63,6 +75,7 @@ int intel_lockdown_flash(void)
 	case 0x29178086:
 	case 0x29188086:
 	case 0x29198086:
+		ich = ICH9;
 		break;
 	default:
 		debug("Not an ICH7 or ICH9 southbridge\n");
@@ -84,6 +97,15 @@ int intel_lockdown_flash(void)
 	reg32 = RCBA32(0x3410); /* GCS - General Control and Status */
 	reg32 |= 1;		/* BILD - BIOS Interface Lockdown */
 	RCBA32(0x3410) = reg32; /* Set BUC.TS and GCS.BBS to RO */
+
+	/* Lock SPI interface with empty opcode registers on ICH9. */
+	if (ICH9 == ich) {
+		RCBA16(ICH9_SPI_PREOP)  = 0x0000;
+		RCBA16(ICH9_SPI_OPTYPE) = 0x0000;
+		RCBA32(ICH9_SPI_OPMENU + 0) = 0x00000000;
+		RCBA32(ICH9_SPI_OPMENU + 4) = 0x00000000;
+		RCBA16(ICH9_SPI_HSFS) |= ICH9_SPI_HSFS_FLOCKDN;
+	}
 
 	debug("BIOS hard locked until next full reset.\n");
 
