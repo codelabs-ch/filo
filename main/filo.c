@@ -72,6 +72,10 @@ static void init(void)
     collect_sys_info(&sys_info);
     relocate();
 
+    /* lib_sysinfo may contain virtual pointers that are invalid
+       after relocation. Therefore, run lib_get_sysinfo(), again. */
+    lib_get_sysinfo();
+
 #if defined(CONFIG_LIBPAYLOAD_STORAGE) && defined(CONFIG_STORAGE)
     /* libpayload storage drivers */
     storage_initialize();
