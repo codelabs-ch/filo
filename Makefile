@@ -88,7 +88,7 @@ INCPAYLOAD = $(LIBPAYLOAD_PREFIX)/include
 LIBGCC = $(shell $(CC) $(CFLAGS) -print-libgcc-file-name)
 GCCINCDIR = $(shell $(CC) -print-search-dirs | head -n 1 | cut -d' ' -f2)include
 
-ARCHDIR-$(CONFIG_TARGET_I386) := i386
+ARCHDIR-$(CONFIG_TARGET_I386) := x86
 
 CPPFLAGS := -nostdinc -imacros $(obj)/config.h
 CPPFLAGS += -I$(INCPAYLOAD) -I$(INCPAYLOAD)/$(ARCHDIR-y)
