@@ -38,14 +38,6 @@ typedef unsigned long long __u64;
 /* linux/posix_type.h */
 typedef long linux_off_t;
 
-/* linux/little_endian.h */
-#define __cpu_to_le64(x) ((__u64) (x))
-#define __le64_to_cpu(x) ((__u64) (x))
-#define __cpu_to_le32(x) ((__u32) (x))
-#define __le32_to_cpu(x) ((__u32) (x))
-#define __cpu_to_le16(x) ((__u16) (x))
-#define __le16_to_cpu(x) ((__u16) (x))
-
 /* include/linux/reiser_fs.h */
 /* This is the new super block of a journaling reiserfs system */
 struct reiserfs_super_block

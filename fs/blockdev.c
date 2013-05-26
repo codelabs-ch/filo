@@ -18,6 +18,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
+#include <endian.h>
 #include <libpayload.h>
 #include <libpayload-config.h>
 #if defined(CONFIG_LIBPAYLOAD_STORAGE) && defined(CONFIG_STORAGE)
@@ -88,8 +89,8 @@ static int open_pc_partition(int part, unsigned long *start_p,
 			printf("Partition %d does not exist.\n", part + 1);
 			return 0;
 		}
-		*start_p = cpu_to_le32(*(u32 *) (p->start_sect));
-		*length_p = cpu_to_le32(*(u32 *) (p->nr_sects));
+		*start_p = htole32(*(u32 *) (p->start_sect));
+		*length_p = htole32(*(u32 *) (p->nr_sects));
 		return 1;
 	} else {
 		/* Extended partition */
@@ -108,7 +109,7 @@ static int open_pc_partition(int part, unsigned long *start_p,
 		}
 		debug("Extended partition at %d.\n", i + 1);
 		/* Visit each logical partition labels */
-		ext_start = cpu_to_le32(*(u32 *) (p[i].start_sect));
+		ext_start = htole32(*(u32 *) (p[i].start_sect));
 		cur_table = ext_start;
 		cur_part = 4;
 		for (;;) {
@@ -127,8 +128,8 @@ static int open_pc_partition(int part, unsigned long *start_p,
 					printf("Partition %d is empty.\n", part + 1);
 					return 0;
 				}
-				*start_p = cur_table + cpu_to_le32(*(u32 *) (p->start_sect));
-				*length_p = cpu_to_le32(*(u32 *) (p->nr_sects));
+				*start_p = cur_table + htole32(*(u32 *) (p->start_sect));
+				*length_p = htole32(*(u32 *) (p->nr_sects));
 				return 1;
 			}
 			/* Second entry is link to next partition */
@@ -136,7 +137,7 @@ static int open_pc_partition(int part, unsigned long *start_p,
 				debug("no link\n");
 				break;
 			}
-			cur_table = ext_start + cpu_to_le32(*(u32 *) (p[1].start_sect));
+			cur_table = ext_start + htole32(*(u32 *) (p[1].start_sect));
 
 			cur_part++;
 		}

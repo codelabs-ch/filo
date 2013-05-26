@@ -59,8 +59,8 @@ cbfs_dir (char *dirname)
   }
 
   filepos = 0;
-  filemax = ntohl(file->len);
-  fileptr = (void*)file+ntohl(file->offset);
+  filemax = be32toh(file->len);
+  fileptr = (void*)file+be32toh(file->offset);
   return 1;
 }
 

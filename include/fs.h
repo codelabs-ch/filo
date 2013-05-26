@@ -20,7 +20,6 @@
 #define FS_H
 
 #include <libpayload.h>
-#include <arch/byteorder.h>
 typedef uint64_t sector_t;
 
 #define DEV_SECTOR_BITS		9

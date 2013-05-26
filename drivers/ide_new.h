@@ -233,9 +233,4 @@ int ob_ide_init(int driveno);
 #define CONFIG_LITTLE_ENDIAN
 #define CONFIG_IDE_LBA48
 
-#define __be32_to_cpu be32_to_cpu
-#define __be16_to_cpu be16_to_cpu
-#define __le32_to_cpu le32_to_cpu
-#define __le16_to_cpu le16_to_cpu
-
 #endif

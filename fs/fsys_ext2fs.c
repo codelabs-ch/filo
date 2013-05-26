@@ -17,6 +17,7 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#include <endian.h>
 #include "filesys.h"
 
 static int mapblock1, mapblock2;
@@ -364,7 +365,7 @@ struct ext4_extent_header
 #define EXT2_INODES_PER_BLOCK(s)       (EXT2_BLOCK_SIZE(s)/EXT2_INODE_SIZE(s))
 
 /* linux/ext2_fs.h */
-#define EXT2_BLOCK_SIZE_BITS(s)        (le32_to_cpu((s)->s_log_block_size) + 10)
+#define EXT2_BLOCK_SIZE_BITS(s)        (le32toh((s)->s_log_block_size) + 10)
 /* kind of from ext2/super.c */
 #define EXT2_BLOCK_SIZE(s)	(1 << EXT2_BLOCK_SIZE_BITS(s))
 /* linux/ext2fs.h */
@@ -393,47 +394,47 @@ void
 dump_super(struct ext2_super_block *s)
 {
     printf(" superblock 0x%p:\n", s);
-    printf("  inodes=%d\n", le32_to_cpu(s->s_inodes_count));
-    printf("  blocks=%d\n", le32_to_cpu(s->s_blocks_count));
-    printf("  reserved=%d\n", le32_to_cpu(s->s_r_blocks_count));
-    printf("  i_free=%d\n", le32_to_cpu(s->s_free_inodes_count));
-    printf("  b_free=%d\n", le32_to_cpu(s->s_free_blocks_count));
-    printf("  first=%d\n", le32_to_cpu(s->s_first_data_block));
-    printf("  log_b_size=%d, b_size=%d\n", le32_to_cpu(s->s_log_block_size), EXT2_BLOCK_SIZE(s));
-    printf("  inode_size=%d\n", le32_to_cpu(EXT2_INODE_SIZE(s)));
-    printf("  (obsoleted) log_f_size=%d\n", le32_to_cpu(s->s_obso_log_frag_size));
-    printf("  bpg=%d\n", le32_to_cpu(s->s_blocks_per_group));
-    printf("  (obsoleted) fpg=%d\n", le32_to_cpu(s->s_obso_frags_per_group));
-    printf("  ipg=%d\n", le32_to_cpu(s->s_inodes_per_group));
+    printf("  inodes=%d\n", le32toh(s->s_inodes_count));
+    printf("  blocks=%d\n", le32toh(s->s_blocks_count));
+    printf("  reserved=%d\n", le32toh(s->s_r_blocks_count));
+    printf("  i_free=%d\n", le32toh(s->s_free_inodes_count));
+    printf("  b_free=%d\n", le32toh(s->s_free_blocks_count));
+    printf("  first=%d\n", le32toh(s->s_first_data_block));
+    printf("  log_b_size=%d, b_size=%d\n", le32toh(s->s_log_block_size), EXT2_BLOCK_SIZE(s));
+    printf("  inode_size=%d\n", le32toh(EXT2_INODE_SIZE(s)));
+    printf("  (obsoleted) log_f_size=%d\n", le32toh(s->s_obso_log_frag_size));
+    printf("  bpg=%d\n", le32toh(s->s_blocks_per_group));
+    printf("  (obsoleted) fpg=%d\n", le32toh(s->s_obso_frags_per_group));
+    printf("  ipg=%d\n", le32toh(s->s_inodes_per_group));
 }
 
 void
 dump_group_desc(struct ext4_group_desc *g)
 {
     printf(" group_desc 0x%p:\n", g);
-    printf("  b_bmap block=%d\n", le32_to_cpu(g->bg_block_bitmap));
-    printf("  i_bmap block=%d\n", le32_to_cpu(g->bg_inode_bitmap));
-    printf("  i_tab block=%d\n", le32_to_cpu(g->bg_inode_table));
-    printf("  free_blks=%d\n", le16_to_cpu(g->bg_free_blocks_count));
-    printf("  free_inodes=%d\n", le16_to_cpu(g->bg_free_inodes_count));
-    printf("  used_dirs=%d\n", le16_to_cpu(g->bg_used_dirs_count));
+    printf("  b_bmap block=%d\n", le32toh(g->bg_block_bitmap));
+    printf("  i_bmap block=%d\n", le32toh(g->bg_inode_bitmap));
+    printf("  i_tab block=%d\n", le32toh(g->bg_inode_table));
+    printf("  free_blks=%d\n", le16toh(g->bg_free_blocks_count));
+    printf("  free_inodes=%d\n", le16toh(g->bg_free_inodes_count));
+    printf("  used_dirs=%d\n", le16toh(g->bg_used_dirs_count));
 }
 
 void
 dump_inode(struct ext2_inode *i)
 {
     printf(" inode 0x%p:\n", i);
-    printf("  mode=%o\n", le16_to_cpu(i->i_mode));
-    printf("  uid=%d\n", le16_to_cpu(i->i_uid));
-    printf("  gid=%d\n", le16_to_cpu(i->i_gid));
-    printf("  size=%d\n", le32_to_cpu(i->i_size));
-    printf("  atime=%d\n", le32_to_cpu(i->i_atime));
-    printf("  ctime=%d\n", le32_to_cpu(i->i_ctime));
-    printf("  mtime=%d\n", le32_to_cpu(i->i_mtime));
-    printf("  dtime=%d\n", le32_to_cpu(i->i_dtime));
-    printf("  links=%d\n", le16_to_cpu(i->i_links_count));
-    printf("  blocks=%d\n", le32_to_cpu(i->i_blocks));
-    printf("  flags=%d\n", le32_to_cpu(i->i_flags));
+    printf("  mode=%o\n", le16toh(i->i_mode));
+    printf("  uid=%d\n", le16toh(i->i_uid));
+    printf("  gid=%d\n", le16toh(i->i_gid));
+    printf("  size=%d\n", le32toh(i->i_size));
+    printf("  atime=%d\n", le32toh(i->i_atime));
+    printf("  ctime=%d\n", le32toh(i->i_ctime));
+    printf("  mtime=%d\n", le32toh(i->i_mtime));
+    printf("  dtime=%d\n", le32toh(i->i_dtime));
+    printf("  links=%d\n", le16toh(i->i_links_count));
+    printf("  blocks=%d\n", le32toh(i->i_blocks));
+    printf("  flags=%d\n", le32toh(i->i_flags));
 }
 
 void 
@@ -473,7 +474,7 @@ ext2fs_mount (void)
       || part_length < (SBLOCK + (sizeof (struct ext2_super_block) / DEV_BSIZE))
       || !devread (SBLOCK, 0, sizeof (struct ext2_super_block),
 		   (char *) SUPERBLOCK)
-      || le16_to_cpu(SUPERBLOCK->s_magic) != EXT2_SUPER_MAGIC)
+      || le16toh(SUPERBLOCK->s_magic) != EXT2_SUPER_MAGIC)
       retval = 0;
 
   return retval;
@@ -509,9 +510,9 @@ ext2fs_block_map (int logical_block)
   if (logical_block < EXT2_NDIR_BLOCKS)
     {
 #ifdef E2DEBUG
-      printf ("ext2fs_block_map: returning %d\n", le32_to_cpu(INODE->i_block[logical_block]));
+      printf ("ext2fs_block_map: returning %d\n", le32toh(INODE->i_block[logical_block]));
 #endif /* E2DEBUG */
-      return le32_to_cpu(INODE->i_block[logical_block]);
+      return le32toh(INODE->i_block[logical_block]);
     }
   /* else */
   logical_block -= EXT2_NDIR_BLOCKS;
@@ -519,13 +520,13 @@ ext2fs_block_map (int logical_block)
   if (logical_block < EXT2_ADDR_PER_BLOCK (SUPERBLOCK))
     {
       if (mapblock1 != 1
-	  && !ext2_rdfsb (le32_to_cpu(INODE->i_block[EXT2_IND_BLOCK]), DATABLOCK1))
+	  && !ext2_rdfsb (le32toh(INODE->i_block[EXT2_IND_BLOCK]), DATABLOCK1))
 	{
 	  errnum = ERR_FSYS_CORRUPT;
 	  return -1;
 	}
       mapblock1 = 1;
-      return le32_to_cpu(((__u32 *) DATABLOCK1)[logical_block]);
+      return le32toh(((__u32 *) DATABLOCK1)[logical_block]);
     }
   /* else */
   logical_block -= EXT2_ADDR_PER_BLOCK (SUPERBLOCK);
@@ -534,13 +535,13 @@ ext2fs_block_map (int logical_block)
     {
       int bnum;
       if (mapblock1 != 2
-	  && !ext2_rdfsb (le32_to_cpu(INODE->i_block[EXT2_DIND_BLOCK]), DATABLOCK1))
+	  && !ext2_rdfsb (le32toh(INODE->i_block[EXT2_DIND_BLOCK]), DATABLOCK1))
 	{
 	  errnum = ERR_FSYS_CORRUPT;
 	  return -1;
 	}
       mapblock1 = 2;
-      if ((bnum = le32_to_cpu(((__u32 *) DATABLOCK1)
+      if ((bnum = le32toh(((__u32 *) DATABLOCK1)
 		   [logical_block >> EXT2_ADDR_PER_BLOCK_BITS (SUPERBLOCK)]))
 	  != mapblock2
 	  && !ext2_rdfsb (bnum, DATABLOCK2))
@@ -549,20 +550,20 @@ ext2fs_block_map (int logical_block)
 	  return -1;
 	}
       mapblock2 = bnum;
-      return le32_to_cpu(((__u32 *) DATABLOCK2)
+      return le32toh(((__u32 *) DATABLOCK2)
 	[logical_block & (EXT2_ADDR_PER_BLOCK (SUPERBLOCK) - 1)]);
     }
   /* else */
   mapblock2 = -1;
   logical_block -= (1 << (EXT2_ADDR_PER_BLOCK_BITS (SUPERBLOCK) * 2));
   if (mapblock1 != 3
-      && !ext2_rdfsb (le32_to_cpu(INODE->i_block[EXT2_TIND_BLOCK]), DATABLOCK1))
+      && !ext2_rdfsb (le32toh(INODE->i_block[EXT2_TIND_BLOCK]), DATABLOCK1))
     {
       errnum = ERR_FSYS_CORRUPT;
       return -1;
     }
   mapblock1 = 3;
-  if (!ext2_rdfsb (le32_to_cpu(((__u32 *) DATABLOCK1)
+  if (!ext2_rdfsb (le32toh(((__u32 *) DATABLOCK1)
 		   [logical_block >> (EXT2_ADDR_PER_BLOCK_BITS (SUPERBLOCK)
 				      * 2)]),
 		   DATABLOCK2))
@@ -570,7 +571,7 @@ ext2fs_block_map (int logical_block)
       errnum = ERR_FSYS_CORRUPT;
       return -1;
     }
-  if (!ext2_rdfsb (le32_to_cpu(((__u32 *) DATABLOCK2)
+  if (!ext2_rdfsb (le32toh(((__u32 *) DATABLOCK2)
 		   [(logical_block >> EXT2_ADDR_PER_BLOCK_BITS (SUPERBLOCK))
 		    & (EXT2_ADDR_PER_BLOCK (SUPERBLOCK) - 1)]),
 		   DATABLOCK2))
@@ -578,7 +579,7 @@ ext2fs_block_map (int logical_block)
       errnum = ERR_FSYS_CORRUPT;
       return -1;
     }
-  return le32_to_cpu(((__u32 *) DATABLOCK2)
+  return le32toh(((__u32 *) DATABLOCK2)
     [logical_block & (EXT2_ADDR_PER_BLOCK (SUPERBLOCK) - 1)]);
 }
 
@@ -786,8 +787,8 @@ static inline
 int ext2_is_fast_symlink (void)
 {
   int ea_blocks;
-  ea_blocks = le32_to_cpu(INODE->i_file_acl) ? EXT2_BLOCK_SIZE (SUPERBLOCK) / DEV_BSIZE : 0;
-  return le32_to_cpu(INODE->i_blocks) == ea_blocks;
+  ea_blocks = le32toh(INODE->i_file_acl) ? EXT2_BLOCK_SIZE (SUPERBLOCK) / DEV_BSIZE : 0;
+  return le32toh(INODE->i_blocks) == ea_blocks;
 }
 
 /* preconditions: ext2fs_mount already executed, therefore supblk in buffer
@@ -841,16 +842,16 @@ ext2fs_dir (char *dirname)
 #endif /* E2DEBUG */
 
       /* look up an inode */
-      group_id = (current_ino - 1) / le32_to_cpu(SUPERBLOCK->s_inodes_per_group);
+      group_id = (current_ino - 1) / le32toh(SUPERBLOCK->s_inodes_per_group);
       group_desc = group_id >> log2 (EXT2_DESC_PER_BLOCK (SUPERBLOCK));
       desc = group_id & (EXT2_DESC_PER_BLOCK (SUPERBLOCK) - 1);
 #ifdef E2DEBUG
-      printf ("ext2fs_dir: ipg=%d, dpb=%d\n", le32_to_cpu(SUPERBLOCK->s_inodes_per_group),
+      printf ("ext2fs_dir: ipg=%d, dpb=%d\n", le32toh(SUPERBLOCK->s_inodes_per_group),
 	      EXT2_DESC_PER_BLOCK (SUPERBLOCK));
       printf ("ext2fs_dir: group_id=%d group_desc=%d desc=%d\n", group_id, group_desc, desc);
 #endif /* E2DEBUG */
       if (!ext2_rdfsb (
-			(WHICH_SUPER + group_desc + le32_to_cpu(SUPERBLOCK->s_first_data_block)),
+			(WHICH_SUPER + group_desc + le32toh(SUPERBLOCK->s_first_data_block)),
 			(char*) GROUP_DESC))
 	{
 	  return 0;
@@ -869,12 +870,12 @@ ext2fs_dir (char *dirname)
 	  return -1;
         }
       ino_blk = ext4_gdp->bg_inode_table + 
-	(((current_ino - 1) % le32_to_cpu(SUPERBLOCK->s_inodes_per_group))
+	(((current_ino - 1) % le32toh(SUPERBLOCK->s_inodes_per_group))
 	 >> log2 (EXT2_INODES_PER_BLOCK (SUPERBLOCK)));
 #ifdef E2DEBUG
       printf ("ext2fs_dir: itab_blk=%d, i_in_grp=%d, log2=%lu\n",
-	 le32_to_cpu(ext4_gdp[desc].bg_inode_table),
-	 ((current_ino - 1) % le32_to_cpu(SUPERBLOCK->s_inodes_per_group)),
+	 le32toh(ext4_gdp[desc].bg_inode_table),
+	 ((current_ino - 1) % le32toh(SUPERBLOCK->s_inodes_per_group)),
 	 log2 (EXT2_INODES_PER_BLOCK (SUPERBLOCK)));
       printf ("ext2fs_dir: inode table fsblock=%d\n", ino_blk);
 #endif /* E2DEBUG */
@@ -909,7 +910,7 @@ ext2fs_dir (char *dirname)
 #endif /* E2DEBUG */
 
       /* If we've got a symbolic link, then chase it. */
-      if (S_ISLNK (le16_to_cpu(INODE->i_mode)))
+      if (S_ISLNK (le16toh(INODE->i_mode)))
 	{
 	  int len;
 	  if (++link_count > MAX_LINK_COUNT)
@@ -924,7 +925,7 @@ ext2fs_dir (char *dirname)
 	    len++;
 
 	  /* Get the symlink size. */
-	  filemax = le32_to_cpu(INODE->i_size);
+	  filemax = le32toh(INODE->i_size);
 	  if (filemax + len > sizeof (linkbuf) - 2)
 	    {
 	      errnum = ERR_FILELENGTH;
@@ -984,7 +985,7 @@ ext2fs_dir (char *dirname)
       /* if end of filename, INODE points to the file's inode */
       if (!*dirname || isspace (*dirname))
 	{
-	  if (!S_ISREG (le16_to_cpu(INODE->i_mode)))
+	  if (!S_ISREG (le16toh(INODE->i_mode)))
 	    {
 	      errnum = ERR_BAD_FILETYPE;
 	      return 0;
@@ -997,7 +998,7 @@ ext2fs_dir (char *dirname)
 		  return 0;
 	    }
 
-	  filemax = le32_to_cpu(INODE->i_size);
+	  filemax = le32toh(INODE->i_size);
 	  return 1;
 	}
 
@@ -1009,7 +1010,7 @@ ext2fs_dir (char *dirname)
 	dirname++;
 
       /* if this isn't a directory of sufficient size to hold our file, abort */
-      if (!(le32_to_cpu(INODE->i_size)) || !S_ISDIR (le16_to_cpu(INODE->i_mode)))
+      if (!(le32toh(INODE->i_size)) || !S_ISDIR (le16toh(INODE->i_mode)))
 	{
 	  errnum = ERR_BAD_FILETYPE;
 	  return 0;
@@ -1033,7 +1034,7 @@ ext2fs_dir (char *dirname)
 
 	  /* if our location/byte offset into the directory exceeds the size,
 	     give up */
-	  if (loc >= le32_to_cpu(INODE->i_size))
+	  if (loc >= le32toh(INODE->i_size))
 	    {
 	      if (print_possibilities < 0)
 		{
@@ -1080,17 +1081,17 @@ ext2fs_dir (char *dirname)
 	  off = loc & (EXT2_BLOCK_SIZE (SUPERBLOCK) - 1);
 	  dp = (struct ext2_dir_entry *) (DATABLOCK2 + off);
 	  /* advance loc prematurely to next on-disk directory entry  */
-	  loc += le16_to_cpu(dp->rec_len);
+	  loc += le16toh(dp->rec_len);
 
 	  /* NOTE: ext2fs filenames are NOT null-terminated */
 
 #ifdef E2DEBUG
-	  printf ("ext2fs_dir: directory entry ino=%d\n", le32_to_cpu(dp->inode));
-	  if (le32_to_cpu(dp->inode))
+	  printf ("ext2fs_dir: directory entry ino=%d\n", le32toh(dp->inode));
+	  if (le32toh(dp->inode))
 	    printf ("entry=%s\n", dp->name);
 #endif /* E2DEBUG */
 
-	  if (le32_to_cpu(dp->inode))
+	  if (le32toh(dp->inode))
 	    {
 	      int saved_c = dp->name[dp->name_len];
 
@@ -1111,9 +1112,9 @@ ext2fs_dir (char *dirname)
 	    }
 
 	}
-      while (!le32_to_cpu(dp->inode) || (str_chk || (print_possibilities && ch != '/')));
+      while (!le32toh(dp->inode) || (str_chk || (print_possibilities && ch != '/')));
 
-      current_ino = le32_to_cpu(dp->inode);
+      current_ino = le32toh(dp->inode);
       *(dirname = rest) = ch;
     }
   /* never get here */

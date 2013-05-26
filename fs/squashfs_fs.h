@@ -849,8 +849,6 @@ struct squashfs_fragment_entry_2 {
  * architectures
  */
 
-#include <arch/byteorder.h>
-
 #ifdef __BIG_ENDIAN
 	/* convert from little endian to big endian */
 #define SQUASHFS_SWAP(value, p, pos, tbits) _SQUASHFS_SWAP(value, p, pos, \

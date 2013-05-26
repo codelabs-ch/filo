@@ -17,7 +17,6 @@
 
 #include <libpayload.h>
 #include <config.h>
-#include <arch/byteorder.h>
 
 #include <fs.h>
 #include "ide_new.h"
@@ -676,8 +675,8 @@ ob_ide_atapi_drive_ready(struct ide_drive *drive)
 		return 1;
 	}
 
-	drive->sectors = __be32_to_cpu(cap.lba) + 1;
-	drive->bs = __be32_to_cpu(cap.block_size);
+	drive->sectors = be32toh(cap.lba) + 1;
+	drive->bs = be32toh(cap.block_size);
 	return 0;
 }
 
@@ -864,7 +863,7 @@ ob_ide_fixup_string(unsigned char *s, unsigned int len)
 #ifdef CONFIG_LITTLE_ENDIAN
 	for (p = end ; p != s;) {
 		unsigned short *pp = (unsigned short *) (p -= 2);
-		*pp = __be16_to_cpu(*pp);
+		*pp = be16toh(*pp);
 	}
 #endif
 
@@ -884,13 +883,13 @@ static int
 ob_ide_fixup_id(struct hd_driveid *id)
 {
 	ob_ide_fixup_string(id->model, 40);
-	id->config = __le16_to_cpu(id->config);
-	id->lba_capacity = __le32_to_cpu(id->lba_capacity);
-	id->cyls = __le16_to_cpu(id->cyls);
-	id->heads = __le16_to_cpu(id->heads);
-	id->sectors = __le16_to_cpu(id->sectors);
-	id->command_set_2 = __le16_to_cpu(id->command_set_2);
-	id->cfs_enable_2 = __le16_to_cpu(id->cfs_enable_2);
+	id->config = le16toh(id->config);
+	id->lba_capacity = le32toh(id->lba_capacity);
+	id->cyls = le16toh(id->cyls);
+	id->heads = le16toh(id->heads);
+	id->sectors = le16toh(id->sectors);
+	id->command_set_2 = le16toh(id->command_set_2);
+	id->cfs_enable_2 = le16toh(id->cfs_enable_2);
 
 	return 0;
 }

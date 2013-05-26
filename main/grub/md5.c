@@ -41,8 +41,8 @@
 
 #ifdef USE_MD5
 
-#define cpu_to_le32(x) (x)
-#define le32_to_cpu(x) cpu_to_le32(x)
+#define htole32(x) (x)
+#define le32toh(x) htole32(x)
 typedef unsigned int UINT4;
 
 /* F, G, H and I are basic MD5 functions.
@@ -103,7 +103,7 @@ static void md5_transform(const unsigned char block[64])
 
 	/* Round 1 */
 	for (i = 0; i < 16; i++) {
-		tmp = a + F(b, c, d) + le32_to_cpu(x[i]) + T[i];
+		tmp = a + F(b, c, d) + le32toh(x[i]) + T[i];
 		tmp = ROTATE_LEFT(tmp, s1[i & 3]);
 		tmp += b;
 		a = d;
@@ -113,7 +113,7 @@ static void md5_transform(const unsigned char block[64])
 	}
 	/* Round 2 */
 	for (i = 0, j = 1; i < 16; i++, j += 5) {
-		tmp = a + G(b, c, d) + le32_to_cpu(x[j & 15]) + T[i + 16];
+		tmp = a + G(b, c, d) + le32toh(x[j & 15]) + T[i + 16];
 		tmp = ROTATE_LEFT(tmp, s2[i & 3]);
 		tmp += b;
 		a = d;
@@ -123,7 +123,7 @@ static void md5_transform(const unsigned char block[64])
 	}
 	/* Round 3 */
 	for (i = 0, j = 5; i < 16; i++, j += 3) {
-		tmp = a + H(b, c, d) + le32_to_cpu(x[j & 15]) + T[i + 32];
+		tmp = a + H(b, c, d) + le32toh(x[j & 15]) + T[i + 32];
 		tmp = ROTATE_LEFT(tmp, s3[i & 3]);
 		tmp += b;
 		a = d;
@@ -133,7 +133,7 @@ static void md5_transform(const unsigned char block[64])
 	}
 	/* Round 4 */
 	for (i = 0, j = 0; i < 16; i++, j += 7) {
-		tmp = a + I(b, c, d) + le32_to_cpu(x[j & 15]) + T[i + 48];
+		tmp = a + I(b, c, d) + le32toh(x[j & 15]) + T[i + 48];
 		tmp = ROTATE_LEFT(tmp, s4[i & 3]);
 		tmp += b;
 		a = d;
@@ -189,12 +189,12 @@ static unsigned char *md5_final()
 		buflen = 0;
 	}
 
-	*(UINT4 *) (buffer + 56) = cpu_to_le32(8 * length);
+	*(UINT4 *) (buffer + 56) = htole32(8 * length);
 	*(UINT4 *) (buffer + 60) = 0;
 	md5_transform(buffer);
 
 	for (i = 0; i < 4; i++)
-		state[i] = cpu_to_le32(state[i]);
+		state[i] = htole32(state[i]);
 	return (unsigned char *) state;
 }
 
