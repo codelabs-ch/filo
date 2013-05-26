@@ -213,13 +213,13 @@ int file_read(void *buf, unsigned long len)
 
 	errnum = 0;
 
-	debug("reading %d bytes, offset 0x%x\n", len, filepos);
+	debug("reading %lu bytes, offset 0x%x\n", len, filepos);
 	return fsys->read_func(buf, len);
 }
 
 unsigned long file_seek(unsigned long offset)
 {
-	debug("seeking to 0x%x\n", offset);
+	debug("seeking to 0x%lx\n", offset);
 	filepos = offset;
 	return filepos;
 }
@@ -231,7 +231,7 @@ unsigned long file_size(void)
 
 void file_set_size(unsigned long size)
 {
-	debug("updating file size to %d bytes\n", size);
+	debug("updating file size to %lu bytes\n", size);
 
 	filemax = size;
 	using_devsize = 0;

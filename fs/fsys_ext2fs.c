@@ -392,7 +392,7 @@ struct ext4_extent_header
 void
 dump_super(struct ext2_super_block *s)
 {
-    printf(" superblock 0x%x:\n", s);
+    printf(" superblock 0x%p:\n", s);
     printf("  inodes=%d\n", le32_to_cpu(s->s_inodes_count));
     printf("  blocks=%d\n", le32_to_cpu(s->s_blocks_count));
     printf("  reserved=%d\n", le32_to_cpu(s->s_r_blocks_count));
@@ -410,7 +410,7 @@ dump_super(struct ext2_super_block *s)
 void
 dump_group_desc(struct ext2_group_desc *g)
 {
-    printf(" group_desc 0x%x:\n", g);
+    printf(" group_desc 0x%p:\n", g);
     printf("  b_bmap block=%d\n", le32_to_cpu(g->bg_block_bitmap));
     printf("  i_bmap block=%d\n", le32_to_cpu(g->bg_inode_bitmap));
     printf("  i_tab block=%d\n", le32_to_cpu(g->bg_inode_table));
@@ -422,7 +422,7 @@ dump_group_desc(struct ext2_group_desc *g)
 void
 dump_inode(struct ext2_inode *i)
 {
-    printf(" inode 0x%x:\n", i);
+    printf(" inode 0x%p:\n", i);
     printf("  mode=%o\n", le16_to_cpu(i->i_mode));
     printf("  uid=%d\n", le16_to_cpu(i->i_uid));
     printf("  gid=%d\n", le16_to_cpu(i->i_gid));
@@ -709,7 +709,7 @@ ext2fs_read (char *buf, int len)
   int size = 0;
 
 #ifdef E2DEBUG
-  printf("ext2fs_read(0x%x, %d)\n", buf, len);
+  printf("ext2fs_read(0x%p, %d)\n", buf, len);
   dump_inode(INODE);
   dump_inode_data((unsigned char *)INODE, sizeof (struct ext2_inode));
 #endif /* E2DEBUG */
@@ -872,8 +872,8 @@ ext2fs_dir (char *dirname)
 	(((current_ino - 1) % le32_to_cpu(SUPERBLOCK->s_inodes_per_group))
 	 >> log2 (EXT2_INODES_PER_BLOCK (SUPERBLOCK)));
 #ifdef E2DEBUG
-      printf ("ext2fs_dir: itab_blk=%d, i_in_grp=%d, log2=%d\n", 
-	 le32_to_cpu(gdp[desc].bg_inode_table),
+      printf ("ext2fs_dir: itab_blk=%d, i_in_grp=%d, log2=%lu\n",
+	 le32_to_cpu(ext4_gdp[desc].bg_inode_table),
 	 ((current_ino - 1) % le32_to_cpu(SUPERBLOCK->s_inodes_per_group)),
 	 log2 (EXT2_INODES_PER_BLOCK (SUPERBLOCK)));
       printf ("ext2fs_dir: inode table fsblock=%d\n", ino_blk);
@@ -893,7 +893,7 @@ ext2fs_dir (char *dirname)
       printf ("ext2fs_dir: ipb=%d, sizeof(inode)=%d\n",
 	      EXT2_INODES_PER_BLOCK (SUPERBLOCK),
 	      EXT2_INODE_SIZE(SUPERBLOCK));
-      printf ("ext2fs_dir: inode=%x, raw_inode=%x\n", INODE, raw_inode);
+      printf ("ext2fs_dir: inode=%p, raw_inode=%p\n", INODE, raw_inode);
       printf ("ext2fs_dir: offset into inode table block=%d\n", (int) raw_inode - (int) INODE);
       dump_inode(raw_inode);
       dump_inode_data((unsigned char *)INODE, EXT2_BLOCK_SIZE(SUPERBLOCK));
@@ -1063,7 +1063,7 @@ ext2fs_dir (char *dirname)
 	  else
 	       map = ext2fs_block_map (blk);
 #ifdef E2DEBUG
-	  printf ("ext2fs_dir: fs block=%d\n", map);
+	  printf ("ext2fs_dir: fs block=%ld\n", map);
 #endif /* E2DEBUG */
 	  mapblock2 = -1;
 	  if (map < 0) 

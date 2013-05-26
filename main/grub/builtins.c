@@ -802,7 +802,7 @@ void copy_path_to_filo_bootline(char *arg, char *path, int use_rootdev, int appe
 			strlcat(path, buffer, BOOT_LINE_LENGTH);
 		}
 		if (addr != -1) {
-			snprintf(buffer, 31, "@0x%x", addr);
+			snprintf(buffer, 31, "@0x%lx", addr);
 			strlcat(path, buffer, BOOT_LINE_LENGTH);
 		}
 		buffer[0]=':';

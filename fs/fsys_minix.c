@@ -476,7 +476,7 @@ minix_dir (char *dirname)
 	     the disk */
 	  map = minix_block_map (blk);
 #ifdef DEBUG_MINIX
-	  printf ("fs block=%d\n", map);
+	  printf ("fs block=%ld\n", map);
 #endif
 	  mapblock2 = -1;
 	  if ((map < 0) || !minix_rdfsb (map, DATABLOCK2))
