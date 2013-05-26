@@ -20,6 +20,7 @@
  */
 
 #include <libpayload.h>
+#include <sys_info.h>
 #include <config.h>
 #include <version.h>
 #include <grub/shared.h>
@@ -83,13 +84,12 @@ void grub_putstr(const char *str)
 
 void grub_printf(const char *format, ...)
 {
-	int ret;
 	va_list args;
 #define OUTPUT_SIZE 256
 	char output[OUTPUT_SIZE];
 
 	va_start(args, format);
-	ret = vsnprintf(output, OUTPUT_SIZE, format, args);
+	vsnprintf(output, OUTPUT_SIZE, format, args);
 	va_end(args);
 	grub_putstr(output);
 	refresh();
