@@ -341,7 +341,7 @@ struct ext4_extent_header
 #define SUPERBLOCK \
     ((struct ext2_super_block *)(FSYS_BUF))
 #define GROUP_DESC \
-    ((struct ext2_group_desc *) \
+    ((struct ext4_group_desc *) \
      ((char *)SUPERBLOCK + sizeof(struct ext2_super_block)))
 #define INODE \
     ((struct ext2_inode *)((char *)GROUP_DESC + EXT2_BLOCK_SIZE(SUPERBLOCK)))
@@ -401,14 +401,14 @@ dump_super(struct ext2_super_block *s)
     printf("  first=%d\n", le32_to_cpu(s->s_first_data_block));
     printf("  log_b_size=%d, b_size=%d\n", le32_to_cpu(s->s_log_block_size), EXT2_BLOCK_SIZE(s));
     printf("  inode_size=%d\n", le32_to_cpu(EXT2_INODE_SIZE(s)));
-    printf("  log_f_size=%d\n", le32_to_cpu(s->s_log_frag_size));
+    printf("  (obsoleted) log_f_size=%d\n", le32_to_cpu(s->s_obso_log_frag_size));
     printf("  bpg=%d\n", le32_to_cpu(s->s_blocks_per_group));
-    printf("  fpg=%d\n", le32_to_cpu(s->s_frags_per_group));
+    printf("  (obsoleted) fpg=%d\n", le32_to_cpu(s->s_obso_frags_per_group));
     printf("  ipg=%d\n", le32_to_cpu(s->s_inodes_per_group));
 }
 
 void
-dump_group_desc(struct ext2_group_desc *g)
+dump_group_desc(struct ext4_group_desc *g)
 {
     printf(" group_desc 0x%p:\n", g);
     printf("  b_bmap block=%d\n", le32_to_cpu(g->bg_block_bitmap));
