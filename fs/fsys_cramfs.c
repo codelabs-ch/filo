@@ -203,7 +203,6 @@ cramfs_read (char *buf, int len)
 	int block_len;
 	int ret = 0;
 	long size = 0;
-	long devread_ret;
 
 	nblocks = (cramfs_buf->inode.size - 1) / CRAMFS_BLOCK + 1;
 	block = filepos / CRAMFS_BLOCK;
@@ -226,7 +225,7 @@ cramfs_read (char *buf, int len)
 			len, block, start, block_len);
 		if (cramfs_buf->cached_block != block) {
 			disk_read_func = disk_read_hook;
-			devread_ret = devread(0, start, block_len, cramfs_buf->data);
+			devread(0, start, block_len, cramfs_buf->data);
 			disk_read_func = NULL;
 			cramfs_buf->cached_block = block;
 		} else debug_cramfs("%d was cached...", block);
@@ -291,8 +290,6 @@ cramfs_dir(char *dirname)
 	u32 dir_size;			     /* size of this directory */
 	u32 off;			     /* offset of this directory */
 	u32 loc;			     /* location within a directory */
-	
-	int namelen;
 
   /* loop invariants:
      current_ino = inode to lookup
@@ -425,7 +422,6 @@ cramfs_dir(char *dirname)
 					cramfs_buf->inode.namelen << 2, cramfs_buf->name))
 				return 0;
 			cramfs_buf->name[cramfs_buf->inode.namelen << 2] = '\0';
-			namelen = cramfs_strlen(cramfs_buf->name);
 			
 			/* advance loc prematurely to next on-disk directory entry  */
 			loc += sizeof(struct cramfs_inode) + (cramfs_buf->inode.namelen << 2);
