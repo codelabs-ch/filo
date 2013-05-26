@@ -71,11 +71,7 @@ static int inode_read(unsigned int inode_block, unsigned int inode_offset);
  */
 static int read_bytes(long long address, unsigned int len, void *output_data)
 {
-  unsigned int block_number, offset;
   int ret;
-
-  block_number = address >> SECTOR_BITS;
-  offset = address - (block_number);
 
   TRACE("reading from position 0x%x, bytes %d\n", (int)address, len);
   disk_read_func = disk_read_hook;
