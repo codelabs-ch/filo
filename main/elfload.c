@@ -135,11 +135,12 @@ static int load_segments(Elf_phdr *phdr, int phnum,
 	unsigned long checksum_offset)
 {
     unsigned long bytes;
-    u64 start_time, time;
     int i;
 
     bytes = 0;
-    start_time = currticks();
+#if defined(DEBUG) && (DEBUG == 1)
+    u64 start_time = currticks();
+#endif
     for (i = 0; i < phnum; i++) {
 	if (phdr[i].p_type != PT_LOAD)
 	    continue;
@@ -165,9 +166,11 @@ static int load_segments(Elf_phdr *phdr, int phnum,
 	debug("ok\n");
 
     }
-    time = currticks() - start_time;
+#if defined(DEBUG) && (DEBUG == 1)
+    u64 time = currticks() - start_time;
     debug("Loaded %lu bytes in %ums (%luKB/s)\n", bytes, time,
 	    time? bytes/time : 0);
+#endif
     return 1;
 }
 
