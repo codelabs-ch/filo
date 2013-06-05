@@ -230,7 +230,6 @@ int ob_ide_init(int driveno);
 
 
 /* FILO compat */
-#define CONFIG_LITTLE_ENDIAN
 #define CONFIG_IDE_LBA48
 
 #endif

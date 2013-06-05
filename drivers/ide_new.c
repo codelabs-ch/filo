@@ -19,6 +19,7 @@
 #include <config.h>
 
 #include <fs.h>
+#include <endian.h>
 #include "ide_new.h"
 #include "hdreg.h"
 
