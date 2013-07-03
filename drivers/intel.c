@@ -49,41 +49,12 @@
 #define ICH9_SPI_OPTYPE		0x3896
 #define ICH9_SPI_OPMENU		0x3898
 
-typedef enum {
-	ICH7, ICH9,
-} ich_t;
-
-int intel_lockdown_flash(void)
+static void lockdown_flash_ich7(void)
 {
 	u8 reg8;
 	u32 reg32;
-	ich_t ich;
 
-	reg32 = pci_read_config32(PCI_DEV(0,0x1f, 0), 0);
-	switch (reg32) {
-		/* ICH7 */
-	case 0x27b08086:
-	case 0x27b88086:
-	case 0x27b98086:
-	case 0x27bd8086:
-		ich = ICH7;
-		break;
-		/* ICH9 */
-	case 0x29128086:
-	case 0x29148086:
-	case 0x29168086:
-	case 0x29178086:
-	case 0x29188086:
-	case 0x29198086:
-		ich = ICH9;
-		break;
-	default:
-		debug("Not an ICH7 or ICH9 southbridge\n");
-		return -1;
-	}
-
-	/* Now try this: */
-	debug("Locking BIOS to read-only... "); 
+	debug("Locking BIOS to read-only... ");
 	reg8 = pci_read_config8(PCI_DEV(0,0x1f,0), 0xdc);	/* BIOS_CNTL */
 	debug(" BIOS Lockdown Enable: %s; BIOS Write-Enable: %s\n",
 			(reg8&2)?"on":"off", (reg8&1)?"rw":"ro");
@@ -97,14 +68,47 @@ int intel_lockdown_flash(void)
 	reg32 = RCBA32(0x3410); /* GCS - General Control and Status */
 	reg32 |= 1;		/* BILD - BIOS Interface Lockdown */
 	RCBA32(0x3410) = reg32; /* Set BUC.TS and GCS.BBS to RO */
+}
 
-	/* Lock SPI interface with empty opcode registers on ICH9. */
-	if (ICH9 == ich) {
-		RCBA16(ICH9_SPI_PREOP)  = 0x0000;
-		RCBA16(ICH9_SPI_OPTYPE) = 0x0000;
-		RCBA32(ICH9_SPI_OPMENU + 0) = 0x00000000;
-		RCBA32(ICH9_SPI_OPMENU + 4) = 0x00000000;
-		RCBA16(ICH9_SPI_HSFS) |= ICH9_SPI_HSFS_FLOCKDN;
+static void lockdown_flash_ich9_empty_ops(void)
+{
+	/* Lock SPI interface with empty opcode registers */
+	RCBA16(ICH9_SPI_PREOP)  = 0x0000;
+	RCBA16(ICH9_SPI_OPTYPE) = 0x0000;
+	RCBA32(ICH9_SPI_OPMENU + 0) = 0x00000000;
+	RCBA32(ICH9_SPI_OPMENU + 4) = 0x00000000;
+	RCBA16(ICH9_SPI_HSFS) |= ICH9_SPI_HSFS_FLOCKDN;
+}
+
+int intel_lockdown_flash(void)
+{
+	const u32 reg32 = pci_read_config32(PCI_DEV(0,0x1f, 0), 0);
+	switch (reg32) {
+
+		/* ICH7 */
+	case 0x27b08086:
+	case 0x27b88086:
+	case 0x27b98086:
+	case 0x27bd8086:
+		lockdown_flash_ich7();
+		break;
+
+		/* ICH9 */
+	case 0x29128086:
+	case 0x29148086:
+	case 0x29168086:
+	case 0x29178086:
+	case 0x29188086:
+	case 0x29198086:
+		lockdown_flash_ich7();
+		/* Coreboot doesn't use flash regions for ICH9 based
+		   boards, so we just lock empty SPI opcodes instead
+		   of setting up any write protection. */
+		lockdown_flash_ich9_empty_ops();
+		break;
+	default:
+		debug("Not an ICH7 or ICH9 southbridge\n");
+		return -1;
 	}
 
 	debug("BIOS hard locked until next full reset.\n");
