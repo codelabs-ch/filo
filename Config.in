@@ -196,6 +196,7 @@ config FLASHROM_LOCKDOWN
 
 	        o Intel ICH7 (FWH)
 	        o Intel ICH9 (FWH + SPI)
+	        o Intel Cougar Point / Panther Point PCH (FWH + SPI)
 	        o AMD SB600 (SPI by locking the flash chip itself)
 
 endmenu

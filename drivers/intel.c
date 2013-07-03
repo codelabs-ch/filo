@@ -45,9 +45,52 @@
 
 #define ICH9_SPI_HSFS		0x3804
 #define ICH9_SPI_HSFS_FLOCKDN	(1 << 15);
+#define ICH9_SPI_FLASH_REGIONS	5
+#define ICH9_SPI_FREG0		0x3854
+#define ICH9_SPI_FPR0		0x3874
 #define ICH9_SPI_PREOP		0x3894
 #define ICH9_SPI_OPTYPE		0x3896
 #define ICH9_SPI_OPMENU		0x3898
+
+/*
+ * SPI Opcode Menu setup for SPIBAR lockdown
+ * should support most common flash chips.
+ */
+#define SPI_OPMENU_0 0x01 /* WRSR: Write Status Register */
+#define SPI_OPTYPE_0 0x01 /* Write, no address */
+
+#define SPI_OPMENU_1 0x02 /* BYPR: Byte Program */
+#define SPI_OPTYPE_1 0x03 /* Write, address required */
+
+#define SPI_OPMENU_2 0x03 /* READ: Read Data */
+#define SPI_OPTYPE_2 0x02 /* Read, address required */
+
+#define SPI_OPMENU_3 0x05 /* RDSR: Read Status Register */
+#define SPI_OPTYPE_3 0x00 /* Read, no address */
+
+#define SPI_OPMENU_4 0x20 /* SE20: Sector Erase 0x20 */
+#define SPI_OPTYPE_4 0x03 /* Write, address required */
+
+#define SPI_OPMENU_5 0x9f /* RDID: Read ID */
+#define SPI_OPTYPE_5 0x00 /* Read, no address */
+
+#define SPI_OPMENU_6 0xd8 /* BED8: Block Erase 0xd8 */
+#define SPI_OPTYPE_6 0x03 /* Write, address required */
+
+#define SPI_OPMENU_7 0x0b /* FAST: Fast Read */
+#define SPI_OPTYPE_7 0x02 /* Read, address required */
+
+#define SPI_OPMENU_UPPER ((SPI_OPMENU_7 << 24) | (SPI_OPMENU_6 << 16) | \
+			  (SPI_OPMENU_5 << 8) | SPI_OPMENU_4)
+#define SPI_OPMENU_LOWER ((SPI_OPMENU_3 << 24) | (SPI_OPMENU_2 << 16) | \
+			  (SPI_OPMENU_1 << 8) | SPI_OPMENU_0)
+
+#define SPI_OPTYPE ((SPI_OPTYPE_7 << 14) | (SPI_OPTYPE_6 << 12) | \
+		    (SPI_OPTYPE_5 << 10) | (SPI_OPTYPE_4 << 8) |  \
+		    (SPI_OPTYPE_3 << 6) | (SPI_OPTYPE_2 << 4) |	  \
+		    (SPI_OPTYPE_1 << 2) | (SPI_OPTYPE_0))
+
+#define SPI_OPPREFIX ((0x50 << 8) | 0x06) /* EWSR and WREN */
 
 static void lockdown_flash_ich7(void)
 {
@@ -80,6 +123,24 @@ static void lockdown_flash_ich9_empty_ops(void)
 	RCBA16(ICH9_SPI_HSFS) |= ICH9_SPI_HSFS_FLOCKDN;
 }
 
+static void lockdown_flash_ich9_lock_regions(void)
+{
+	/* Lock SPI interface with the opcodes coreboot uses */
+	RCBA16(ICH9_SPI_PREOP)  = SPI_OPPREFIX;
+	RCBA16(ICH9_SPI_OPTYPE) = SPI_OPTYPE;
+	RCBA32(ICH9_SPI_OPMENU + 0) = SPI_OPMENU_LOWER;
+	RCBA32(ICH9_SPI_OPMENU + 4) = SPI_OPMENU_UPPER;
+
+	/* Copy flash regions from FREG0-4 to FPR0-4
+	   and enable write protection bit31 */
+	int i;
+	for (i = 0; i < (4 * ICH9_SPI_FLASH_REGIONS); i += 4)
+		RCBA32(ICH9_SPI_FPR0 + i) =
+			RCBA32(ICH9_SPI_FREG0 + i) | (1 << 31);
+
+	RCBA16(ICH9_SPI_HSFS) |= ICH9_SPI_HSFS_FLOCKDN;
+}
+
 int intel_lockdown_flash(void)
 {
 	const u32 reg32 = pci_read_config32(PCI_DEV(0,0x1f, 0), 0);
@@ -106,8 +167,46 @@ int intel_lockdown_flash(void)
 		   of setting up any write protection. */
 		lockdown_flash_ich9_empty_ops();
 		break;
+
+		/* Cougar Point */
+	case 0x1c448086:
+	case 0x1c468086:
+	case 0x1c478086:
+	case 0x1c498086:
+	case 0x1c4a8086:
+	case 0x1c4b8086:
+	case 0x1c4c8086:
+	case 0x1c4d8086:
+	case 0x1c4e8086:
+	case 0x1c4f8086:
+	case 0x1c508086:
+	case 0x1c528086:
+	case 0x1c548086:
+	case 0x1c568086:
+	case 0x1c5c8086:
+		/* Panther Point */
+	case 0x1e448086:
+	case 0x1e468086:
+	case 0x1e478086:
+	case 0x1e488086:
+	case 0x1e498086:
+	case 0x1e4a8086:
+	case 0x1e538086:
+	case 0x1e558086:
+	case 0x1e568086:
+	case 0x1e578086:
+	case 0x1e588086:
+	case 0x1e598086:
+	case 0x1e5d8086:
+	case 0x1e5e8086:
+	case 0x1e5f8086:
+		lockdown_flash_ich7();
+		/* Since Cougar Point, coreboot uses flash regions,
+		   lock them and set up static SPI opcodes. */
+		lockdown_flash_ich9_lock_regions();
+		break;
 	default:
-		debug("Not an ICH7 or ICH9 southbridge\n");
+		debug("Not a supported ICH or PCH southbridge\n");
 		return -1;
 	}
 
