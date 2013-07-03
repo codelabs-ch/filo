@@ -191,7 +191,12 @@ config FLASHROM_LOCKDOWN
 	  Enable system flash memory write protections and lock them down prior
 	  starting the kernel. Flash memory lockdown can be disabled per boot
 	  entry with the new command 'flashrom_unlock'.
-	  NOTE: Only supported on selected Intel hardware, ICH7 so far.
+
+	  NOTE: Only supported on selected hardware:
+
+	        o Intel ICH7 (FWH)
+	        o Intel ICH9 (FWH + SPI)
+	        o AMD SB600 (SPI by locking the flash chip itself)
 
 endmenu
 
