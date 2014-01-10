@@ -25,8 +25,6 @@
 unsigned long long simple_strtoull(const char *cp,char **endp,unsigned int base);
 unsigned long long strtoull_with_suffix(const char *cp,char **endp,unsigned int base);
 
-void hexdump(const void *p, unsigned int len);
-
 long long simple_strtoll(const char *cp,char **endp,unsigned int base);
 
 #define abort() halt()
