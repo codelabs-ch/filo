@@ -861,7 +861,7 @@ ob_ide_fixup_string(unsigned char *s, unsigned int len)
 	/*
 	 * if little endian arch, byte swap the string
 	 */
-#ifdef CONFIG_LITTLE_ENDIAN
+#ifdef CONFIG_LP_LITTLE_ENDIAN
 	for (p = end ; p != s;) {
 		unsigned short *pp = (unsigned short *) (p -= 2);
 		*pp = be16toh(*pp);

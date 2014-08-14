@@ -1838,7 +1838,7 @@ static struct builtin builtin_timeout = {
 
 static int keymap_func(char *arg, int flags)
 {
-#ifdef CONFIG_PC_KEYBOARD
+#ifdef CONFIG_LP_PC_KEYBOARD
 	if (keyboard_set_layout(arg)) {
 		errnum = ERR_BAD_ARGUMENT;
 		return 1;

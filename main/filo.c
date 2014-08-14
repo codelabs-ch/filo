@@ -89,7 +89,7 @@ static void init(void)
     printf("No USB stack in libpayload.\n");
 #endif
 #endif
-#if defined(CONFIG_PC_KEYBOARD) || defined(CONFIG_USB_HID)
+#if defined(CONFIG_LP_PC_KEYBOARD) || defined(CONFIG_LP_USB_HID)
     add_reset_handler(filo_reset_handler);
 #endif
 #ifdef CONFIG_SUPPORT_SOUND
