@@ -813,7 +813,7 @@ int linux_load(const char *file, const char *cmdline)
 	}
 
 	file_close();
-#if defined(CONFIG_USB)
+#if defined(CONFIG_LP_USB)
 	usb_exit();
 #endif
 

@@ -77,12 +77,12 @@ static void init(void)
        after relocation. Therefore, run lib_get_sysinfo(), again. */
     lib_get_sysinfo();
 
-#if defined(CONFIG_LIBPAYLOAD_STORAGE) && defined(CONFIG_STORAGE)
+#if defined(CONFIG_LIBPAYLOAD_STORAGE) && defined(CONFIG_LP_STORAGE)
     /* libpayload storage drivers */
     storage_initialize();
 #endif
 #if defined(CONFIG_USB_DISK)
-#if defined(CONFIG_USB)
+#if defined(CONFIG_LP_USB)
     /* libpayload USB stack is there */
     usb_initialize();
 #else

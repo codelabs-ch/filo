@@ -21,7 +21,7 @@
 #include <endian.h>
 #include <libpayload.h>
 #include <libpayload-config.h>
-#if defined(CONFIG_LIBPAYLOAD_STORAGE) && defined(CONFIG_STORAGE)
+#if defined(CONFIG_LIBPAYLOAD_STORAGE) && defined(CONFIG_LP_STORAGE)
 #include <storage/storage.h>
 #endif
 #include <config.h>
@@ -251,10 +251,10 @@ int devopen(const char *name, int *reopen)
 
 	int tmp_drive = drive;
 	switch (type) {
-#if (defined(CONFIG_LIBPAYLOAD_STORAGE) && defined(CONFIG_STORAGE)) || \
+#if (defined(CONFIG_LIBPAYLOAD_STORAGE) && defined(CONFIG_LP_STORAGE)) || \
 		defined(CONFIG_IDE_DISK) || defined(CONFIG_IDE_NEW_DISK)
 	case DISK_IDE:
-#if defined(CONFIG_LIBPAYLOAD_STORAGE) && defined(CONFIG_STORAGE)
+#if defined(CONFIG_LIBPAYLOAD_STORAGE) && defined(CONFIG_LP_STORAGE)
 		if (drive < storage_device_count()) {
 			if (storage_probe(drive) != POLL_MEDIUM_PRESENT)
 				return 0;
@@ -391,12 +391,12 @@ static void *read_sector(unsigned long sector)
 	if (cache_sect[hash] != sector) {
 		cache_sect[hash] = (unsigned long) -1;
 		switch (dev_type) {
-#if (defined(CONFIG_LIBPAYLOAD_STORAGE) && defined(CONFIG_STORAGE)) || \
+#if (defined(CONFIG_LIBPAYLOAD_STORAGE) && defined(CONFIG_LP_STORAGE)) || \
 			defined(CONFIG_IDE_DISK) || defined(CONFIG_IDE_NEW_DISK)
 		case DISK_IDE:
 		{
 			int tmp_drive = dev_drive;
-#if defined(CONFIG_LIBPAYLOAD_STORAGE) && defined(CONFIG_STORAGE)
+#if defined(CONFIG_LIBPAYLOAD_STORAGE) && defined(CONFIG_LP_STORAGE)
 			if (dev_drive < storage_device_count()) {
 				int count = (NUM_CACHE-hash>8)?8:(NUM_CACHE-hash);
 				if (storage_probe(tmp_drive) == POLL_NO_MEDIUM) {
@@ -466,7 +466,7 @@ static void *read_sector(unsigned long sector)
 	printf("Disk read error dev=%d drive=%d sector=%lu\n",
 	       dev_type, dev_drive, sector);
 #if defined(CONFIG_IDE_NEW_DISK) || \
-	(defined(CONFIG_LIBPAYLOAD_STORAGE) && defined(CONFIG_STORAGE))
+	(defined(CONFIG_LIBPAYLOAD_STORAGE) && defined(CONFIG_LP_STORAGE))
       err_out:
 #endif
 	flush_cache();
