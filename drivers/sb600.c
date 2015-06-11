@@ -1204,7 +1204,6 @@ static int enable_flash_sb600(struct pci_dev *dev)
 int sb600_spi_lockdown(void) {
 	struct flashchip *flash;
 	struct pci_dev *dev;
-	int res;
 
 	dev = pci_dev_find(0x1002, 0x438d);
 	if (!dev) {
