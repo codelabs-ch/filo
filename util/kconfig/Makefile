@@ -11,7 +11,7 @@ ifeq ($(_OS),MINGW32)
        regex-objs=regex.o
 endif
 
-Kconfig := Config.in
+Kconfig := Kconfig
 
 FILO_CONFIG := $(src)/.config
 LIB_CONFIG  := $(src)/lib.config
