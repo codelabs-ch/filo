@@ -33,6 +33,11 @@ export LIBCONFIG_PATH
 export KERNELVERSION      := $(PROGRAM_VERSION)
 export KCONFIG_AUTOHEADER := $(obj)/config.h
 export KCONFIG_AUTOCONFIG := $(obj)/auto.conf
+export KCONFIG_DEPENDENCIES := $(obj)/auto.conf.cmd
+export KCONFIG_SPLITCONFIG := $(obj)/config
+export KCONFIG_TRISTATE := $(obj)/tristate.conf
+export KCONFIG_NEGATIVES := 1
+export KCONFIG_CONFIG := .config
 
 CONFIG_SHELL := sh
 KBUILD_DEFCONFIG := configs/defconfig
@@ -170,6 +175,10 @@ $(obj)/version.h: Makefile
 
 $(obj)/%/:
 	mkdir -p $@
+
+ifndef NOMKDIR
+$(shell mkdir -p $(KCONFIG_SPLITCONFIG) $(objk)/lxdialog)
+endif
 
 prepare: $(sort $(dir $(OBJS))) $(obj)/util/kconfig/lxdialog/
 
