@@ -211,11 +211,11 @@ enum {
 struct ata_sector {
 	u16 all;
 	union {
-#ifdef CONFIG_LP_BIG_ENDIAN
+#if IS_ENABLED(CONFIG_LP_BIG_ENDIAN)
 		u8 high;
 		u8 low;
 #endif
-#ifdef CONFIG_LP_LITTLE_ENDIAN
+#if IS_ENABLED(CONFIG_LP_LITTLE_ENDIAN)
 		u8 low;
 		u8 high;
 #endif

@@ -41,8 +41,6 @@
 
 #ifdef USE_MD5
 
-#define htole32(x) (x)
-#define le32toh(x) htole32(x)
 typedef unsigned int UINT4;
 
 /* F, G, H and I are basic MD5 functions.

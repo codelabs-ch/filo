@@ -20,7 +20,7 @@
 #include <libpayload-config.h>
 
 /* Only use this code if libpayload is compiled with USB stack */
-#ifdef CONFIG_LP_USB
+#if IS_ENABLED(CONFIG_LP_USB)
 #include <fs.h>
 #include <usb/usb.h>
 #include <usb/usbmsc.h>

@@ -77,25 +77,25 @@ static void init(void)
        after relocation. Therefore, run lib_get_sysinfo(), again. */
     lib_get_sysinfo();
 
-#if defined(CONFIG_LIBPAYLOAD_STORAGE) && defined(CONFIG_LP_STORAGE)
+#if IS_ENABLED(CONFIG_LIBPAYLOAD_STORAGE) && IS_ENABLED(CONFIG_LP_STORAGE)
     /* libpayload storage drivers */
     storage_initialize();
 #endif
-#if defined(CONFIG_USB_DISK)
-#if defined(CONFIG_LP_USB)
+#if IS_ENABLED(CONFIG_USB_DISK)
+#if IS_ENABLED(CONFIG_LP_USB)
     /* libpayload USB stack is there */
     usb_initialize();
 #else
     printf("No USB stack in libpayload.\n");
 #endif
 #endif
-#if defined(CONFIG_LP_PC_KEYBOARD) || defined(CONFIG_LP_USB_HID)
+#if IS_ENABLED(CONFIG_LP_PC_KEYBOARD) || IS_ENABLED(CONFIG_LP_USB_HID)
     add_reset_handler(filo_reset_handler);
 #endif
-#ifdef CONFIG_SUPPORT_SOUND
+#if IS_ENABLED(CONFIG_SUPPORT_SOUND)
     sound_init();
 #endif
-#ifdef CONFIG_SLOW_SATA
+#if IS_ENABLED(CONFIG_SLOW_SATA)
     delay(5);
 #endif
 }
@@ -165,7 +165,7 @@ int main(void)
 
 #ifdef CONFIG_AUTOBOOT_FILE
 #ifdef CONFIG_AUTOBOOT_DELAY
-#ifdef CONFIG_NON_INTERACTIVE
+#if IS_ENABLED(CONFIG_NON_INTERACTIVE)
 #error "autoboot delay is not supported for non-interactive builds"
 #define autoboot_delay() 0 /* success */
 #else
@@ -207,7 +207,7 @@ static inline int autoboot_delay(void)
 
 static void autoboot(void)
 {
-#ifndef CONFIG_NON_INTERACTIVE
+#if !IS_ENABLED(CONFIG_NON_INTERACTIVE)
     /* If Escape key is pressed already, skip autoboot */
     if (havechar() && getchar()==ESCAPE)
 	return;
@@ -231,7 +231,7 @@ int main(void)
     /* Try default image */
     autoboot();
 
-#ifndef CONFIG_NON_INTERACTIVE
+#if !IS_ENABLED(CONFIG_NON_INTERACTIVE)
     /* The above didn't work, ask user */
     while (havechar())
 	getchar();

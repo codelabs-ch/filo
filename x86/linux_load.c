@@ -350,7 +350,7 @@ static void set_memory_size(struct linux_params *params)
 /* Video mode */
 static void set_video_mode(struct linux_params *params)
 {
-#if CONFIG_LP_COREBOOT_VIDEO_CONSOLE
+#if IS_ENABLED(CONFIG_LP_COREBOOT_VIDEO_CONSOLE)
 	/* Are we running on a framebuffer console? */
 	if (!lib_sysinfo.framebuffer)
 		return;
@@ -677,7 +677,7 @@ static void hardware_setup(void)
 	outb(0xFF, 0xA1);	/* mask off all interrupts for now */
 	outb(0xFB, 0x21);	/* mask all irq's but irq2 which is cascaded */
 
-#ifdef CONFIG_FLASHROM_LOCKDOWN
+#if IS_ENABLED(CONFIG_FLASHROM_LOCKDOWN)
 	/* lockdown flashROM */
 	extern int flashrom_lockdown;
 	extern int intel_lockdown_flash(void);
@@ -704,10 +704,10 @@ static int start_linux(u32 kern_addr, struct linux_params *params)
 {
 	struct segment_desc *linux_gdt;
 	struct context *ctx;
-#ifdef CONFIG_LP_VGA_VIDEO_CONSOLE
+#if IS_ENABLED(CONFIG_LP_VGA_VIDEO_CONSOLE)
 	unsigned int cursor_x, cursor_y, cursor_en;
 #endif
-#ifdef CONFIG_PCMCIA_CF
+#if IS_ENABLED(CONFIG_PCMCIA_CF)
 	unsigned char *cf_bar;
 	int i;
 #endif
@@ -747,7 +747,7 @@ static int start_linux(u32 kern_addr, struct linux_params *params)
 	debug("EIP=%#x\n", kern_addr);
 	printf("Jumping to entry point...\n");
 
-#ifdef CONFIG_LP_VGA_VIDEO_CONSOLE
+#if IS_ENABLED(CONFIG_LP_VGA_VIDEO_CONSOLE)
 	/* Update VGA cursor position.
 	 * This must be here because the printf changes the value! */
 	video_console_get_cursor(&cursor_x, &cursor_y, &cursor_en);
@@ -755,7 +755,7 @@ static int start_linux(u32 kern_addr, struct linux_params *params)
 	params->orig_y = cursor_y;
 #endif
 
-#ifdef CONFIG_PCMCIA_CF
+#if IS_ENABLED(CONFIG_PCMCIA_CF)
 	cf_bar = phys_to_virt(pci_read_config32(PCI_DEV(0, 0xa, 1), 0x10));
 	for (i = 0x836; i < 0x840; i++) {
 		cf_bar[i] = 0;
@@ -813,7 +813,7 @@ int linux_load(const char *file, const char *cmdline)
 	}
 
 	file_close();
-#if defined(CONFIG_LP_USB)
+#if IS_ENABLED(CONFIG_LP_USB)
 	usb_exit();
 #endif
 

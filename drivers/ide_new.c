@@ -23,7 +23,7 @@
 #include "ide_new.h"
 #include "hdreg.h"
 
-#ifdef CONFIG_SUPPORT_PCI
+#if IS_ENABLED(CONFIG_SUPPORT_PCI)
 #include <pci.h>
 #endif
 
@@ -55,7 +55,7 @@ static const int ctl_ports[IDE_MAX_CHANNELS] = { 0x3f6, 0x376, 0x3ee, 0x36e };
 #undef ATA_PEDANTIC
 
 // debug function currently not used.
-#if defined(CONFIG_DEBUG_IDE) && 0
+#if IS_ENABLED(CONFIG_DEBUG_IDE) && 0
 static void dump_drive(struct ide_drive *drive)
 {
 	debug("IDE DRIVE @%lx:\n", (unsigned long)drive);
@@ -861,7 +861,7 @@ ob_ide_fixup_string(unsigned char *s, unsigned int len)
 	/*
 	 * if little endian arch, byte swap the string
 	 */
-#ifdef CONFIG_LP_LITTLE_ENDIAN
+#if IS_ENABLED(CONFIG_LP_LITTLE_ENDIAN)
 	for (p = end ; p != s;) {
 		unsigned short *pp = (unsigned short *) (p -= 2);
 		*pp = be16toh(*pp);
@@ -930,7 +930,7 @@ ob_ide_identify_drive(struct ide_drive *drive)
 		drive->bs = 512;
 		drive->max_sectors = 255;
 
-#ifdef CONFIG_IDE_LBA48
+#if IS_ENABLED(CONFIG_IDE_LBA48)
 		if ((id.command_set_2 & 0x0400) && (id.cfs_enable_2 & 0x0400)) {
 			drive->addressing = ide_lba48;
 			drive->max_sectors = 65535;
@@ -1149,7 +1149,7 @@ ob_ide_read_blocks(struct ide_drive *drive, int n, u32 blk, unsigned char* dest)
 	return (cnt);
 }
 
-#ifdef CONFIG_SUPPORT_PCI
+#if IS_ENABLED(CONFIG_SUPPORT_PCI)
 static int pci_find_ata_device_on_bus(int bus, pcidev_t * dev, int *index, int sata, int pata)
 {
 	int slot, func;
@@ -1223,14 +1223,14 @@ static void fixupregs(struct ide_channel *chan)
 
 static int find_ide_controller_compat(struct ide_channel *chan, int index)
 {
-#ifdef CONFIG_SUPPORT_PCI
+#if IS_ENABLED(CONFIG_SUPPORT_PCI)
 	int skip, i, pci_index = index / 2;
 	pcidev_t dev;
 #else
 	if (index >= IDE_MAX_CHANNELS)
 		return -1;
 #endif
-#ifdef CONFIG_PCMCIA_CF
+#if IS_ENABLED(CONFIG_PCMCIA_CF)
 	if (index == 2) {
 		chan->io_regs[0] = 0x1e0;
 		chan->io_regs[8] = 0x1ec;
@@ -1238,7 +1238,7 @@ static int find_ide_controller_compat(struct ide_channel *chan, int index)
 		return 0;
 	}
 #endif
-#ifdef CONFIG_SUPPORT_PCI
+#if IS_ENABLED(CONFIG_SUPPORT_PCI)
 	/* skip any SATA and PATA PCI controllers in native mode */
 	for (skip = i = 0; i < pci_index && index; i++) {
 		int devidx = i;
@@ -1269,7 +1269,7 @@ static int find_ide_controller_compat(struct ide_channel *chan, int index)
 	return 0;
 }
 
-#ifdef CONFIG_SUPPORT_PCI
+#if IS_ENABLED(CONFIG_SUPPORT_PCI)
 static int find_ide_controller(struct ide_channel *chan, int chan_index)
 {
 	int pci_index;

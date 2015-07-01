@@ -257,20 +257,20 @@ struct hd_driveid {
 };
 
 struct request_sense {
-#if defined(CONFIG_LP_BIG_ENDIAN)
+#if IS_ENABLED(CONFIG_LP_BIG_ENDIAN)
 	u8 valid		: 1;
 	u8 error_code		: 7;
-#elif defined(CONFIG_LP_LITTLE_ENDIAN)
+#elif IS_ENABLED(CONFIG_LP_LITTLE_ENDIAN)
 	u8 error_code		: 7;
 	u8 valid		: 1;
 #endif
 	u8 segment_number;
-#if defined(CONFIG_LP_BIG_ENDIAN)
+#if IS_ENABLED(CONFIG_LP_BIG_ENDIAN)
 	u8 reserved1		: 2;
 	u8 ili			: 1;
 	u8 reserved2		: 1;
 	u8 sense_key		: 4;
-#elif defined(CONFIG_LP_LITTLE_ENDIAN)
+#elif IS_ENABLED(CONFIG_LP_LITTLE_ENDIAN)
 	u8 sense_key		: 4;
 	u8 reserved2		: 1;
 	u8 ili			: 1;

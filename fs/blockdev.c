@@ -21,7 +21,7 @@
 #include <endian.h>
 #include <libpayload.h>
 #include <libpayload-config.h>
-#if defined(CONFIG_LIBPAYLOAD_STORAGE) && defined(CONFIG_LP_STORAGE)
+#if IS_ENABLED(CONFIG_LIBPAYLOAD_STORAGE) && IS_ENABLED(CONFIG_LP_STORAGE)
 #include <storage/storage.h>
 #endif
 #include <config.h>
@@ -251,10 +251,10 @@ int devopen(const char *name, int *reopen)
 
 	int tmp_drive = drive;
 	switch (type) {
-#if (defined(CONFIG_LIBPAYLOAD_STORAGE) && defined(CONFIG_LP_STORAGE)) || \
-		defined(CONFIG_IDE_DISK) || defined(CONFIG_IDE_NEW_DISK)
+#if (IS_ENABLED(CONFIG_LIBPAYLOAD_STORAGE) && IS_ENABLED(CONFIG_LP_STORAGE)) || \
+		IS_ENABLED(CONFIG_IDE_DISK) || IS_ENABLED(CONFIG_IDE_NEW_DISK)
 	case DISK_IDE:
-#if defined(CONFIG_LIBPAYLOAD_STORAGE) && defined(CONFIG_LP_STORAGE)
+#if IS_ENABLED(CONFIG_LIBPAYLOAD_STORAGE) && IS_ENABLED(CONFIG_LP_STORAGE)
 		if (drive < storage_device_count()) {
 			if (storage_probe(drive) != POLL_MEDIUM_PRESENT)
 				return 0;
@@ -264,7 +264,7 @@ int devopen(const char *name, int *reopen)
 			tmp_drive -= storage_device_count();
 		}
 #endif
-#if defined(CONFIG_IDE_DISK) || defined(CONFIG_IDE_NEW_DISK)
+#if IS_ENABLED(CONFIG_IDE_DISK) || IS_ENABLED(CONFIG_IDE_NEW_DISK)
 		if (ide_probe(tmp_drive) != 0) {
 			debug("Failed to open IDE.\n");
 			return 0;
@@ -273,7 +273,7 @@ int devopen(const char *name, int *reopen)
 #endif
 		break;
 #endif
-#ifdef CONFIG_USB_DISK
+#if IS_ENABLED(CONFIG_USB_DISK)
 	case DISK_USB:
 		if (usb_probe(drive) != 0) {
 			debug("Failed to open USB.\n");
@@ -283,7 +283,7 @@ int devopen(const char *name, int *reopen)
 		break;
 #endif
 
-#ifdef CONFIG_FLASH_DISK
+#if IS_ENABLED(CONFIG_FLASH_DISK)
 	case DISK_FLASH:
 		if (flash_probe(drive) != 0) {
 			debug("Failed to open FLASH.\n");
@@ -363,7 +363,7 @@ int devopen(const char *name, int *reopen)
 
 void devclose(void)
 {
-#ifdef CONFIG_FLASH_DISK
+#if IS_ENABLED(CONFIG_FLASH_DISK)
 	/* Try to close NAND if it was left open */
 	if (dev_type == DISK_FLASH)
 		NAND_close();
@@ -391,12 +391,12 @@ static void *read_sector(unsigned long sector)
 	if (cache_sect[hash] != sector) {
 		cache_sect[hash] = (unsigned long) -1;
 		switch (dev_type) {
-#if (defined(CONFIG_LIBPAYLOAD_STORAGE) && defined(CONFIG_LP_STORAGE)) || \
-			defined(CONFIG_IDE_DISK) || defined(CONFIG_IDE_NEW_DISK)
+#if (IS_ENABLED(CONFIG_LIBPAYLOAD_STORAGE) && IS_ENABLED(CONFIG_LP_STORAGE)) || \
+			IS_ENABLED(CONFIG_IDE_DISK) || IS_ENABLED(CONFIG_IDE_NEW_DISK)
 		case DISK_IDE:
 		{
 			int tmp_drive = dev_drive;
-#if defined(CONFIG_LIBPAYLOAD_STORAGE) && defined(CONFIG_LP_STORAGE)
+#if IS_ENABLED(CONFIG_LIBPAYLOAD_STORAGE) && IS_ENABLED(CONFIG_LP_STORAGE)
 			if (dev_drive < storage_device_count()) {
 				int count = (NUM_CACHE-hash>8)?8:(NUM_CACHE-hash);
 				if (storage_probe(tmp_drive) == POLL_NO_MEDIUM) {
@@ -414,10 +414,10 @@ static void *read_sector(unsigned long sector)
 				tmp_drive -= storage_device_count();
 			}
 #endif
-#if defined(CONFIG_IDE_DISK)
+#if IS_ENABLED(CONFIG_IDE_DISK)
 			if (ide_read(tmp_drive, sector, buf) != 0)
 				goto readerr;
-#elif defined(CONFIG_IDE_NEW_DISK)
+#elif IS_ENABLED(CONFIG_IDE_NEW_DISK)
 			int count = (NUM_CACHE-hash>8)?8:(NUM_CACHE-hash);
 			int ret;
 			ret = ide_read_blocks(tmp_drive, sector, count, buf);
@@ -434,7 +434,7 @@ static void *read_sector(unsigned long sector)
 			break;
 		}
 #endif
-#ifdef CONFIG_USB_DISK
+#if IS_ENABLED(CONFIG_USB_DISK)
 		case DISK_USB:
 		{
 			int count = (NUM_CACHE-hash>8)?8:(NUM_CACHE-hash);
@@ -447,7 +447,7 @@ static void *read_sector(unsigned long sector)
 		}
 #endif
 
-#ifdef CONFIG_FLASH_DISK
+#if IS_ENABLED(CONFIG_FLASH_DISK)
 		case DISK_FLASH:
 			if (flash_read(dev_drive, sector, buf) != 0)
 				return 0;
@@ -465,8 +465,8 @@ static void *read_sector(unsigned long sector)
       readerr:
 	printf("Disk read error dev=%d drive=%d sector=%lu\n",
 	       dev_type, dev_drive, sector);
-#if defined(CONFIG_IDE_NEW_DISK) || \
-	(defined(CONFIG_LIBPAYLOAD_STORAGE) && defined(CONFIG_LP_STORAGE))
+#if IS_ENABLED(CONFIG_IDE_NEW_DISK) || \
+	(IS_ENABLED(CONFIG_LIBPAYLOAD_STORAGE) && IS_ENABLED(CONFIG_LP_STORAGE))
       err_out:
 #endif
 	flush_cache();
