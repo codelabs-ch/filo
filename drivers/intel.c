@@ -210,6 +210,8 @@ int intel_lockdown_flash(void)
 		/* Since Cougar Point, coreboot uses flash regions,
 		   lock them and set up static SPI opcodes. */
 		lockdown_flash_ich9_lock_regions();
+		/* Also trigger coreboot's SMM finalize() handlers. */
+		outb(0xcb, 0xb2);
 		break;
 	default:
 		debug("Not a supported ICH or PCH southbridge\n");
