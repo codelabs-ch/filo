@@ -24,6 +24,7 @@
 
 #include <config.h>
 #include <fs.h>
+#include <flashlock.h>
 #include <lib.h>
 #include <grub/shared.h>
 #include <timer.h>

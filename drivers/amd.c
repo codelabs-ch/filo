@@ -20,6 +20,7 @@
 #include <libpayload.h>
 #include <config.h>
 #include <pci.h>
+#include <flashlock.h>
 
 #define DEBUG_THIS CONFIG_DEBUG_AMD
 #include <debug.h>

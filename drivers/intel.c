@@ -21,6 +21,7 @@
 #include <config.h>
 #include <pci/pci.h>
 #include <pci.h>
+#include <flashlock.h>
 
 #define DEBUG_THIS CONFIG_DEBUG_INTEL
 #include <debug.h>

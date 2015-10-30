@@ -24,7 +24,7 @@
 #include <config.h>
 #include <grub/shared.h>
 #include <fs.h>
-#include <lib.h>
+#include <flashlock.h>
 #include <timer.h>
 
 extern char config_file[];
@@ -42,10 +42,6 @@ char UNIQUE_BUF[UNIQUE_BUFLEN]; /* The buffer for the unique string.  */
 char KILL_BUF[KILL_BUFLEN]; /* The kill buffer for the command-line.  */
 char MENU_BUF[MENU_BUFLEN]; /* The buffer for the menu entries.  */
 static char configs[16384];
-
-#ifdef CONFIG_FLASHROM_LOCKDOWN
-int flashrom_lockdown = 1;
-#endif
 
 /* get_option() is currently only implemented on x86 */
 int __attribute__((weak)) get_option(void *dest, const char *name)

@@ -160,8 +160,6 @@ extern int max_lines;
 extern int count_lines;
 extern int use_pager;
 
-extern int flashrom_lockdown;
-
 /*
  *  Error variables.
  */

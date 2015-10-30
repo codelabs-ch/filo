@@ -30,6 +30,7 @@
 #include <coreboot_tables.h>
 #include <config.h>
 #include <fs.h>
+#include <flashlock.h>
 #include "context.h"
 #include "segment.h"
 
@@ -689,26 +690,8 @@ static void hardware_setup(void)
 	outb(0xFF, 0xA1);	/* mask off all interrupts for now */
 	outb(0xFB, 0x21);	/* mask all irq's but irq2 which is cascaded */
 
-#if IS_ENABLED(CONFIG_FLASHROM_LOCKDOWN)
-	/* lockdown flashROM */
-	extern int flashrom_lockdown;
-	extern int intel_lockdown_flash(void);
-	extern int amd_lockdown_flash(void);
-
-	if (flashrom_lockdown) {
-		printf("Locking system flash memory...\n");
-		if (intel_lockdown_flash() == 0) {
-			printf("done (Intel)\n");
-		} else if (amd_lockdown_flash() == 0) {
-			printf("done (AMD)\n");
-		} else {
-			printf("FAILED!\n");
-			delay(5);
-		}
-	} else {
-		printf("Leaving system flash memory unlocked...\n");
-	}
-#endif
+	if (IS_ENABLED(CONFIG_FLASHROM_LOCKDOWN))
+		lockdown_flash();
 }
 
 /* Start Linux */
