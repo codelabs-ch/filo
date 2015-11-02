@@ -213,7 +213,7 @@ static u32 load_linux_header(struct linux_header *hdr)
 	}
 
 	if (hdr->boot_sector_magic != 0xaa55) {
-		printf("Not a Linux kernel image\n");
+		debug("Not a Linux kernel image\n");
 		return 0;
 	}
 
