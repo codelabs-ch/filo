@@ -80,7 +80,7 @@ HOSTCXXFLAGS := -I$(srck) -I$(objk) -pipe
 
 ifeq ($(strip $(HAVE_DOTCONFIG)),)
 
-all: config
+all: defconfig
 include util/kconfig/Makefile
 
 else
