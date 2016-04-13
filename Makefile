@@ -26,9 +26,13 @@ export obj := $(src)/build
 export objk := $(src)/build/util/kconfig
 
 ifndef LIBCONFIG_PATH
-	LIBCONFIG_PATH := $(src)/../libpayload
+LIBCONFIG_PATH := $(src)/../coreboot/payloads/libpayload
 endif
 export LIBCONFIG_PATH
+
+ifeq ($(wildcard $(LIBCONFIG_PATH)/*),)
+$(error Could not find libpayload at $(LIBCONFIG_PATH))
+endif
 
 export KERNELVERSION      := $(PROGRAM_VERSION)
 export KCONFIG_AUTOHEADER := $(obj)/config.h
