@@ -100,6 +100,8 @@ LIBPAYLOAD = $(LIBPAYLOAD_PREFIX)/lib/libpayload.a
 INCPAYLOAD = $(LIBPAYLOAD_PREFIX)/include
 LIBGCC = $(shell $(CC) $(CFLAGS) -print-libgcc-file-name)
 GCCINCDIR = $(shell $(CC) -print-search-dirs | head -n 1 | cut -d' ' -f2)include
+LPGCC = $(LIBPAYLOAD_PREFIX)/bin/lpgcc
+LPAS = $(LIBPAYLOAD_PREFIX)/bin/lpas
 
 ARCHDIR-$(CONFIG_TARGET_I386) := x86
 
@@ -142,7 +144,7 @@ endif
 
 $(obj)/filo: $(OBJS) $(LIBPAYLOAD)
 	printf "  LD      $(subst $(shell pwd)/,,$(@))\n"
-	$(LD) -N -T $(ARCHDIR-y)/ldscript $(OBJS) --start-group $(LIBS) --end-group -o $@
+	CC=$(CC) $(LPGCC) $(OBJS) $(LIBS) -o $@
 
 $(obj)/filo.bzImage: $(TARGET) $(obj)/i386/linux_head.o
 	$(OBJCOPY) -O binary $(obj)/i386/linux_head.o $@.tmp1
@@ -162,11 +164,11 @@ $(KCONFIG_AUTOHEADER): $(src)/.config
 $(OBJS): $(KCONFIG_AUTOHEADER) $(obj)/version.h | libpayload
 $(obj)/%.o: $(src)/%.c
 	printf "  CC      $(subst $(shell pwd)/,,$(@))\n"
-	$(CC) -MMD $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
+	CC=$(CC) $(LPGCC) -MMD $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
 
 $(obj)/%.S.o: $(src)/%.S
 	printf "  AS      $(subst $(shell pwd)/,,$(@))\n"
-	$(AS) $(ASFLAGS) -o $@ $<
+	AS=$(AS) $(LPAS) $(ASFLAGS) -o $@ $<
 
 $(obj)/%.map: $(obj)/%
 	printf "  SYMS    $(subst $(shell pwd)/,,$(@))\n"
