@@ -4,13 +4,21 @@
 
 mainmenu "FILO Configuration"
 
-# When (if) we support multiple architectures, this will become an option.
+choice
+	prompt "Build for architecture"
+	default TARGET_I386
+
 config TARGET_I386
-	bool
-	default y
+	bool "x86"
+
+config TARGET_ARM
+	bool "ARM"
+
+endchoice
 
 config MULTIBOOT_IMAGE
 	bool "Include a MultiBoot header"
+	depends on TARGET_I386
 	default y
 	help
 	  Including a MultiBoot header makes FILO chainloadable by MultiBoot
@@ -103,6 +111,7 @@ menu "Drivers"
 
 config IDE_DISK
 	bool "IDE DISK support"
+	depends on TARGET_I386
 	default y
 	help
 	  Driver for hard disk, CompactFlash, and CD-ROM on IDE bus
@@ -138,6 +147,7 @@ config PCMCIA_CF
 
 config IDE_NEW_DISK
 	bool "New IDE driver"
+	depends on TARGET_I386
 	default n
 	depends on !IDE_DISK
 	help
@@ -165,6 +175,7 @@ config FLASH_DISK
 config SUPPORT_PCI
 	bool "PCI support"
 	default y
+	depends on TARGET_I386
 
 config PCI_BRUTE_SCAN
 	bool "Scan all PCI busses"
@@ -234,7 +245,7 @@ config FSYS_ISO9660
 config ELTORITO
 	bool "El Torito bootable CDROMs"
 	default y
-	depends on FSYS_ISO9660
+	depends on FSYS_ISO9660 && TARGET_I386
 	help
 	  Support for boot disk image in bootable CD-ROM (El Torito)
 

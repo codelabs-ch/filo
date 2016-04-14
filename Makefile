@@ -81,6 +81,8 @@ $(if $(wildcard .xcompile),,$(shell bash util/xcompile/xcompile > .xcompile))
 include .xcompile
 
 ARCH-$(CONFIG_TARGET_I386) := x86_32
+ARCH-$(CONFIG_TARGET_ARM) := arm
+
 CC := $(CC_$(ARCH-y))
 AS := $(AS_$(ARCH-y))
 LD := $(LD_$(ARCH-y))
@@ -104,6 +106,7 @@ LPGCC = $(LIBPAYLOAD_PREFIX)/bin/lpgcc
 LPAS = $(LIBPAYLOAD_PREFIX)/bin/lpas
 
 ARCHDIR-$(CONFIG_TARGET_I386) := x86
+ARCHDIR-$(CONFIG_TARGET_ARM) := arm
 
 CPPFLAGS := -nostdinc -imacros $(obj)/config.h
 CPPFLAGS += -I$(INCPAYLOAD) -I$(INCPAYLOAD)/$(ARCHDIR-y)
@@ -116,8 +119,7 @@ CFLAGS += $(call cc-option, -fno-stack-protector,)
 
 LIBS := $(LIBPAYLOAD) $(LIBGCC)
 
-SUBDIRS-y += main/ fs/ drivers/
-SUBDIRS-$(CONFIG_TARGET_I386) += x86/
+SUBDIRS-y += main fs drivers $(ARCHDIR-y)
 
 $(foreach subdir,$(SUBDIRS-y),$(eval include $(subdir)/Makefile.inc))
 

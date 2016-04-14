@@ -1030,6 +1030,7 @@ static struct builtin builtin_lock = {
 };
 
 #ifdef CONFIG_DEVELOPER_TOOLS
+#ifdef CONFIG_SUPPORT_PCI
 static int lspci_indent = 0;
 static void lspci_scan_bus(int bus)
 {
@@ -1139,6 +1140,7 @@ static struct builtin builtin_lspci = {
 	"Show PCI devices or dump PCI config space"
 };
 #endif
+#endif
 
 #ifdef CONFIG_USE_MD5_PASSWORDS
 /* md5crypt */
@@ -1194,6 +1196,7 @@ static struct builtin builtin_md5crypt = {
 #endif				/* CONFIG_USE_MD5_PASSWORDS */
 
 #if CONFIG_DEVELOPER_TOOLS
+#if CONFIG_TARGET_I386
 /* nvram */
 static int nvram_func(char *arg, int flags)
 {
@@ -1255,6 +1258,7 @@ static struct builtin builtin_nvram = {
 	"Change the coreboot nvram to boot the normal or fallback"
 	    "image on the next boot."
 };
+#endif
 #endif
 
 /* password */
@@ -1561,6 +1565,7 @@ static struct builtin builtin_serial = {
 };
 
 #ifdef CONFIG_DEVELOPER_TOOLS
+#ifdef CONFIG_SUPPORT_PCI
 static int setpci_func(char *arg, int flags)
 {
 	char *walk = arg;
@@ -1715,6 +1720,7 @@ static struct builtin builtin_setpci = {
 	"setpci <device>[.bwl][=value]",
 	"Show/change PCI config space values"
 };
+#endif
 #endif
 
 /* terminal */
@@ -1945,13 +1951,17 @@ struct builtin *builtin_table[] = {
 	&builtin_keymap,
 	&builtin_lock,
 #ifdef CONFIG_DEVELOPER_TOOLS
+#ifdef CONFIG_SUPPORT_PCI
 	&builtin_lspci,
+#endif
 #endif
 #ifdef CONFIG_USE_MD5_PASSWORDS
 	&builtin_md5crypt,
 #endif
 #ifdef CONFIG_DEVELOPER_TOOLS
+#ifdef CONFIG_TARGET_I386
 	&builtin_nvram,
+#endif
 #endif
 	&builtin_password,
 	&builtin_pause,
@@ -1963,7 +1973,9 @@ struct builtin *builtin_table[] = {
 	&builtin_root,
 	&builtin_serial,
 #ifdef CONFIG_DEVELOPER_TOOLS
+#ifdef CONFIG_SUPPORT_PCI
 	&builtin_setpci,
+#endif
 #endif
 	&builtin_terminal,
 	&builtin_timeout,

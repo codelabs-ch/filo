@@ -47,6 +47,12 @@ static char configs[16384];
 int flashrom_lockdown = 1;
 #endif
 
+/* get_option() is currently only implemented on x86 */
+int __attribute__((weak)) get_option(void *dest, const char *name)
+{
+	return 1;
+}
+
 int using_grub_interface = 0;
 
 #define ENTER '\r'
