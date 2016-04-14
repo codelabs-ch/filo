@@ -40,6 +40,7 @@ export KCONFIG_NEGATIVES := 1
 export KCONFIG_CONFIG := .config
 
 CONFIG_SHELL := sh
+CONFIG_COMPILER_GCC=y
 KBUILD_DEFCONFIG := configs/defconfig
 UNAME_RELEASE := $(shell uname -r)
 HAVE_DOTCONFIG := $(wildcard .config)
@@ -62,17 +63,6 @@ try-run = $(shell set -e;		\
 	fi;				\
 	rm -rf "$$TMP")
 
-cc-option = $(call try-run,$(CC) $(1) -S -xc /dev/null -o "$$TMP",$(1),$(2))
-
-$(if $(wildcard .xcompile),,$(shell bash util/xcompile/xcompile > .xcompile))
-include .xcompile
-
-CROSS_PREFIX ?=
-CC ?= $(CROSS_PREFIX)gcc -m32
-AS ?= $(CROSS_PREFIX)as --32
-LD ?= $(CROSS_PREFIX)ld -belf32-i386
-NM ?= $(CROSS_PREFIX)nm
-STRIP ?= $(CROSS_PREFIX)strip
 HOSTCC ?= gcc
 HOSTCXX ?= g++
 HOSTCFLAGS := -I$(srck) -I$(objk) -pipe
@@ -86,6 +76,24 @@ include util/kconfig/Makefile
 else
 
 include $(src)/.config
+
+$(if $(wildcard .xcompile),,$(shell bash util/xcompile/xcompile > .xcompile))
+include .xcompile
+
+ARCH-$(CONFIG_TARGET_I386) := x86_32
+CC := $(CC_$(ARCH-y))
+AS := $(AS_$(ARCH-y))
+LD := $(LD_$(ARCH-y))
+NM := $(NM_$(ARCH-y))
+OBJCOPY := $(OBJCOPY_$(ARCH-y))
+OBJDUMP := $(OBJDUMP_$(ARCH-y))
+READELF := $(READELF_$(ARCH-y))
+STRIP := $(STRIP_$(ARCH-y))
+AR := $(AR_$(ARCH-y))
+
+CFLAGS += $(CFLAGS_$(ARCH-y))
+
+cc-option = $(call try-run,$(CC) $(1) -S -xc /dev/null -o "$$TMP",$(1),$(2))
 
 LIBPAYLOAD_PREFIX ?= $(obj)/libpayload
 LIBPAYLOAD = $(LIBPAYLOAD_PREFIX)/lib/libpayload.a
@@ -107,7 +115,7 @@ CFLAGS += $(call cc-option, -fno-stack-protector,)
 LIBS := $(LIBPAYLOAD) $(LIBGCC)
 
 SUBDIRS-y += main/ fs/ drivers/
-SUBDIRS-y += $(ARCHDIR-y)/
+SUBDIRS-$(CONFIG_TARGET_I386) += x86/
 
 $(foreach subdir,$(SUBDIRS-y),$(eval include $(subdir)/Makefile.inc))
 
@@ -125,7 +133,7 @@ else
 libpayload: $(LIBPAYLOAD)
 $(LIBPAYLOAD): $(src)/$(LIB_CONFIG)
 	@printf "Building libpayload...\n"
-	$(MAKE) -C $(LIBCONFIG_PATH) obj=$(obj)/libpayload-build distclean
+	CROSS_COMPILE_$(ARCH-y)=$(CROSS_COMPILE_$(ARCH-y)) $(MAKE) -C $(LIBCONFIG_PATH) obj=$(obj)/libpayload-build distclean
 	cp lib.config $(LIBCONFIG_PATH)/.config
 	mkdir -p $(LIBCONFIG_PATH)/build
 	$(MAKE) -C $(LIBCONFIG_PATH) obj=$(obj)/libpayload-build oldconfig
