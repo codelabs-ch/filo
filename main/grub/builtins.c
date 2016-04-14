@@ -458,6 +458,7 @@ static struct builtin builtin_dumpmem = {
 	"Dump memory"
 };
 
+#if CONFIG_TARGET_I386
 /* dumppm */
 static int dumppm_func(char *arg, int flags)
 {
@@ -505,6 +506,7 @@ static struct builtin builtin_dumppm = {
 	"dumppm",
 	"Dump Powermanagement registers"
 };
+#endif
 #endif
 
 #if CONFIG_EXPERIMENTAL
@@ -857,6 +859,7 @@ static struct builtin builtin_initrd = {
 
 
 #ifdef CONFIG_DEVELOPER_TOOLS
+#ifdef CONFIG_TARGET_I386
 /* io */
 static int io_func(char *arg, int flags)
 {
@@ -963,6 +966,7 @@ static struct builtin builtin_io = {
 	"io port[.bwl][=val]",
 	"Read/write IO ports."
 };
+#endif
 #endif
 
 /* kernel */
@@ -1919,7 +1923,9 @@ struct builtin *builtin_table[] = {
 	&builtin_default,
 #ifdef CONFIG_DEVELOPER_TOOLS
 	&builtin_dumpmem,
+#ifdef CONFIG_TARGET_I386
 	&builtin_dumppm,
+#endif
 #endif
 #ifdef CONFIG_EXPERIMENTAL
 	&builtin_find,
@@ -1931,7 +1937,9 @@ struct builtin *builtin_table[] = {
 	&builtin_hiddenmenu,
 	&builtin_initrd,
 #ifdef CONFIG_DEVELOPER_TOOLS
+#ifdef CONFIG_TARGET_I386
 	&builtin_io,
+#endif
 #endif
 	&builtin_kernel,
 	&builtin_keymap,
