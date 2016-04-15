@@ -23,38 +23,6 @@
 #include <config.h>
 #include <fs.h>
 
-#if defined(__i386__)
-/*
- * ffz = Find First Zero in word. Undefined if no zero exists,
- * so code should check against ~0UL first..
- */
-static inline unsigned long ffz (unsigned long word)
-{
-	__asm__ ("bsfl %1,%0"
-			: "=r" (word)
-			: "r" (~word));
-  return word;
-}
-#elif defined(__ppc__)
-static inline unsigned long __ilog2(unsigned long x)
-{
-	unsigned long lz;
-	asm ("cntlzw %0,%1" : "=r" (lz) : "r" (x));
-	return 31 - lz;
-}
-
-static inline unsigned long ffz(unsigned long x)
-{
-	if ((x = ~x) == 0)
-		return 32;
-
-	return __ilog2(x & -x);
-}
-#endif
-
-#define log2(n) ffz(~(n))
-
-
 static inline int
 substring (const char *s1, const char *s2)
 {
