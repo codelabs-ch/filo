@@ -18,20 +18,18 @@
  */
 
 #include <libpayload.h>
-#include <arch/rdtsc.h>
-#include <arch/timer.h>
+#include <timer.h>
 
 u64 currticks(void)
 {
-	/* Read the Time Stamp Counter */
-	return  rdtsc();
+	return timer_raw_value();
 }
 
 int getrtsecs (void)
 {
 	u64 t;
-	t=currticks();
-	t=t/(TICKS_PER_SEC);
+	t=timer_raw_value();
+	t=t / timer_hz();
 	return (int)t;
 }
 

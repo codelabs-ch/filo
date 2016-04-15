@@ -26,7 +26,7 @@
 #include <fs.h>
 #include <lib.h>
 #include <grub/shared.h>
-#include <arch/timer.h>
+#include <timer.h>
 #ifdef CONFIG_USE_MD5_PASSWORDS
 #include <grub/md5.h>
 #endif

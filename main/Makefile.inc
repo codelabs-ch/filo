@@ -20,5 +20,6 @@ include main/grub/Makefile.inc
 
 TARGETS-y += main/filo.o main/strtox.o
 TARGETS-y += main/elfload.o main/ipchecksum.o 
+TARGETS-y += main/timer.o
 TARGETS-$(CONFIG_SUPPORT_SOUND) += main/sound.o
 TARGETS-$(CONFIG_MULTIBOOT_IMAGE) += main/mb_hdr.o

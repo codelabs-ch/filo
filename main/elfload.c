@@ -22,7 +22,7 @@
 
 #include <libpayload.h>
 #include <config.h>
-#include <arch/timer.h>
+#include <timer.h>
 #include <sys_info.h>
 #include <elf.h>
 #include <arch/elf.h>
@@ -139,7 +139,7 @@ static int load_segments(Elf_phdr *phdr, int phnum,
 
     bytes = 0;
 #if defined(DEBUG) && (DEBUG == 1)
-    u64 start_time = currticks();
+    u64 start_time = timer_raw_value();
 #endif
     for (i = 0; i < phnum; i++) {
 	if (phdr[i].p_type != PT_LOAD)
@@ -167,8 +167,8 @@ static int load_segments(Elf_phdr *phdr, int phnum,
 
     }
 #if defined(DEBUG) && (DEBUG == 1)
-    u64 time = currticks() - start_time;
-    debug("Loaded %lu bytes in %ums (%luKB/s)\n", bytes, time,
+    u64 time = (timer_raw_value() - start_time) / (timer_hz() * 1000);
+    debug("Loaded %lu bytes in %lldms (%luKB/s)\n", bytes, time,
 	    time? bytes/time : 0);
 #endif
     return 1;

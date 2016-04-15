@@ -25,7 +25,7 @@
 #include <grub/shared.h>
 #include <fs.h>
 #include <lib.h>
-#include <arch/timer.h>
+#include <timer.h>
 
 extern char config_file[];
 extern int reload_configfile;

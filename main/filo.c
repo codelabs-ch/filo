@@ -23,7 +23,7 @@
 #include <fs.h>
 #include <sys_info.h>
 #include <sound.h>
-#include <arch/timer.h>
+#include <timer.h>
 #include <debug.h>
 
 PAYLOAD_INFO(name, PROGRAM_NAME " " PROGRAM_VERSION);

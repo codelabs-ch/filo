@@ -20,12 +20,12 @@
 #ifndef	TIMER_H
 #define TIMER_H
 
-extern u32 cpu_khz;
+#include <libpayload.h>
 
 u64 currticks(void);
 int getrtsecs (void);
 
-#define TICKS_PER_SEC (cpu_khz * 1000)
+#define TICKS_PER_SEC timer_hz()
 #define TICKS_PER_USEC (cpu_khz / 1000)
 
 
