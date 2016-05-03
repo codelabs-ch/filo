@@ -74,8 +74,6 @@ substring (const char *s1, const char *s2)
   return 1;
 }
 
-#define grub_memmove memmove
-
 #define MAXINT 0x7fffffff
 
 /* This is only used by fsys_* to determine if it's hard disk. If it is,

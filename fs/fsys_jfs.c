@@ -291,7 +291,7 @@ jfs_dir (char *dirname)
 				return 0;
 			}
 			if (di_size < (di_mode & INLINEEA ? 256 : 128)) {
-				grub_memmove (linkbuf, inode->di_fastsymlink, di_size);
+				memmove (linkbuf, inode->di_fastsymlink, di_size);
 				n = di_size;
 			} else if (di_size < JFS_PATH_MAX - 1) {
 				filepos = 0;
