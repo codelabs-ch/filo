@@ -339,7 +339,7 @@ cramfs_dir(char *dirname)
 			linkbuf[filemax + len] = '\0';
 
 			/* Read the necessary blocks, and reset the file pointer. */
-			len = grub_read(linkbuf, filemax);
+			len = file_read(linkbuf, filemax);
 			filepos = 0;
 			if (!len)
 				return 0;

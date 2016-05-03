@@ -136,11 +136,6 @@ typedef enum
 
 extern grub_error_t errnum;
 
-#define grub_open file_open
-#define grub_read file_read
-#define grub_seek file_seek
-#define grub_close file_close
-
 /* instrumentation variables */
 /* (Not used in FILO) */
 extern void (*disk_read_hook) (int, int, int);

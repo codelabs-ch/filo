@@ -942,7 +942,7 @@ ext2fs_dir (char *dirname)
 
 	  /* Read the symlink data. 
 	   * Slow symlink is extents enabled
-	   * But since grub_read invokes ext2fs_read, nothing to change here
+	   * But since file_read invokes ext2fs_read, nothing to change here
 	   * */
 	  if (! ext2_is_fast_symlink ())
 	    {
