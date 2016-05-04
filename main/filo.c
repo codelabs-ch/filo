@@ -116,7 +116,7 @@ int boot(const char *line)
     /* If the boot command is successful, the loader
      * function will not return.
      *
-     * If the loader is not supported, or it recognized 
+     * If the loader is not supported, or it recognized
      * that it does not match for the given file type, it
      * will return LOADER_NOT_SUPPORT.
      *
@@ -153,12 +153,12 @@ int main(void)
 {
     void grub_menulst(void);
     void grub_main(void);
-    
+
     /* Initialize */
     init();
     grub_menulst();
     grub_main();
-    return 0;   
+    return 0;
 }
 
 #else // ! CONFIG_USE_GRUB
@@ -174,7 +174,7 @@ static inline int autoboot_delay(void)
     u64 timeout;
     int sec, tmp;
     char key;
-    
+
     key = 0;
 
     printf("Press <Enter> for default boot, or <Esc> for boot prompt... ");
@@ -227,7 +227,7 @@ int main(void)
 
     /* Initialize */
     init();
-    
+
     /* Try default image */
     autoboot();
 

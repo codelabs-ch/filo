@@ -104,7 +104,7 @@ int main(int argc, char **argv){
 				verbose = 1;
 				break;
 		}
-	}				
+	}
 	if(!BINFILE){
 		usage();
 		printf("\nError: No output file specified\n\n");
@@ -147,7 +147,7 @@ int main(int argc, char **argv){
 	fwrite(&bootHdr, 1, sizeof(ARTECBOOT_HEADER), BINFILE);
 	fseek(BINFILE, bootHdr.kernelStart, SEEK_SET);
 
-	/* Copy kernel into output file */	
+	/* Copy kernel into output file */
 	fseek(KERNFILE, 0, SEEK_SET);
 	while((i = fread(&buf, 1, BUFSIZE, KERNFILE)) != 0){
 		fwrite(&buf, 1, i, BINFILE);
@@ -166,7 +166,7 @@ int main(int argc, char **argv){
 	}
 
 	fclose(BINFILE);
-	
+
 	if(verbose){
 		printf("magicHeader: 0x%04lx\n", bootHdr.magicHeader);
 		printf("bootVersion: 0x%04x\n", bootHdr.bootVersion);

@@ -592,10 +592,10 @@ static int load_initrd(struct linux_header *hdr,
 #if 0
 		else {
 			/* Otherwise, see if we can put it above us.
-			 * 
+			 *
 			 *   This would be a good idea if we could easily find
 			 *   out where the memory hole lives.
-			 *   
+			 *
 			 *   There's nothing wrong with the initrd living below
 			 *   FILO. (stepan)
 			 *
@@ -650,7 +650,7 @@ static void hardware_setup(void)
 
 	/* we're getting screwed again and again by this problem of the 8259.
 	 * so we're going to leave this lying around for inclusion into crt0.S
-	 * on an as-needed basis. 
+	 * on an as-needed basis.
 	 *
 	 * well, that went ok, I hope. Now we have to reprogram the interrupts
 	 * :-(
@@ -721,8 +721,8 @@ static int start_linux(u32 kern_addr, struct linux_params *params)
 	linux_gdt[2] = gdt[FLAT_CODE];
 	linux_gdt[3] = gdt[FLAT_DATA];
 	/* 2.6 kernel uses 12 and 13, but head.S uses backward-compatible
-	 * segments (2 and 3), so it SHOULD not be a problem. 
-	 * However, some distro kernels (eg. RH9) with backported threading 
+	 * segments (2 and 3), so it SHOULD not be a problem.
+	 * However, some distro kernels (eg. RH9) with backported threading
 	 * patch use 12 and 13 also when booting... */
 	linux_gdt[12] = gdt[FLAT_CODE];
 	linux_gdt[13] = gdt[FLAT_DATA];

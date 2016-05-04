@@ -85,7 +85,7 @@ struct ext2_super_block
 	 * the incompatible feature set is that if there is a bit set
 	 * in the incompatible feature set that the kernel doesn't
 	 * know about, it should refuse to mount the filesystem.
-	 * 
+	 *
 	 * e2fsck's requirements are more strict; if it doesn't know
 	 * about a feature in either the compatible or incompatible
 	 * feature set, it must abort and not try to meddle with
@@ -268,11 +268,11 @@ struct ext2_dir_entry
     char name[EXT2_NAME_LEN];	/* File name */
   };
 
-/* linux/ext4_fs_extents.h */ 
+/* linux/ext4_fs_extents.h */
 /* This is the extent on-disk structure.
  * It's used at the bottom of the tree.
  */
-struct ext4_extent 
+struct ext4_extent
   {
 	__u32  ee_block;   /* first logical block extent covers */
 	__u16  ee_len;     /* number of blocks covered by extent */
@@ -284,7 +284,7 @@ struct ext4_extent
  * This is index on-disk structure.
  * It's used at all the levels except the bottom.
  */
-struct ext4_extent_idx 
+struct ext4_extent_idx
   {
     __u32  ei_block;   /* index covers logical blocks from 'block' */
     __u32  ei_leaf_lo; /* pointer to the physical block of the next *
@@ -296,7 +296,7 @@ struct ext4_extent_idx
 /*
  * Each block (leaves and indexes), even inode-stored has header.
  */
-struct ext4_extent_header 
+struct ext4_extent_header
   {
     __u16  eh_magic;   /* probably will support different formats */
     __u16  eh_entries; /* number of valid entries */
@@ -369,8 +369,8 @@ struct ext4_extent_header
 /* kind of from ext2/super.c */
 #define EXT2_BLOCK_SIZE(s)	(1 << EXT2_BLOCK_SIZE_BITS(s))
 /* linux/ext2fs.h */
-/* bergwolf: sizeof(struct ext2_group_desc) is changed in ext4 
- * in kernel code, ext2/3 uses sizeof(struct ext2_group_desc) to calculate 
+/* bergwolf: sizeof(struct ext2_group_desc) is changed in ext4
+ * in kernel code, ext2/3 uses sizeof(struct ext2_group_desc) to calculate
  * number of desc per block, while ext4 uses superblock->s_desc_size in stead
  * superblock->s_desc_size is not available in ext2/3
  * */
@@ -437,7 +437,7 @@ dump_inode(struct ext2_inode *i)
     printf("  flags=%d\n", le32toh(i->i_flags));
 }
 
-void 
+void
 dump_inode_data(unsigned char *inode, int len)
 {
   static char hexdigit[] = "0123456789abcdef";
@@ -485,8 +485,8 @@ static int
 ext2_rdfsb (int fsblock, void * buffer)
 {
 #ifdef E2DEBUG
-  printf ("ext2_rdfsb: fsblock %d, devblock %d, size %d\n", fsblock, 
-	  fsblock * (EXT2_BLOCK_SIZE (SUPERBLOCK) / DEV_BSIZE), 
+  printf ("ext2_rdfsb: fsblock %d, devblock %d, size %d\n", fsblock,
+	  fsblock * (EXT2_BLOCK_SIZE (SUPERBLOCK) / DEV_BSIZE),
 	  EXT2_BLOCK_SIZE (SUPERBLOCK));
 #endif /* E2DEBUG */
   return devread (fsblock * (EXT2_BLOCK_SIZE (SUPERBLOCK) / DEV_BSIZE), 0,
@@ -593,7 +593,7 @@ ext4_ext_binsearch_idx(struct ext4_extent_header* eh, int logical_block)
   struct ext4_extent_idx *r, *l, *m;
   l = EXT_FIRST_INDEX(eh) + 1;
   r = EXT_LAST_INDEX(eh);
-  while (l <= r) 
+  while (l <= r)
     {
 	  m = l + (r - l) / 2;
 	  if (logical_block < m->ei_block)
@@ -604,8 +604,8 @@ ext4_ext_binsearch_idx(struct ext4_extent_header* eh, int logical_block)
   return (struct ext4_extent_idx*)(l - 1);
 }
 
-/* extent binary search 
- * find closest extent in the leaf level 
+/* extent binary search
+ * find closest extent in the leaf level
  * kind of from ext4_ext_binsearch in ext4/extents.c
  */
 static struct ext4_extent*
@@ -614,7 +614,7 @@ ext4_ext_binsearch(struct ext4_extent_header* eh, int logical_block)
   struct ext4_extent *r, *l, *m;
   l = EXT_FIRST_EXTENT(eh) + 1;
   r = EXT_LAST_EXTENT(eh);
-  while (l <= r) 
+  while (l <= r)
     {
 	  m = l + (r - l) / 2;
 	  if (logical_block < m->ee_block)
@@ -625,7 +625,7 @@ ext4_ext_binsearch(struct ext4_extent_header* eh, int logical_block)
   return (struct ext4_extent*)(l - 1);
 }
 
-/* Maps extents enabled logical block into physical block via an inode. 
+/* Maps extents enabled logical block into physical block via an inode.
  * EXT4_HUGE_FILE_FL should be checked before calling this.
  */
 static int
@@ -685,7 +685,7 @@ ext4fs_block_map (int logical_block)
 
   /* depth==0, we come to the leaf */
   ex = ext4_ext_binsearch(eh, logical_block);
-  if (ex->ee_start_hi) 
+  if (ex->ee_start_hi)
 	{/* 64bit physical block number not supported */
 	  errnum = ERR_FILELENGTH;
 	  return -1;
@@ -720,7 +720,7 @@ ext2fs_read (char *buf, int len)
       logical_block = filepos >> EXT2_BLOCK_SIZE_BITS (SUPERBLOCK);
       offset = filepos & (EXT2_BLOCK_SIZE (SUPERBLOCK) - 1);
       /* map logical block of an extents enabled file into a physical block on the disk */
-      if (EXT4_HAS_INCOMPAT_FEATURE(SUPERBLOCK,EXT4_FEATURE_INCOMPAT_EXTENTS) 
+      if (EXT4_HAS_INCOMPAT_FEATURE(SUPERBLOCK,EXT4_FEATURE_INCOMPAT_EXTENTS)
                     && INODE->i_flags & EXT4_EXTENTS_FL)
           map = ext4fs_block_map (logical_block);
       else
@@ -859,7 +859,7 @@ ext2fs_dir (char *dirname)
 
 #ifdef E2DEBUG
       dump_group_desc(GROUP_DESC);
-#endif /* E2DEBUG */	
+#endif /* E2DEBUG */
 
       ext4_gdp = (struct ext4_group_desc *)( (__u8*)GROUP_DESC +
 		      desc * EXT2_DESC_SIZE(SUPERBLOCK));
@@ -869,7 +869,7 @@ ext2fs_dir (char *dirname)
 	  errnum = ERR_FILELENGTH;
 	  return -1;
         }
-      ino_blk = ext4_gdp->bg_inode_table + 
+      ino_blk = ext4_gdp->bg_inode_table +
 	(((current_ino - 1) % le32toh(SUPERBLOCK->s_inodes_per_group))
 	 >> log2 (EXT2_INODES_PER_BLOCK (SUPERBLOCK)));
 #ifdef E2DEBUG
@@ -940,7 +940,7 @@ ext2fs_dir (char *dirname)
 	    }
 	  linkbuf[filemax + len] = '\0';
 
-	  /* Read the symlink data. 
+	  /* Read the symlink data.
 	   * Slow symlink is extents enabled
 	   * But since file_read invokes ext2fs_read, nothing to change here
 	   * */
@@ -954,7 +954,7 @@ ext2fs_dir (char *dirname)
 	    }
 	  else
 	    {
-	      /* Copy the data directly from the inode. 
+	      /* Copy the data directly from the inode.
 		   * Fast symlink is not extents enabled
 		   * */
 	      len = filemax;
@@ -1067,7 +1067,7 @@ ext2fs_dir (char *dirname)
 	  printf ("ext2fs_dir: fs block=%ld\n", map);
 #endif /* E2DEBUG */
 	  mapblock2 = -1;
-	  if (map < 0) 
+	  if (map < 0)
 	    {
 	      *rest = ch;
 	      return 0;

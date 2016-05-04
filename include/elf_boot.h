@@ -16,8 +16,8 @@
  */
 
 
-#ifndef ELF_BOOT_H 
-#define ELF_BOOT_H 
+#ifndef ELF_BOOT_H
+#define ELF_BOOT_H
 
 
 /* This defines the structure of a table of parameters useful for ELF
@@ -52,7 +52,7 @@ typedef struct Elf_Bhdr
 	Elf_Half b_records;
 } Elf_Bhdr;
 
-/* 
+/*
  * ELF Notes.
  */
 

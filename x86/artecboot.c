@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- *	FILO Artecboot loader, enables multiboot through custom header 
+ *	FILO Artecboot loader, enables multiboot through custom header
  *
  *	Copyright 2006 Andrei Birjukov <andrei.birjukov@artecdesign.ee> and
  *	Artec Design LLC http://www.artecdesign.ee
@@ -39,7 +39,7 @@ int artecboot_load(const char *file, const char *cmdline)
 	printf("Starting the Artecboot loader...\n");
 	// clear the boot header
 	memset(&bootHdr, 0, sizeof(bootHdr));
-	
+
 	// try opening the boot parameter file
 	if (!file_open(file))
 	{
@@ -48,7 +48,7 @@ int artecboot_load(const char *file, const char *cmdline)
 	}
 
 	file_seek(0);	// seek to the beginning of the parameter file
-	
+
 	// now read out the boot header
 	if(file_read(&bootHdr, sizeof(ARTECBOOT_HEADER)) != sizeof(ARTECBOOT_HEADER))
 	{
@@ -56,7 +56,7 @@ int artecboot_load(const char *file, const char *cmdline)
 		file_close();
 		return LOADER_NOT_SUPPORT;
 	}
-	
+
 	// check whether the parameter data is valid at all
 	if(bootHdr.magicHeader != ARTECBOOT_HEADER_MAGIC)
 	{
@@ -72,7 +72,7 @@ int artecboot_load(const char *file, const char *cmdline)
 		file_close();
 		return LOADER_NOT_SUPPORT;
 	}
-	
+
 	// shall we replace the command line?
 	if(bootHdr.bitFlags & FLAG_CMDLINE)
 	{
@@ -89,9 +89,9 @@ int artecboot_load(const char *file, const char *cmdline)
 				break;
 			}
 	}
-	else if(cmdline) 
+	else if(cmdline)
 		strncpy(bootHdr.cmdLine, cmdline, sizeof(bootHdr.cmdLine));
-	
+
 	// proceed basing on the specified OS type
 	switch(bootHdr.osType)
 	{
@@ -102,58 +102,58 @@ int artecboot_load(const char *file, const char *cmdline)
 			if(bootHdr.bitFlags & FLAG_FILESYSTEM)
 			{
 				// we are using a real filesystem, so format the initrd file as usually
-				sprintf(initrdParam, " initrd=%s", bootHdr.initrdFile); 
+				sprintf(initrdParam, " initrd=%s", bootHdr.initrdFile);
 			}
 			else
 			{
 				// we are using a 'fake' filesystem, so use the image offset
 				sprintf(initrdParam, " initrd=%s@0x%x,0x%x",
 						dev_name, bootHdr.initrdStart, bootHdr.initrdSize);
-			}			
+			}
 
-			debug("adding initrd parameter: %s\n", initrdParam); 
+			debug("adding initrd parameter: %s\n", initrdParam);
 			strncat(bootHdr.cmdLine, initrdParam, sizeof(bootHdr.cmdLine));
 		}
-	
+
 		printf("Starting Linux loader...\n");
 
-		// if using a real filesystem, load the kernel image from a specified file		
+		// if using a real filesystem, load the kernel image from a specified file
 		if(bootHdr.bitFlags & FLAG_FILESYSTEM)
 			linux_load(bootHdr.kernelFile, bootHdr.cmdLine);
 		// if using a 'fake' filesystem, consider reading from the same image
 		else
 		{
-			part_start = bootHdr.kernelStart >> DEV_SECTOR_BITS;	
+			part_start = bootHdr.kernelStart >> DEV_SECTOR_BITS;
 			part_length = ((bootHdr.kernelSize-1) >> DEV_SECTOR_BITS) + 1;
 			filemax = bootHdr.kernelSize;
 			using_devsize = 0;
 			linux_load(file, bootHdr.cmdLine);
 		}
-	
+
 		break;
-		
+
 	case OS_WINCE:
 
 		printf("Starting Windows CE loader...\n");
-		// if using a real filesystem, load the kernel image from a specified file		
+		// if using a real filesystem, load the kernel image from a specified file
 		if(bootHdr.bitFlags & FLAG_FILESYSTEM)
 			wince_load(bootHdr.kernelFile, bootHdr.cmdLine);
 		// if using a 'fake' filesystem, consider reading from the same image
 		else
 		{
-			part_start = bootHdr.kernelStart >> DEV_SECTOR_BITS;	
+			part_start = bootHdr.kernelStart >> DEV_SECTOR_BITS;
 			part_length = ((bootHdr.kernelSize-1) >> DEV_SECTOR_BITS) + 1;
-			filemax = bootHdr.kernelSize;	
+			filemax = bootHdr.kernelSize;
 			wince_load(file, bootHdr.cmdLine);
 		}
 
-		break;	
-		
+		break;
+
 	default:
 		printf("Boot error: unknown OS type, aborting: %d\n", bootHdr.osType);
 		return LOADER_NOT_SUPPORT;
 	}
-	
+
 	file_close();
 	return 0;
 }

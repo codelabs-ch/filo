@@ -155,7 +155,7 @@ static int load_segments(Elf_phdr *phdr, int phnum,
 	}
 	bytes += phdr[i].p_filesz;
 	debug("clearing... ");
-	memset(phys_to_virt(phdr[i].p_paddr + phdr[i].p_filesz), 0, 
+	memset(phys_to_virt(phdr[i].p_paddr + phdr[i].p_filesz), 0,
 		phdr[i].p_memsz - phdr[i].p_filesz);
 	if (phdr[i].p_offset <= checksum_offset
 		&& phdr[i].p_offset + phdr[i].p_filesz >= checksum_offset+2) {
@@ -364,7 +364,7 @@ int elf_load(const char *filename, const char *cmdline)
     }
 
     file_close();
-    
+
     boot_notes = build_boot_notes(cmdline);
 
 #if CONFIG_PCMCIA_CF

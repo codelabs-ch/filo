@@ -22,12 +22,12 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
- 
+
 #define NO_ERROR 0
 #define COMP_UNKNOWN 1	 /* The specififed bytype is invalid */
 #define CODE_NOT_FOUND 2 /* a huffman code in the stream could not be decoded */
-#define TOO_MANY_BITS 3	 /* pull_bits was passed an argument that is too 
-			  * large */ 
+#define TOO_MANY_BITS 3	 /* pull_bits was passed an argument that is too
+			  * large */
 
 /* This struct represents an entire huffman code set. It has various lookup
  * tables to speed decoding */
@@ -60,18 +60,18 @@ struct bitstream {
 	int  code_pos[8];
 	int  code_lengths[19];
 	int  code_symbols[19];
-	
+
 	int  length_count[16];
 	int  length_first[16];
 	int  length_pos[16];
 	int  length_lengths[288];
 	int  length_symbols[288];
-	
+
 	struct huffman_set codes;
 	struct huffman_set lengths;
 	struct huffman_set distance;
 };
-	
+
 #define NO_COMP 0
 #define FIXED_COMP 1
 #define DYNAMIC_COMP 2

@@ -35,7 +35,7 @@ static ARTECBOOT_HEADER bootHdr;
 static uint32_t fileStart = 0;
 
 // device read helper, calls the block device read function
-// returns number of bytes parsed fthe stream 
+// returns number of bytes parsed fthe stream
 
 int aboot_devread(char* pData, int nSize)
 {
@@ -45,7 +45,7 @@ int aboot_devread(char* pData, int nSize)
 
 	uint32_t sector = (fileStart + filepos) >> DEV_SECTOR_BITS;
 	uint32_t byteOffset = (fileStart + filepos) & DEV_SECTOR_MASK;
-	
+
 	debug("file start %x, sector %x, offset %d\n", fileStart, sector, byteOffset);
 
 	if (sector + ((nSize + DEV_SECTOR_MASK) >> DEV_SECTOR_BITS) > part_length)
@@ -63,7 +63,7 @@ int aboot_devread(char* pData, int nSize)
 			debug("sector 0x%x read failed\n", sector);
 			// do not abort immediately, try some more
 			if((failCount --) == 0) return 0;
-			
+
 			sector ++;	// try the next sector
 			total += DEV_SECTOR_SIZE;
 			continue;
@@ -73,10 +73,10 @@ int aboot_devread(char* pData, int nSize)
 		if (len > nSize)
 			len = nSize;
 		memcpy(pData, sectorBuf + byteOffset, len);
-		
+
 		sector ++;
 		byteOffset = 0;
-		
+
 		nSize -= len;
 		pData += len;
 		total += len;
@@ -91,10 +91,10 @@ int aboot_mount(void)
 	debug("Mounting Artecboot VFS...\n");
 	// clear the boot header
 	memset(&bootHdr, 0, sizeof(bootHdr));
-	
+
 	fileStart = 0;
 	filepos = 0;
-	
+
 	// now read out the boot header
 	if(aboot_devread((char*)&bootHdr, sizeof(ARTECBOOT_HEADER)) < sizeof(ARTECBOOT_HEADER))
 	{
@@ -130,9 +130,9 @@ int aboot_read(char *buf, int len)
 
 	read = aboot_devread(buf, len);
 	filepos += read;	// advance current position
-	
+
 	debug("read %d bytes, pos %x\n", read, filepos);
-	
+
 	// returned length may be greater than requested size because of skipped bad blocks
 	if(read >= len) return len;
 	return 0;
@@ -143,7 +143,7 @@ int aboot_dir(char *dirname)
 	int nRet = 0;
 	// sanity check
 	if(bootHdr.magicHeader != ARTECBOOT_HEADER_MAGIC) return 0;
-	
+
 	// we can only recognize certain hardcoded filenames
 	if(!strcmp(dirname, ABOOT_FILE_HEADER))
 	{
@@ -173,7 +173,7 @@ int aboot_dir(char *dirname)
 		filemax = 0;
 		nRet = 0;
 	}
-	
+
 	debug("open file: %s, size %d, dev start %x\n", dirname, filemax, fileStart);
 	return nRet;
 }

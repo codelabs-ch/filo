@@ -1,6 +1,6 @@
 /*
  *   OpenBIOS polled ide driver
- *   
+ *
  *   Copyright (C) 2004 Jens Axboe <axboe@suse.de>
  *   Copyright (C) 2005 Stefan Reinauer <stepan@openbios.org>
  *   Copyright (C) 2009-2010 coresystems GmbH
@@ -357,7 +357,7 @@ ob_ide_pio_data_in(struct ide_drive *drive, struct ata_command *cmd)
 		cmd->stat = stat;
 		return 1;
 	}
-				
+
 	ob_ide_write_registers(drive, cmd);
 
 	/*
@@ -811,7 +811,7 @@ ob_ide_read_ata_lba48(struct ide_drive *drive, unsigned long long block,
  * read 'sectors' sectors from ata device
  */
 static int
-ob_ide_read_ata(struct ide_drive *drive, unsigned long long block, 
+ob_ide_read_ata(struct ide_drive *drive, unsigned long long block,
 		unsigned char *buf, unsigned int sectors)
 {
 	unsigned long long end_block = block + sectors;
@@ -1134,7 +1134,7 @@ ob_ide_read_blocks(struct ide_drive *drive, int n, u32 blk, unsigned char* dest)
 		int len = n;
 		if (len > drive->max_sectors)
 			len = drive->max_sectors;
-			
+
 		debug("reading %d sectors from blk %d\n",len, blk);
 		if (ob_ide_read_sectors(drive, blk, dest, len)) {
 			return n-1;
@@ -1290,7 +1290,7 @@ static int find_ide_controller(struct ide_channel *chan, int chan_index)
 			return -1;
 		}
 	}
-	
+
 	vendor = pci_read_config16(dev, 0);
 	device = pci_read_config16(dev, 2);
 	prog_if = pci_read_config8(dev, 9);
@@ -1420,7 +1420,7 @@ int ide_probe(int drive)
 		return -1;
 
 	return 0;
-	
+
 }
 
 int ide_probe_verbose(int drive)

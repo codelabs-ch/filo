@@ -25,7 +25,7 @@
 #define SUPERBLOCK ((struct squashfs_super_block *) (FSYS_BUF))
 #define INODE_DATA ((union squashfs_inode_header *)\
     			((int)SUPERBLOCK + (((sizeof(struct squashfs_super_block)>>5)+1)*32)))
-/* 
+/*
  * We need to allocate two buffers of SQUASHFS_FILE_MAX_SIZE.
  * One will be used to lad the compressed data (that can be as large as
  * SQUASHFS_FILE_MAX_SIZE) and one that store the uncompressed data.  Our
@@ -500,7 +500,7 @@ static int squashfs_lookup_directory(int inode_block,
  *    |                 |              \     |                           |
  *    |                 |               \----|___________________________|
  *    |_________________|
- *  
+ *
  * an inode block is compressed, so the size length of the block is not known
  * in advance, but an inode block always contains SQUASHFS_METADATA_SIZE length
  * bytes.

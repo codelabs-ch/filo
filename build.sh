@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ "$1" == "" ]; then 
+if [ "$1" == "" ]; then
 	CONFIG=defconfig
 fi
 
@@ -23,7 +23,7 @@ $MAKE distclean
 cd ../coreboot/payloads/libpayload
 $MAKE distclean
 build_with_config $CONFIG
-$MAKE DESTDIR=$FILO/build install 
+$MAKE DESTDIR=$FILO/build install
 cd $FILO
 build_with_config $CONFIG
 

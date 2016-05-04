@@ -16,7 +16,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
- 
+
 /* fsys_minix.c used as a skeleton, cramfs code in kernel used as
  * documentation and some code */
 
@@ -152,9 +152,9 @@ cramfs_strlen (const char *str)
 
 #endif
 /* check filesystem types and read superblock into memory buffer */
-int 
+int
 cramfs_mount(void)
-{	
+{
 	debug_cramfs("attempting to mount a cramfs\n");
 
 	cramfs_buf = (struct cramfs_buf *) FSYS_BUF;
@@ -162,17 +162,17 @@ cramfs_mount(void)
 		debug_cramfs("partition too short\n");
        		return 0;
 	}
-	  
+
 	if (!devread(0, 0, sizeof(struct cramfs_super), (char *) &cramfs_buf->super)) {
 		debug_cramfs("cannot read superblock\n");
 		return 0;
 	}
-  
+
 	if (cramfs_buf->super.magic != CRAMFS_MAGIC) {
 		debug_cramfs("magic does not match\n");
 		return 0;
 	}
-	
+
 	if (cramfs_memcmp(CRAMFS_SIGNATURE, cramfs_buf->super.signature, 16)) {
 		debug_cramfs("signiture does not match\n");
 		return 0;
@@ -187,7 +187,7 @@ cramfs_mount(void)
 		debug_cramfs("root is not a directory\n");
 		return 0;
 	}
-	
+
 	debug_cramfs("cramfs mounted\n");
 	return 1;
 }
@@ -213,14 +213,14 @@ cramfs_read (char *buf, int len)
 	if (block)
 		start = cramfs_buf->block_ptrs[block - 1];
 	else start = (cramfs_buf->inode.offset + nblocks) << 2;
-	
+
 	debug_cramfs("reading a file of %d blocks starting at offset %d (block %d)\n", nblocks, start, block);
 	debug_cramfs("filepos is %d\n", filepos);
 
 	while (block < nblocks && len > 0) {
 		end = cramfs_buf->block_ptrs[block];
 		block_len = end - start;
-		
+
 		debug_cramfs("reading to %d bytes at block %d at offset %d, %d bytes...",
 			len, block, start, block_len);
 		if (cramfs_buf->cached_block != block) {
@@ -229,10 +229,10 @@ cramfs_read (char *buf, int len)
 			disk_read_func = NULL;
 			cramfs_buf->cached_block = block;
 		} else debug_cramfs("%d was cached...", block);
-		
+
 		if (!ret && (filepos % CRAMFS_BLOCK)) {
 			/* its the first read, and its not block aligned */
-			debug_cramfs("doing a non-aligned decompression of block %d at offset %d\n", 
+			debug_cramfs("doing a non-aligned decompression of block %d at offset %d\n",
 					block, filepos % CRAMFS_BLOCK);
 			if (cramfs_buf->decompressed_block != block) {
 				size = decompress_block(cramfs_buf->temp, cramfs_buf->data + 2, memcpy);
@@ -242,7 +242,7 @@ cramfs_read (char *buf, int len)
 			size -= filepos % CRAMFS_BLOCK;
 			if (size > len) size = len;
 			if (size > 0)
-				memcpy(buf, cramfs_buf->temp + (filepos % CRAMFS_BLOCK), size);		
+				memcpy(buf, cramfs_buf->temp + (filepos % CRAMFS_BLOCK), size);
 		} else  {
 			/* just another full block read */
 			size = decompress_block((unsigned char *)buf, cramfs_buf->data + 2, memcpy);
@@ -283,10 +283,10 @@ cramfs_dir(char *dirname)
 
 	char linkbuf[PATH_MAX];	  	   /* buffer for following sym-links */
 	int link_count = 0;
-	
+
 	char *rest;
 	char ch;
-	
+
 	u32 dir_size;			     /* size of this directory */
 	u32 off;			     /* offset of this directory */
 	u32 loc;			     /* location within a directory */
@@ -298,7 +298,7 @@ cramfs_dir(char *dirname)
 
 #ifdef CONFIG_DEBUG_CRAMFS
 	printf("\n");
-#endif  
+#endif
 
 	current_ino = CRAMFS_ROOT_INO;
 	parent_ino = current_ino;
@@ -379,7 +379,7 @@ cramfs_dir(char *dirname)
 		/* skip over slashes */
 		while (*dirname == '/') dirname++;
 
-		/* if this isn't a directory of sufficient size to hold our file, 
+		/* if this isn't a directory of sufficient size to hold our file,
 		   abort */
 		if (!(cramfs_buf->inode.size) || !S_ISDIR(cramfs_buf->inode.mode)) {
 			errnum = ERR_BAD_FILETYPE;
@@ -412,17 +412,17 @@ cramfs_dir(char *dirname)
 				}
 				return (print_possibilities < 0);
 			}
-			
+
 			current_ino = off + loc;
-			
+
 			/* read in this inode */
 			if (!devread(0, current_ino, sizeof(struct cramfs_inode), (char *) &cramfs_buf->inode))
 				return 0;
-			if (!devread(0, current_ino + sizeof(struct cramfs_inode), 
+			if (!devread(0, current_ino + sizeof(struct cramfs_inode),
 					cramfs_buf->inode.namelen << 2, cramfs_buf->name))
 				return 0;
 			cramfs_buf->name[cramfs_buf->inode.namelen << 2] = '\0';
-			
+
 			/* advance loc prematurely to next on-disk directory entry  */
 			loc += sizeof(struct cramfs_inode) + (cramfs_buf->inode.namelen << 2);
 

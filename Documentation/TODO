@@ -11,21 +11,21 @@ Cleanup
       dangerous to plain wrong.
 
 Devices/Drivers
-    - create a list of all available devices (and search this on for menu.lst 
+    - create a list of all available devices (and search this on for menu.lst
       or "find" or tab completion)
     - USB keyboard/Serial support
     - Full & tested USB support
-    
+
 CD/DVD Boot support
     - gather syslinux config files from CDs/DVDs and add their entries
-      to the menu. (Create a menu if syslinux config files are found 
+      to the menu. (Create a menu if syslinux config files are found
       but no menu.lst)
 
 SCSI
     - yeah, scsi support, good point. This is an open issue in LinuxBIOS
       for now. Int13 support somehow?
       http://cvs.sourceforge.net/viewcvs.py/u-boot/u-boot/board/MAI/bios_emulator/
-     
+
 Config File Support
 
     - search for a menu.lst rather than hardcoding it?!?
@@ -38,5 +38,5 @@ Config File Support
 
     - We can have an entry in hard disk's filo.cfg to boot from CD-ROM.
       If this entry is selected, filo.cfg from CD-ROM is read.
- 
-      
+
+

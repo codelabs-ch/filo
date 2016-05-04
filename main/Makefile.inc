@@ -1,6 +1,6 @@
 #
-# Copyright (C) 2008 by coresystems GmbH 
-# 
+# Copyright (C) 2008 by coresystems GmbH
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
@@ -19,7 +19,7 @@
 include main/grub/Makefile.inc
 
 TARGETS-y += main/filo.o main/strtox.o
-TARGETS-y += main/elfload.o main/ipchecksum.o 
+TARGETS-y += main/elfload.o main/ipchecksum.o
 TARGETS-y += main/timer.o
 TARGETS-$(CONFIG_SUPPORT_SOUND) += main/sound.o
 TARGETS-$(CONFIG_MULTIBOOT_IMAGE) += main/mb_hdr.o

@@ -4,7 +4,7 @@
 #define TRUE	1	// hmm that's quite obvious :)
 #define FALSE	0
 
-typedef struct msr_struct 
+typedef struct msr_struct
 {
 	unsigned lo;
 	unsigned hi;
@@ -72,7 +72,7 @@ typedef struct _FLASH_INFO
 //              Shift 8 bit to the left to form the correct address for 16bit port
 //
 #define VALIDADDR				0x05
-#define OEMADDR					0x04		// 5th byte in spare area 
+#define OEMADDR					0x04		// 5th byte in spare area
 
 //  NAND Flash Command. This appears to be generic across all NAND flash chips
 
@@ -87,7 +87,7 @@ typedef struct _FLASH_INFO
 #define CMD_ERASE2              0xd0        //  Erase phase 2
 #define CMD_STATUS              0x70        //  Status read
 #define CMD_RESET               0xff        //  Reset
-#define CMD_READ_2K             0x30        //  Second cycle read cmd for 2KB flash 
+#define CMD_READ_2K             0x30        //  Second cycle read cmd for 2KB flash
 
 // Registers within the NAND flash controller BAR -- memory mapped
 
@@ -101,7 +101,7 @@ typedef struct _FLASH_INFO
 #define MM_NAND_LAC				0x814
 #define MM_NAND_ECC_CTL			0x815
 
-// Registers within the NAND flash controller BAR -- I/O mapped 
+// Registers within the NAND flash controller BAR -- I/O mapped
 
 #define IO_NAND_DATA			0x00		// 0 to 3, in fact
 #define IO_NAND_CTL				0x04

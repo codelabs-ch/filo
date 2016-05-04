@@ -394,7 +394,7 @@ static int default_func(char *arg, int flags)
 	unsigned char buf[1];
 	if (get_option(buf, "boot_default"))
 		buf[0] = 0xff;
-	
+
 	if ((unsigned char)buf[0] != 0xff) {
 		printf("Default override by CMOS.\n");
 		return 0;
@@ -519,7 +519,7 @@ static int find_func(char *arg, int flags)
 	int got_file = 0;
 
 	// the grub find works like this:
-	// 
+	//
 	// for all disks
 	//   for all partitions on disk
 	//     open file
@@ -1379,7 +1379,7 @@ static struct builtin builtin_poweroff = {
 #ifdef CONFIG_DEVELOPER_TOOLS
 static int probe_func(char *arg, int flags)
 {
-#if CONFIG_IDE_DISK 
+#if CONFIG_IDE_DISK
 	int i;
 
 	for (i=0; i<8; i++)

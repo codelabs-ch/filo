@@ -35,7 +35,7 @@ struct gdtarg {
 	unsigned int base;
 } __attribute__ ((packed));
 
-/* How far the virtual address (used in C) is different from physical 
+/* How far the virtual address (used in C) is different from physical
  * address. Since we start in flat mode, the initial value is zero. */
 unsigned long virt_offset = 0;
 

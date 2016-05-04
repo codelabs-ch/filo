@@ -34,24 +34,24 @@
 
 #define BSY_SET_DURING_SPINUP 1
 /*
- *   UBL, The Universal Talkware Boot Loader 
+ *   UBL, The Universal Talkware Boot Loader
  *    Copyright (C) 2000 Universal Talkware Inc.
  *    Copyright (C) 2002 Eric Biederman
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
  *   the Free Software Foundation; either version 2 of the License, or
- *   (at your option) any later version. 
- * 
+ *   (at your option) any later version.
+ *
  *   This program is distributed in the hope that it will be useful,
  *   but WITHOUT ANY WARRANTY; without even the implied warranty of
  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details. 
- * 
+ *   GNU General Public License for more details.
+ *
  *   You should have received a copy of the GNU General Public License
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- * 
+ *
  *
  */
 struct controller {
@@ -234,9 +234,9 @@ struct ide_pio_command
 
 static unsigned short ide_base[] = {
 	IDE_BASE0,
-	IDE_BASE1, 
-	IDE_BASE2, 
-	IDE_BASE3, 
+	IDE_BASE1,
+	IDE_BASE2,
+	IDE_BASE3,
 	0
 };
 
@@ -245,7 +245,7 @@ static struct harddisk_info harddisk_info[IDE_MAX_DRIVES];
 
 static unsigned char ide_buffer[IDE_SECTOR_SIZE];
 
-static int await_ide(int (*done)(struct controller *ctrl), 
+static int await_ide(int (*done)(struct controller *ctrl),
 	struct controller *ctrl, u64 timeout)
 {
 	int result;
@@ -306,10 +306,10 @@ int select_drive(struct controller *ctrl, int drive)
 	status = inb(IDE_REG_STATUS(ctrl));
 
 	mdelay(10);
-	
+
 	device = inb(IDE_REG_DEVICE(ctrl));
 	status = inb(IDE_REG_STATUS(ctrl));
-	
+
 	if (device == (0xa0 | (drive<<4)))
 		return 1;
 	else
@@ -340,7 +340,7 @@ static int ide_software_reset(struct controller *ctrl)
 	debug("Resetting ide%d... ",
 			ctrl - controllers);
 	/* Disable Interrupts and reset the ide bus */
-	outb(IDE_CTRL_HD15 | IDE_CTRL_SRST | IDE_CTRL_NIEN, 
+	outb(IDE_CTRL_HD15 | IDE_CTRL_SRST | IDE_CTRL_NIEN,
 		IDE_REG_DEVICE_CONTROL(ctrl));
 	/* If BSY bit is not asserted within 400ns, no device there */
 	if (await_ide(bsy, ctrl, currticks() + IDE_RESET_PULSE) < 0) {
@@ -379,7 +379,7 @@ static void pio_set_registers(
 		 * The linux ide code suggests 50ms is the right
 		 * amount of time to use here.
 		 */
-		mdelay(50); 
+		mdelay(50);
 	}
 	outb(cmd->feature,         IDE_REG_FEATURE(ctrl));
 	if (cmd->command == IDE_CMD_READ_SECTORS_EXT) {
@@ -514,7 +514,7 @@ static inline int ide_read_sector_chs(
 	unsigned int track;
 	unsigned int offset;
 	unsigned int cylinder;
-		
+
 	memset(&cmd, 0, sizeof(cmd));
 	cmd.sector_count = 1;
 
@@ -547,7 +547,7 @@ static inline int ide_read_sector_lba(
 	cmd.lba_high = (sector >> 16) & 0xff;
 	cmd.device = IDE_DH_DEFAULT |
 		((sector >> 24) & 0x0f) |
-		info->slave | 
+		info->slave |
 		IDE_DH_LBA;
 	cmd.command = IDE_CMD_READ_SECTORS;
 	//debug("%s: sector= %ld, device command= 0x%x.\n",__FUNCTION__,(unsigned long) sector, cmd.device);
@@ -668,7 +668,7 @@ static int init_drive(struct harddisk_info *info, struct controller *ctrl,
 	debug("Testing for hd%c\n", 'a'+drive);
 
 	/* Select the drive that we are testing */
-	outb(IDE_DH_DEFAULT | IDE_DH_HEAD(0) | IDE_DH_CHS | info->slave, 
+	outb(IDE_DH_DEFAULT | IDE_DH_HEAD(0) | IDE_DH_CHS | info->slave,
 		IDE_REG_DEVICE(ctrl));
 	mdelay(50);
 
@@ -692,17 +692,17 @@ static int init_drive(struct harddisk_info *info, struct controller *ctrl,
 		}
 	}
 	debug("Probing for hd%c\n", 'a'+drive);
-	
+
 	memset(&cmd, 0, sizeof(cmd));
 	cmd.device = IDE_DH_DEFAULT | IDE_DH_HEAD(0) | IDE_DH_CHS | info->slave;
 	cmd.command = ident_command;
 
-	
+
 	if (pio_data_in(ctrl, &cmd, buffer, IDE_SECTOR_SIZE) < 0) {
 		/* Well, if that command didn't work, we probably don't have drive. */
 		return 1;
 	}
-	
+
 
 	/* Now suck the data out */
 	drive_info = (uint16_t *)buffer;
@@ -716,7 +716,7 @@ static int init_drive(struct harddisk_info *info, struct controller *ctrl,
 			/* If the command doesn't work give up on the drive */
 			return 1;
 		}
-		
+
 	}
 	if ((drive_info[2] == 0x37C8) || (drive_info[2] == 0x8C73)) {
 		/* The response is incomplete retry the drive info command */
@@ -756,7 +756,7 @@ static int init_drive(struct harddisk_info *info, struct controller *ctrl,
 		if (drive_info[83] & (1 <<10)) {
 			/* Should LBA48 depend on LBA? */
 			info->address_mode = ADDRESS_MODE_LBA48;
-			info->sectors = 
+			info->sectors =
 				(((sector_t)drive_info[103]) << 48) |
 				(((sector_t)drive_info[102]) << 32) |
 				(((sector_t)drive_info[101]) << 16) |
@@ -768,7 +768,7 @@ static int init_drive(struct harddisk_info *info, struct controller *ctrl,
 		info->heads = drive_info[3];
 		info->cylinders = drive_info[1];
 		info->sectors_per_track = drive_info[6];
-		info->sectors = 
+		info->sectors =
 			info->sectors_per_track *
 			info->heads *
 			info->cylinders;
@@ -850,7 +850,7 @@ static int ide_bus_floating(struct controller *ctrl)
 	do {
 		/* Take logical OR to avoid chattering */
 		status |= inb(IDE_REG_STATUS(ctrl));
-		/* If it makes 0xff, it's possible to be floating, 
+		/* If it makes 0xff, it's possible to be floating,
 		 * do test2 to ensure. */
 		if (status == 0xff)
 			goto test2;
@@ -863,7 +863,7 @@ static int ide_bus_floating(struct controller *ctrl)
 	return 0;
 
 test2:
-	/* Test 2: write something to registers, then read back and 
+	/* Test 2: write something to registers, then read back and
 	 * compare. Note that ATA spec inhibits this while BSY is set,
 	 * but for many drives this works. This is a confirmation step anyway.
 	 */
@@ -873,7 +873,7 @@ test2:
 	if (inb(ctrl->cmd_base+2) == 0xaa
 			&& inb(ctrl->cmd_base+3) == 0x55
 			&& inb(ctrl->cmd_base+4) == 0xff) {
-		/* We have some registers there. 
+		/* We have some registers there.
 		 * Though this does not mean it is not a NIC or something... */
 		return 0;
 	}
@@ -884,12 +884,12 @@ test2:
 	return 1;
 }
 
-static int init_controller(struct controller *ctrl, int drive, unsigned char *buffer) 
+static int init_controller(struct controller *ctrl, int drive, unsigned char *buffer)
 {
 	struct harddisk_info *info;
 
 	/* Put the drives ide channel in a know state and wait
-	 * for the drives to spinup.  
+	 * for the drives to spinup.
 	 *
 	 * In practice IDE disks tend not to respond to commands until
 	 * they have spun up.  This makes IDE hard to deal with
@@ -913,7 +913,7 @@ static int init_controller(struct controller *ctrl, int drive, unsigned char *bu
 	 * So speed wise I am only slow if the BSY bit is not set
 	 * or not reported by the IDE controller during spinup, which
 	 * is quite rare.
-	 * 
+	 *
 	 */
 	debug("init_controller: drive %d\n", drive);
 #if !BSY_SET_DURING_SPINUP
@@ -930,7 +930,7 @@ static int init_controller(struct controller *ctrl, int drive, unsigned char *bu
 	}
 
 	/* Note: I have just done a software reset.  It may be
-	 * reasonable to just read the boot time signatures 
+	 * reasonable to just read the boot time signatures
 	 * off of the drives to see if they are present.
 	 *
 	 * For now I will go with just sending commands to the drives
@@ -949,7 +949,7 @@ static int init_controller(struct controller *ctrl, int drive, unsigned char *bu
 		init_drive(info, ctrl, 0, master_drive, buffer,
 				IDE_CMD_IDENTIFY_PACKET_DEVICE);
 
-	debug("MASTER CHECK: master %s\n", 
+	debug("MASTER CHECK: master %s\n",
 			info->drive_exists ? "yes" : "no");
 	/* slave and master */
 	if (info->drive_exists && !info->slave_absent) {
@@ -968,11 +968,11 @@ static int init_controller(struct controller *ctrl, int drive, unsigned char *bu
 	if (!info->drive_exists) {
 		debug("NO MASTER -- check slave!\n");
 		init_drive(info, ctrl, 1, drive, buffer, IDE_CMD_IDENTIFY_DEVICE);
-		
+
 		if (!info->drive_exists)
 			init_drive(info, ctrl, 1, drive, buffer,
 				IDE_CMD_IDENTIFY_PACKET_DEVICE);
-		debug("SLAVE ONLY CHECK: slave %s\n", 
+		debug("SLAVE ONLY CHECK: slave %s\n",
 				info->drive_exists ? "yes" : "no");
 	}
 
@@ -1221,7 +1221,7 @@ static int find_ide_controller(struct controller *ctrl, int ctrl_index)
 			return -1;
 		}
 	}
-	
+
 	vendor = pci_read_config16(dev, 0);
 	device = pci_read_config16(dev, 2);
 	prog_if = pci_read_config8(dev, 9);

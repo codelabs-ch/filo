@@ -493,7 +493,7 @@ static void run_menu(char *menu_entries, char *config_entries, int num_entries, 
 
 		/* Check for a keypress, however if TIMEOUT has been expired
 		   (GRUB_TIMEOUT == -1) relax in GETKEY even if no key has been
-		   pressed.  
+		   pressed.
 		   This avoids polling (relevant in the grub-shell and later on
 		   in grub if interrupt driven I/O is done).  */
 		if (checkkey() >= 0 || grub_timeout < 0) {
@@ -962,7 +962,7 @@ static int rewrite_isolinux_config(void)
 			// Our kernel has an absolute path, so
 			// we only grab the device portion of the
 			// config file
-			
+
 			// (hd0,0)/configfile.cfg or hda1:/configfile.cfg
 			spos = strchr(config_file, '/');
 			if (!spos) {
@@ -1241,7 +1241,7 @@ restart:
 			}
 
 			/* Check if the default entry is present. Otherwise reset
-			 * it to fallback if fallback is valid, or to DEFAULT_ENTRY 
+			 * it to fallback if fallback is valid, or to DEFAULT_ENTRY
 			 * if not.
 			 */
 			if (default_entry >= num_entries) {

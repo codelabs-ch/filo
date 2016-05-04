@@ -266,7 +266,7 @@ void platform_poweroff(void)
 {
 	u16 pmbase;
 	u32 reg32;
-	
+
 	pmbase = pci_read_config16(PCI_DEV(0,0x1f, 0), 0x40) & 0xfffe;
 
 	/* Mask interrupts */
@@ -324,7 +324,7 @@ void platform_reboot(void)
 		outb(0xfe, 0x64);       /* pulse reset low */
 		udelay(50);
 	}
-	
+
 	for (;;) ;
 }
 

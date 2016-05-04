@@ -24,6 +24,6 @@ void relocate(void)
 
 u32 start_elf(u32 entry_point, u32 param)
 {
-	// Not supported	
+	// Not supported
 	return 0;
 }

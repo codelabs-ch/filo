@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- *	WindowsCE/i386 loader 
+ *	WindowsCE/i386 loader
  *
  *	Copyright 2006 Andrei Birjukov <andrei.birjukov@artecdesign.ee> and
  *	Artec Design LLC http://www.artecdesign.ee
@@ -224,7 +224,7 @@ void wince_init_bootarg(u32 entryPoint)
 	g_ppBootArgs = phys_to_virt(BOOTARG_PTR_LOCATION);
 	*g_ppBootArgs = (void *) BOOTARG_LOCATION;
 
-	// keep our BOOT_ARGS somewhere in a dry dark place 
+	// keep our BOOT_ARGS somewhere in a dry dark place
 	g_pBootArgs = phys_to_virt(BOOTARG_LOCATION);
 
 	debug("BOOT_ARGS at addr 0x%x, pointer at 0x%x [%x]\n",
@@ -233,7 +233,7 @@ void wince_init_bootarg(u32 entryPoint)
 
 	memset(g_pBootArgs, 0, sizeof(BOOT_ARGS));
 
-	// this data was copied from WinCE EDBG boot args       
+	// this data was copied from WinCE EDBG boot args
 	g_pBootArgs->ucEdbgAdapterType = EDBG_ADAPTER_DEFAULT;
 	// use the first PCI NIC available
 	g_pBootArgs->ucEdbgIRQ = 0;
@@ -278,7 +278,7 @@ int wince_load(const char *file, const char *cmdline)
 		file_close();
 		return LOADER_NOT_SUPPORT;
 	}
-	// now read image start address and size        
+	// now read image start address and size
 	file_read((void *) &g_imageStart, sizeof(u32));
 	file_read((void *) &g_imageSize, sizeof(u32));
 
@@ -292,7 +292,7 @@ int wince_load(const char *file, const char *cmdline)
 	printf("Windows CE BIN image, start 0x%x, length %d\n",
 	       g_imageStart, g_imageSize);
 
-	// main image reading loop      
+	// main image reading loop
 	while (1) {
 		// first grab the segment descriptor
 		if (file_read(&segInfo, sizeof(SEGMENT_INFO)) <
@@ -334,7 +334,7 @@ int wince_load(const char *file, const char *cmdline)
 		// Look for ROMHDR to compute ROM offset.  NOTE: romimage guarantees that the record containing
 		// the TOC signature and pointer will always come before the record that contains the ROMHDR contents.
 
-		if (segInfo.segSize == sizeof(ROMHDR) && 
+		if (segInfo.segSize == sizeof(ROMHDR) &&
 				(*(u32 *) phys_to_virt(g_imageStart + ROM_SIGNATURE_OFFSET) == ROM_SIGNATURE)) {
 			u32 tempOffset =
 			    (segInfo.segAddr -
@@ -344,7 +344,7 @@ int wince_load(const char *file, const char *cmdline)
 			ROMHDR *pROMhdr = (ROMHDR *) pDest;
 
 			// check to make sure this record really contains the ROMHDR.
-			if ((pROMhdr->physfirst == (g_imageStart - tempOffset)) && 
+			if ((pROMhdr->physfirst == (g_imageStart - tempOffset)) &&
 					(pROMhdr->physlast == (g_imageStart - tempOffset + g_imageSize)) &&
 			    		(u32) (((pROMhdr-> dllfirst << 16) & 0xffff0000) <= pROMhdr->dlllast) &&
 			    		(u32) (((pROMhdr-> dllfirst << 16) & 0x0000ffff) <= pROMhdr->dlllast)) {
@@ -376,7 +376,7 @@ int wince_load(const char *file, const char *cmdline)
 	file_close();
 
 	// prepare the boot arguments
-	// note that the last segment size carries the launch address 
+	// note that the last segment size carries the launch address
 	wince_init_bootarg(segInfo.segSize);
 
 	// finally, call the generic launch() function

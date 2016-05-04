@@ -26,15 +26,15 @@ REQUIREMENTS
     Only i386 PC architecture is currently supported.
 
     x86-64 (AMD 64) machines in 32-bit mode do also work.
-    (coreboot uses 32-bit mode and the Linux kernel does the 
+    (coreboot uses 32-bit mode and the Linux kernel does the
     transition to 64-bit mode)
 
     I'm using an AMD64 based mainboard with IDE hard disk
-    and a DVD drive for testing, and QEmu, Bochs or VMware 
+    and a DVD drive for testing, and QEmu, Bochs or VMware
     for development.
 
     Recent version of GNU toolchain is required to build.
-    I have tested with the toolchains from SUSE 10.0 and SUSE 10.1, 
+    I have tested with the toolchains from SUSE 10.0 and SUSE 10.1,
     but slightly older versions might also work.
 
 INSTALL
@@ -70,17 +70,17 @@ NOTES
 
     If you are using the GRUB like frontend:
 
-    - make sure you adapt your menu.lst path 
-    - if you want to use FILO over a serial connection, make sure you have 
+    - make sure you adapt your menu.lst path
+    - if you want to use FILO over a serial connection, make sure you have
       something like this in your menu.lst file:
 
         serial --unit=0 --speed=115200
         terminal serial console
-	
+
 USING
 
     When FILO starts, it displays "boot:" prompt or the GRUB menu interface.
-    
+
     At "boot:" prompt, type the name of your boot image, and optionally
     the kernel parameter, in the form:
 	DEVICE:FILENAME[ PARAM]
@@ -88,7 +88,7 @@ USING
 	boot: hda1:/vmlinuz root=/dev/hda1
 
     Notation of DEVICE for IDE disk and CD-ROM is same as in Linux
-    (eg. hda1 means the first partition of master device on primary 
+    (eg. hda1 means the first partition of master device on primary
     IDE channel). Support for El Torito bootable CD-ROM, "hdc1" means
     the boot disk image of the CD-ROM at hdc.
 
@@ -138,24 +138,24 @@ USB
 
     USB support is originally taken from Steven James's baremetal in
     coreboot-v1 util.
-    
-    Yinghai Lu seperated common functions from uhci.c to usb.c and 
+
+    Yinghai Lu seperated common functions from uhci.c to usb.c and
     created ohci.c to support ohci.
     ohci.c is heavily inspired by Linux Kernel 2.4.22 drivers/usb/host/usb-ohci.c.
-    
+
     Stefan Reinauer integrated USB back into the main filo version.
-    
+
     USB support includes several parts
      1. UHCI+OHCI--->USB: provides usb init, usb_control_msg and usb_bulk_msg interface
-     2. USB_SCSI: bulk only device 
+     2. USB_SCSI: bulk only device
      3. USB_X interface to FILO
-    
+
     todo:
      - EHCI support
 
 BUG REPORTING
 
-    If you have problem with FILO, set DEBUG_ALL in Config and send its 
+    If you have problem with FILO, set DEBUG_ALL in Config and send its
     console output to the coreboot mailinglist at <coreboot@coreboot.org>.
 
 ACKNOWLEDGEMENTS

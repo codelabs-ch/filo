@@ -58,7 +58,7 @@ config MENULST_FILE
 	help
 	  For VIA Epia-MII CF use:
 	    hde1:/boot/filo/menu.lst
-	
+
 config MENULST_TIMEOUT
 	int "Timeout for loading menu.lst"
 	default 0
@@ -121,9 +121,9 @@ config IDE_DISK_POLL_DELAY
 	default 0
 	depends on IDE_DISK
 	help
-	  Add a short delay when polling status registers 
+	  Add a short delay when polling status registers
 	  (required on some broken SATA controllers)
-	  NOTE: Slows down access significantly, so disable 
+	  NOTE: Slows down access significantly, so disable
 	  whenever possible. Set to 1 if you require this.
 
 config SLOW_SATA
@@ -134,7 +134,7 @@ config SLOW_SATA
 	  SATA drives seem to have problems reporting their spinup.
 	  This will delay FILO start by 5s so the disks have some time to settle.
 	  (required on some broken SATA controllers)
-	  NOTE: Slows down access significantly, so disable 
+	  NOTE: Slows down access significantly, so disable
 	  whenever possible.
 
 config PCMCIA_CF

@@ -45,7 +45,7 @@ Version 0.5b2 stepan 2006-04-28
 
 Version 0.5b1 stepan 2005-10-01
     * Integrate grub user interface
-    
+
 Version 0.4.2 ts1 2003-10-31
     * Added brute force method of PCI scan (turned off by default.)
     * Workaround for CD drives that report unusual sector size.

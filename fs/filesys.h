@@ -44,10 +44,10 @@ static inline unsigned long __ilog2(unsigned long x)
 }
 
 static inline unsigned long ffz(unsigned long x)
-{       
+{
 	if ((x = ~x) == 0)
 		return 32;
-		        
+
 	return __ilog2(x & -x);
 }
 #endif
@@ -55,7 +55,7 @@ static inline unsigned long ffz(unsigned long x)
 #define log2(n) ffz(~(n))
 
 
-static inline int 
+static inline int
 substring (const char *s1, const char *s2)
 {
   while (*s1 == *s2)
@@ -77,7 +77,7 @@ substring (const char *s1, const char *s2)
 #define MAXINT 0x7fffffff
 
 /* This is only used by fsys_* to determine if it's hard disk. If it is,
- * they try to guess filesystem type by partition type. I guess it is 
+ * they try to guess filesystem type by partition type. I guess it is
  * not necessory, so hardcoded to 0 (first floppy) --ts1 */
 #define current_drive 0
 
@@ -279,5 +279,5 @@ int aboot_dir (char *dirname);
 #define	FS_EXT2FS	17	/* Linux Extended 2 file system */
 
 #ifdef CONFIG_DEBUG_FSYS_EXT2FS
-#define E2DEBUG 
+#define E2DEBUG
 #endif

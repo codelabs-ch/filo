@@ -1,5 +1,5 @@
 /* fsys_xfs.c - an implementation for the SGI XFS file system */
-/*  
+/*
  *  GRUB  --  GRand Unified Bootloader
  *  Copyright (C) 2001,2002  Free Software Foundation, Inc.
  *
@@ -131,7 +131,7 @@ le64 (__uint64_t x)
 static xfs_fsblock_t
 xt_start (xfs_bmbt_rec_32_t *r)
 {
-	return (((xfs_fsblock_t)(le32 (r->l1) & mask32lo(9))) << 43) | 
+	return (((xfs_fsblock_t)(le32 (r->l1) & mask32lo(9))) << 43) |
 	       (((xfs_fsblock_t)le32 (r->l2)) << 11) |
 	       (((xfs_fsblock_t)le32 (r->l3)) >> 21);
 }
@@ -358,7 +358,7 @@ next_dentry (xfs_ino_t *ino)
 			++name;
 			++namelen;
 			sfe = (xfs_dir2_sf_entry_t *)
-				(inode->di_u.di_c 
+				(inode->di_u.di_c
 				 + sizeof(xfs_dir2_sf_hdr_t)
 				 - xfs.i8param);
 			break;
@@ -455,7 +455,7 @@ xfs_mount (void)
 
 	if (!devread (0, 0, sizeof(super), (char *)&super)
 	    || (le32(super.sb_magicnum) != XFS_SB_MAGIC)
-	    || ((le16(super.sb_versionnum) 
+	    || ((le16(super.sb_versionnum)
 		& XFS_SB_VERSION_NUMBITS) != XFS_SB_VERSION_4) ) {
 		return 0;
 	}
@@ -502,7 +502,7 @@ xfs_read (char *buf, int len)
 		offset = xad->offset;
 		xadlen = xad->len;
 		if (isinxt (filepos >> xfs.blklog, offset, xadlen)) {
-			endofcur = (offset + xadlen) << xfs.blklog; 
+			endofcur = (offset + xadlen) << xfs.blklog;
 			toread = (endofcur >= endpos)
 				  ? len : (endofcur - filepos);
 
@@ -524,7 +524,7 @@ xfs_read (char *buf, int len)
 			}
 			continue;
 		}
-		endofprev = offset + xadlen; 
+		endofprev = offset + xadlen;
 	}
 
 	return filepos - startpos;

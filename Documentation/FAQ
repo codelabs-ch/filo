@@ -1,4 +1,4 @@
-Q. My GRUB menu.lst does not work. 
+Q. My GRUB menu.lst does not work.
 A. The disks are numbered differently in FILO. They might or might not follow
    the Linux scheme, depending on the order of driver modules in Linux, etc.
    hd2,0 is hdc1, not necessarily the third disk (there might be no hdb)

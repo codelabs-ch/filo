@@ -332,7 +332,7 @@ static void NAND_readData(u8 *pData, int nSize)
 
 	if(nSize > 528) return;		// oversized buffer?
 
-	// read from port mapped registers, 
+	// read from port mapped registers,
 	for(i=0; i<nDwords; i++)
 		((u32*)pData)[i] = inl(g_baseAddr + IO_NAND_DATA);
 
@@ -429,7 +429,7 @@ int NAND_isBlockBad(u32 blockID)
 
 	// Get the first page of the block
 	u32 dwPageID = blockID * g_flashInfo.pagesPerBlock;
-	
+
 	// for 512-byte page size, use the original addressing scheme
 	if(g_flashInfo.dataBytesPerPage == PAGE_SIZE_512)
 	{
@@ -462,7 +462,7 @@ int NAND_isBlockBad(u32 blockID)
 
 	// Check the first page.
 	NAND_writeCTL(CS_NAND_CTL_CLE);		// latch command
-	
+
 	if(g_flashInfo.dataBytesPerPage == PAGE_SIZE_2048)
 		NAND_writeIO(CMD_READ);			// send read command
 	else NAND_writeIO(CMD_READ2);		// send read command 2
@@ -476,7 +476,7 @@ int NAND_isBlockBad(u32 blockID)
 	NAND_writeIO(pa2);					// send Page Address 2
 	NAND_writeIO(pa3);					// send Page Address 3
 	NAND_writeCTL(0x00);				// select chip
-	
+
 	if(g_flashInfo.dataBytesPerPage == PAGE_SIZE_2048)
 	{
 		NAND_writeCTL(CS_NAND_CTL_CLE);	// latch command
@@ -509,7 +509,7 @@ __inline int IsECCWritten(u8 *pECC)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// 
+//
 
 void NAND_close(void)
 {
@@ -518,7 +518,7 @@ void NAND_close(void)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// 
+//
 
 int NAND_initChip(int chipNum)
 {
@@ -526,31 +526,31 @@ int NAND_initChip(int chipNum)
 
 	if (g_chipID == chipNum) return 0;
 	if (g_chipID != -1) NAND_close();
-	
+
 	memset(&g_flashInfo, 0, sizeof(g_flashInfo));
 
 	g_chipID = -1;
 
 	///////////////////////////////////////////////////////////////////////////////////
 	// init the MSR_DIVIL_BALL_OPTS register, enable flash mode
-	
+
 	msr = rdmsr(MSR_DIVIL_BALL_OPTS);
-	
+
 	if (msr.lo & PIN_OPT_IDE) {
 		printf("NAND controller not enabled!\n");
 		return -1;
 	}
-	
+
 	///////////////////////////////////////////////////////////////////////////////////
 	// init the MSR_DIVIL_LBAR_FLSHx register, I/O mapped mode, set a hardcoded base address
 	// Later we restore initial state
-	
+
 	g_orig_flsh = rdmsr(MSR_DIVIL_LBAR_FLSH0 + chipNum);
 	if (!(g_orig_flsh.hi & NOR_NAND)) {
 		printf("CS%d set up for NOR, aborting!\n", chipNum);
 		return -1;
 	}
-	
+
 	msr.hi = SET_FLSH_HIGH;
 	msr.lo = SET_FLSH_LOW;
 	wrmsr(MSR_DIVIL_LBAR_FLSH0 + chipNum, msr);
@@ -562,12 +562,12 @@ int NAND_initChip(int chipNum)
 
 	// read out flash chip ID
 	g_deviceID = NAND_readFlashID();
-	
+
 	switch(g_deviceID)	// allow only known flash chips
 	{
 	case SAMSUNG_NAND_64MB:
 	case ST_NAND_64MB:
-		
+
 		g_flashInfo.numBlocks = 4096;
 		g_flashInfo.pagesPerBlock = 32;
 		g_flashInfo.dataBytesPerPage = 512;
@@ -582,14 +582,14 @@ int NAND_initChip(int chipNum)
 		g_flashInfo.pagesPerBlock = 64;
 		g_flashInfo.dataBytesPerPage = 2048;
 		g_flashInfo.flashType = FLASH_NAND;
-		
+
 	case ST_NAND_512MB:
 
 		g_flashInfo.numBlocks = 4096;
 		g_flashInfo.pagesPerBlock = 64;
 		g_flashInfo.dataBytesPerPage = 2048;
 		g_flashInfo.flashType = FLASH_NAND;
-		
+
 		break;
 
 	default:
@@ -610,7 +610,7 @@ int NAND_initChip(int chipNum)
 	memset(g_pBBT, BLOCK_UNKNOWN, g_flashInfo.numBlocks);
 
 	g_chipID = chipNum;
-	
+
 	printf("Geode LX flash driver initialized, device ID 0x%x\n", g_deviceID);
 	debug("FlashChip = 0x%x\n", g_chipID);
 	debug("NumBlocks = 0x%x\n", g_flashInfo.numBlocks);
@@ -645,10 +645,10 @@ int NAND_readPage(u32 pageAddr, u8 *pPageBuff)
 		u8 addr1 = (u8)(pageAddr & 0xff);
 		u8 addr2 = (u8)((pageAddr >> 8) & 0xff);
 		u8 addr3 = (u8)((pageAddr >> 16) & 0xff);
-		
+
 		u16 eccSize = 0;				// total ECC size
 		u32 pageSize = 0;
-		
+
 		NAND_writeCTL(0x00);				// enable chip
 		NAND_checkStatus((u32)-1);		// check ready
 
@@ -656,15 +656,15 @@ int NAND_readPage(u32 pageAddr, u8 *pPageBuff)
 		NAND_writeIO(CMD_READ);				// send read command
 		NAND_writeCTL(CS_NAND_CTL_ALE);		// latch address
 		NAND_writeIO(0x00);					// send Column Address 1
-		
+
 		if(g_flashInfo.dataBytesPerPage == PAGE_SIZE_2048)
 			NAND_writeIO(0x00);				// send Column Address 2
-		
+
 		NAND_writeIO(addr1);				// send Page Address 1
 		NAND_writeIO(addr2);				// send Page Address 2
 		NAND_writeIO(addr3);				// send Page Address 3
 		NAND_writeCTL(0x00);				// select chip
-		
+
 		if(g_flashInfo.dataBytesPerPage == PAGE_SIZE_2048)
 		{
 			NAND_writeCTL(CS_NAND_CTL_CLE);	// latch command
@@ -694,7 +694,7 @@ int NAND_readPage(u32 pageAddr, u8 *pPageBuff)
 		{
 			// Read the ECC info according to Linux MTD format, first part
 			NAND_readData(g_eccTest, 4);
-	
+
 			bBadBlock = NAND_readDataByte();	// bad block byte
 			bReserved = NAND_readDataByte();	// reserved byte
 			// Read the ECC info according to Linux MTD format, second part
@@ -708,11 +708,11 @@ int NAND_readPage(u32 pageAddr, u8 *pPageBuff)
 		else if(g_flashInfo.dataBytesPerPage == PAGE_SIZE_2048)
 		{
 			int i;
-			for(i=0; i<40; i++) NAND_readDataByte();	// skip stuff 
+			for(i=0; i<40; i++) NAND_readDataByte();	// skip stuff
 			// Read the ECC info according to Linux MTD format (2048 byte page)
-			NAND_readData(g_eccTest, eccSize); 
+			NAND_readData(g_eccTest, eccSize);
 		}
-		
+
 		// test the data integrity; if the data is invalid, attempt to fix it using ECC
 		if(memcmp(g_eccCalc, g_eccTest, eccSize))
 		{
@@ -726,7 +726,7 @@ int NAND_readPage(u32 pageAddr, u8 *pPageBuff)
 				NAND_writeCTL(CS_NAND_CTL_CE);	// disable chip
 				return ERROR_NO_ECC;
 			}
-			
+
 			debug("Page data (page 0x%x) is invalid. Attempting ECC to fix it.\n", pageAddr);
 			nRet = NAND_correctData(&pPageBuff[0], &g_eccTest[0], &g_eccCalc[0]);
 			if(nRet == -1)
@@ -749,8 +749,8 @@ int NAND_readPage(u32 pageAddr, u8 *pPageBuff)
 			else if(nRet == 0) debug("No errors detected (page 0x%x, second part)\n", pageAddr);
 			else debug("Invalid data (page 0x%x, second part) was corrected using ECC!\n", pageAddr);
 		}
-	} 
-	else 
+	}
+	else
 	{
 		debug("Page address [%d] is too large\n", pageAddr);
 		return ERROR_BAD_ADDRESS;
@@ -776,14 +776,14 @@ int flash_read(int drive, sector_t sector, void *buffer)
 	int block, nRet;
 	u32 pageAddress = sector * DEV_SECTOR_SIZE / g_flashInfo.dataBytesPerPage;
 	u32 pageOffset = sector * DEV_SECTOR_SIZE % g_flashInfo.dataBytesPerPage;
-	
+
 	// sanity check
 	if(!g_pBBT || !g_flashInfo.pagesPerBlock)
 	{
 		debug("error: NAND not initialized\n");
 		return -1;
 	}
-	
+
 	// check that the page ID is valid
 	if(pageAddress >= (g_flashInfo.numBlocks * g_flashInfo.pagesPerBlock))
 	{
@@ -794,7 +794,7 @@ int flash_read(int drive, sector_t sector, void *buffer)
 	// get block address
 	block = pageAddress / g_flashInfo.pagesPerBlock;
 
-	debug("drive %d, sector %d -> page %d + %d, buffer 0x%08x\n", 
+	debug("drive %d, sector %d -> page %d + %d, buffer 0x%08x\n",
 		drive, (unsigned int)sector, pageAddress, pageOffset, (unsigned int)buffer);
 
 	// get the block status first
@@ -805,12 +805,12 @@ int flash_read(int drive, sector_t sector, void *buffer)
 	}
 
 	// return failure immediately if the block is bad
-	if(g_pBBT[block] == BLOCK_BAD) 
+	if(g_pBBT[block] == BLOCK_BAD)
 	{
 		debug("error: block %x is bad\n", block);
 		return -3;
 	}
-	
+
 	// check if we have just read that page
 	if(g_currentPage == pageAddress)
 	{
@@ -818,10 +818,10 @@ int flash_read(int drive, sector_t sector, void *buffer)
 		memcpy(buffer, g_pageBuf + pageOffset, DEV_SECTOR_SIZE);
 		return ERROR_SUCCESS;
 	}
-	
+
 	// otherwise proceed with normal reading
 	nRet = NAND_readPage(pageAddress, g_pageBuf);
 	memcpy(buffer, g_pageBuf + pageOffset, DEV_SECTOR_SIZE);
-	
+
 	return nRet;
 }

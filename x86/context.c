@@ -33,7 +33,7 @@ static void start_main(void);	/* forward decl. */
 void __exit_context(void);	/* assembly routine */
 
 /*
- * Main context structure 
+ * Main context structure
  * It is placed at the bottom of our stack, and loaded by assembly routine
  * to start us up.
  */
@@ -87,7 +87,7 @@ struct context *init_context(u8 * stack, u32 stack_size, int num_params)
 {
 	struct context *ctx;
 
-	ctx = (struct context *) (stack + stack_size - 
+	ctx = (struct context *) (stack + stack_size -
 			(sizeof(*ctx) + num_params * sizeof(u32)));
 	memset(ctx, 0, sizeof(*ctx));
 
