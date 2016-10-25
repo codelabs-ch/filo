@@ -21,7 +21,7 @@
 #include <config.h>
 #include <lib.h>
 #include <fs.h>
-#include <arch/timer.h>
+#include <timer.h>
 #ifdef CONFIG_SUPPORT_PCI
 #include <pci.h>
 #endif
