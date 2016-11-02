@@ -147,6 +147,21 @@ static void lockdown_flash_ich9_lock_regions(void)
 	RCBA16(ICH9_SPI_HSFS) |= ICH9_SPI_HSFS_FLOCKDN;
 }
 
+static void lockdown_flash_pch(void)
+{
+	u8 reg8;
+
+	reg8 = pci_read_config8(PCI_DEV(0,0x1f,0), 0xdc);	/* BIOS_CNTL */
+	reg8 |= (1 << 5);
+	pci_write_config8(PCI_DEV(0,0x1f,0), 0xdc, reg8);
+
+	lockdown_flash_ich7();
+
+	/* Since Cougar Point, coreboot uses flash regions,
+	   lock them and set up static SPI opcodes. */
+	lockdown_flash_ich9_lock_regions();
+}
+
 int intel_lockdown_flash(void)
 {
 	const u32 reg32 = pci_read_config32(PCI_DEV(0,0x1f, 0), 0);
@@ -206,10 +221,8 @@ int intel_lockdown_flash(void)
 	case 0x1e5d8086:
 	case 0x1e5e8086:
 	case 0x1e5f8086:
-		lockdown_flash_ich7();
-		/* Since Cougar Point, coreboot uses flash regions,
-		   lock them and set up static SPI opcodes. */
-		lockdown_flash_ich9_lock_regions();
+		lockdown_flash_pch();
+
 		/* Also trigger coreboot's SMM finalize() handlers. */
 		outb(0xcb, 0xb2);
 		break;
