@@ -182,7 +182,10 @@ struct linux_params {
 	u32 initrd_addr_max;	/* 0x22c */
 	u32 kernel_alignment;	/* 0x230 */
 	u8 relocatable_kernel;	/* 0x234 */
-	u8 reserved13[155];		/* 0x22c */
+	u8 min_alignment;	/* 0x235 */
+	u8 reserved13[42];	/* 0x236 */
+	u32 init_size;		/* 0x260 */
+	u8 reserved14[108];	/* 0x264 */
 	struct e820entry e820_map[E820MAX];	/* 0x2d0 */
 	u8 reserved16[688];	/* 0x550 */
 #define COMMAND_LINE_SIZE 256
@@ -282,6 +285,7 @@ init_linux_params(struct linux_params *params, struct linux_header *hdr)
 	/* Copy some useful values from header */
 	params->mount_root_rdonly = hdr->root_flags;
 	params->orig_root_dev = hdr->root_dev;
+	params->loader_flags = hdr->loadflags;
 
 	/* Video parameters.
 	 * This assumes we have VGA in standard 80x25 text mode,
@@ -810,6 +814,14 @@ int linux_load(const char *file, const char *cmdline)
 			return -1;
 		}
 		free(initrd_file);
+	}
+
+	/* set init_size */
+	if (hdr.protocol_version < 0x020a) {
+		/* conservative size assumption */
+		params->init_size = 3 * kern_size;
+	} else {
+		params->init_size = hdr.init_size;
 	}
 
 	file_close();
