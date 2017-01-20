@@ -622,7 +622,6 @@ ob_ide_atapi_drive_ready(struct ide_drive *drive)
 {
 	struct atapi_command *cmd = &drive->channel->atapi_cmd;
 	struct atapi_capacity cap;
-	int i;
 
 	memset(cmd, 0, sizeof(*cmd));
 	cmd->cdb[0] = ATAPI_TUR;
