@@ -19,6 +19,7 @@
 
 #include <libpayload.h>
 #include <config.h>
+#include <pci/pci.h>
 #include <pci.h>
 
 #define DEBUG_THIS CONFIG_DEBUG_INTEL
@@ -38,6 +39,10 @@
 #define   SLP_TYP_S4	(6 << 10)
 #define   SLP_TYP_S5	(7 << 10)
 #define GPE0_EN		0x2c
+#define GPE0_EN_31_0	0x90
+#define GPE0_EN_63_32	0x94
+#define GPE0_EN_95_64	0x98
+#define GPE0_EN_127_96	0x9c
 
 #define RCBA8(x) *((volatile u8 *)(DEFAULT_RCBA + x))
 #define RCBA16(x) *((volatile u16 *)(DEFAULT_RCBA + x))
@@ -264,10 +269,18 @@ static void busmaster_disable(void)
 
 void platform_poweroff(void)
 {
+	const u32 pmc_dev = PCI_DEV(0, 0x1f, 2); /* from Sunrise Point PCH on */
+	const u32 lpc_dev = PCI_DEV(0, 0x1f, 0);
+
 	u16 pmbase;
 	u32 reg32;
 
-	pmbase = pci_read_config16(PCI_DEV(0,0x1f, 0), 0x40) & 0xfffe;
+	const u16 class = pci_read_config16(pmc_dev, PCI_CLASS_DEVICE);
+	const int is_pmc = class == PCI_CLASS_MEMORY_OTHER;
+	if (is_pmc)
+		pmbase = pci_read_config16(pmc_dev, 0x40) & 0xff00;
+	else
+		pmbase = pci_read_config16(lpc_dev, 0x40) & 0xfffe;
 
 	/* Mask interrupts */
 	asm("cli");
@@ -276,7 +289,14 @@ void platform_poweroff(void)
 	busmaster_disable();
 
 	/* avoid any GPI waking the system from S5 */
-	outl(0x00000000, pmbase + GPE0_EN);
+	if (is_pmc) {
+		outl(0x00000000, pmbase + GPE0_EN_31_0);
+		outl(0x00000000, pmbase + GPE0_EN_63_32);
+		outl(0x00000000, pmbase + GPE0_EN_95_64);
+		outl(0x00000000, pmbase + GPE0_EN_127_96);
+	} else {
+		outl(0x00000000, pmbase + GPE0_EN);
+	}
 
 	/* Clear Power Button Status */
 	outw(PWRBTN_STS, pmbase + PM1_STS);
@@ -293,7 +313,8 @@ void platform_poweroff(void)
 	reg32 |= SLP_EN;
 	outl(reg32, pmbase + PM1_CNT);
 
-	for (;;) ;
+	printf("\nPOWEROFF FAILURE! Power off the system manually, please.\n");
+	halt();
 }
 
 static inline void kbc_wait(void)
@@ -310,6 +331,11 @@ void platform_reboot(void)
 {
 	int i;
 
+	/* Try a system reset first. */
+	outb(0x2, 0xcf9);
+	outb(0x6, 0xcf9);
+
+	/* Fall back to keyboard controller reset. */
 	for (i = 0; i < 10; i++) {
 		kbc_wait();
 
@@ -325,6 +351,7 @@ void platform_reboot(void)
 		udelay(50);
 	}
 
-	for (;;) ;
+	printf("\nREBOOT FAILURE! Reboot the system manually, please.\n");
+	halt();
 }
 
