@@ -50,13 +50,19 @@
 #define RCBA32(x) *((volatile u32 *)(DEFAULT_RCBA + x))
 
 #define ICH9_SPI_HSFS		0x3804
-#define ICH9_SPI_HSFS_FLOCKDN	(1 << 15);
+#define ICH9_SPI_HSFS_FLOCKDN	(1 << 15)
 #define ICH9_SPI_FLASH_REGIONS	5
 #define ICH9_SPI_FREG0		0x3854
 #define ICH9_SPI_FPR0		0x3874
 #define ICH9_SPI_PREOP		0x3894
 #define ICH9_SPI_OPTYPE		0x3896
 #define ICH9_SPI_OPMENU		0x3898
+
+#define PCH100_SPI_HSFS		0x04
+#define PCH100_SPI_HSFS_WRSDIS	(1 << 11)
+#define PCH100_DLOCK		0x0c
+#define PCH100_DLOCK_PR0_LOCKDN	(1 << 8)
+#define PCH100_SPI_FPR0		0x84
 
 /*
  * SPI Opcode Menu setup for SPIBAR lockdown
@@ -163,8 +169,41 @@ static void lockdown_flash_pch(void)
 	lockdown_flash_ich9_lock_regions();
 }
 
+static int lockdown_flash_spt(void)
+{
+	const unsigned int fpr_count = 5;
+	uint8_t *const spibar = phys_to_virt(
+		pci_read_config32(PCI_DEV(0, 0x1f, 5), PCI_BASE_ADDRESS_0)
+		& 0xfffff000);
+
+	if (!spibar || spibar == phys_to_virt(0xfffff000)) {
+		printf("ERROR: SPIBAR not accessible!\n");
+		return -1;
+	}
+
+	/* Find a writeable FPR to write-protect everything. */
+	unsigned int i;
+	for (i = 0; i < fpr_count; ++i) {
+		write32(spibar + PCH100_SPI_FPR0 + 4 * i, 0xffff0000);
+		if (read32(spibar + PCH100_SPI_FPR0 + 4 * i) == 0xffff0000)
+			break;
+	}
+	if (i >= fpr_count) {
+		printf("ERROR: Can't find writeable FPR register!\n");
+		return -1;
+	}
+	write32(spibar + PCH100_DLOCK,
+		read32(spibar + PCH100_DLOCK) | PCH100_DLOCK_PR0_LOCKDN << i);
+	write32(spibar + PCH100_SPI_HSFS,
+		read32(spibar + PCH100_SPI_HSFS)
+		| ICH9_SPI_HSFS_FLOCKDN | PCH100_SPI_HSFS_WRSDIS);
+	return 0;
+}
+
 int intel_lockdown_flash(void)
 {
+	int ret = 0;
+
 	const u32 reg32 = pci_read_config32(PCI_DEV(0,0x1f, 0), 0);
 
 	switch (reg32) {
@@ -228,14 +267,62 @@ int intel_lockdown_flash(void)
 		/* Also trigger coreboot's SMM finalize() handlers. */
 		outb(0xcb, 0xb2);
 		break;
+
+		/* Skylake U/Y */
+	case 0x9d418086:
+	case 0x9d438086:
+	case 0x9d468086:
+	case 0x9d488086:
+		/* Kaby Lake U/Y */
+	case 0x9d4b8086:
+	case 0x9d4e8086:
+	case 0x9d508086:
+	case 0x9d518086:
+	case 0x9d538086:
+	case 0x9d568086:
+	case 0x9d588086:
+		/* Sunrise Point PCH-H */
+	case 0xa1418086:
+	case 0xa1428086:
+	case 0xa1438086:
+	case 0xa1448086:
+	case 0xa1458086:
+	case 0xa1468086:
+	case 0xa1478086:
+	case 0xa1488086:
+	case 0xa1498086:
+	case 0xa14a8086:
+	case 0xa14b8086:
+	case 0xa14d8086:
+	case 0xa14e8086:
+	case 0xa1508086:
+	case 0xa1518086:
+	case 0xa1528086:
+	case 0xa1538086:
+	case 0xa1548086:
+	case 0xa1558086:
+		/* Union Point PCH-H */
+	case 0xa2c48086:
+	case 0xa2c58086:
+	case 0xa2c68086:
+	case 0xa2c78086:
+	case 0xa2c88086:
+	case 0xa2c98086:
+	case 0xa2ca8086:
+	case 0xa2cc8086:
+		ret = lockdown_flash_spt();
+		break;
+
 	default:
-		debug("Not a supported ICH or PCH southbridge\n");
-		return -1;
+		printf("ERROR: Not a supported ICH or PCH southbridge\n");
+		ret = -1;
+		break;
 	}
 
-	debug("BIOS hard locked until next full reset.\n");
+	if (ret == 0)
+		debug("BIOS hard locked until next full reset.\n");
 
-	return 0;
+	return ret;
 }
 
 /* We should add some "do this for each pci device" function to libpayload */
