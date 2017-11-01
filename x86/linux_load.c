@@ -689,9 +689,6 @@ static void hardware_setup(void)
 
 	outb(0xFF, 0xA1);	/* mask off all interrupts for now */
 	outb(0xFB, 0x21);	/* mask all irq's but irq2 which is cascaded */
-
-	if (IS_ENABLED(CONFIG_FLASHROM_LOCKDOWN))
-		lockdown_flash();
 }
 
 /* Start Linux */
@@ -817,6 +814,12 @@ int linux_load(const char *file, const char *cmdline)
 	}
 
 	file_close();
+
+	if (IS_ENABLED(CONFIG_FLASHROM_LOCKDOWN)) {
+		if (lockdown_flash())
+			return -1;
+	}
+
 #if IS_ENABLED(CONFIG_LP_USB)
 	usb_exit();
 #endif
