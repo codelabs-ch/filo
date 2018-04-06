@@ -4,7 +4,7 @@ without help from legacy BIOS services.
 Expected usage is to flash it into the BIOS ROM together with coreboot.
 
 Find the latest version and more information on FILO
-at http://www.coreboot.org/FILO
+at https://www.coreboot.org/FILO
 
 FEATURES
 
