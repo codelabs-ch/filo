@@ -867,7 +867,7 @@ ext2fs_dir (char *dirname)
 		      && (! ext4_gdp->bg_inode_table_hi))
         {/* 64bit itable not supported */
 	  errnum = ERR_FILELENGTH;
-	  return -1;
+	  return 0;
         }
       ino_blk = ext4_gdp->bg_inode_table +
 	(((current_ino - 1) % le32toh(SUPERBLOCK->s_inodes_per_group))
