@@ -864,7 +864,7 @@ ext2fs_dir (char *dirname)
       ext4_gdp = (struct ext4_group_desc *)( (__u8*)GROUP_DESC +
 		      desc * EXT2_DESC_SIZE(SUPERBLOCK));
       if (EXT4_HAS_INCOMPAT_FEATURE(SUPERBLOCK, EXT4_FEATURE_INCOMPAT_64BIT)
-		      && (! ext4_gdp->bg_inode_table_hi))
+		      && ext4_gdp->bg_inode_table_hi)
         {/* 64bit itable not supported */
 	  errnum = ERR_FILELENGTH;
 	  return 0;
