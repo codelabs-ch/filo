@@ -151,7 +151,7 @@ endif
 
 $(obj)/filo: $(OBJS) $(LIBPAYLOAD)
 	printf "  LD      $(subst $(shell pwd)/,,$(@))\n"
-	CC=$(CC) $(LPGCC) $(OBJS) $(LIBS) -o $@
+	CC="$(CC)" $(LPGCC) $(OBJS) $(LIBS) -o $@
 
 $(obj)/filo.bzImage: $(TARGET) $(obj)/x86/linux_head.o
 	$(OBJCOPY) -O binary $(obj)/x86/linux_head.o $@.tmp1
@@ -171,11 +171,11 @@ $(KCONFIG_AUTOHEADER): $(src)/.config
 $(OBJS): $(KCONFIG_AUTOHEADER) $(obj)/version.h | libpayload
 $(obj)/%.o: $(src)/%.c
 	printf "  CC      $(subst $(shell pwd)/,,$(@))\n"
-	CC=$(CC) $(LPGCC) -MMD $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
+	CC="$(CC)" $(LPGCC) -MMD $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
 
 $(obj)/%.S.o: $(src)/%.S
 	printf "  AS      $(subst $(shell pwd)/,,$(@))\n"
-	AS=$(AS) $(LPAS) $(ASFLAGS) -o $@ $<
+	AS="$(AS)" $(LPAS) $(ASFLAGS) -o $@ $<
 
 $(obj)/%.map: $(obj)/%
 	printf "  SYMS    $(subst $(shell pwd)/,,$(@))\n"
