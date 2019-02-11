@@ -27,7 +27,7 @@ REQUIREMENTS
 
     x86-64 (AMD 64) machines in 32-bit mode do also work.
     (coreboot uses 32-bit mode and the Linux kernel does the
-    transition to 64-bit mode)
+    transition to 64-bit mode.)
 
     I'm using an AMD64 based mainboard with IDE hard disk
     and a DVD drive for testing, and QEmu, Bochs or VMware
