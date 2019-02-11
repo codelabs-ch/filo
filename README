@@ -30,7 +30,7 @@ REQUIREMENTS
     transition to 64-bit mode.)
 
     I'm using an AMD64 based mainboard with IDE hard disk
-    and a DVD drive for testing, and QEmu, Bochs or VMware
+    and a DVD drive for testing, and QEMU, Bochs or VMware
     for development.
 
     Recent version of GNU toolchain is required to build.
