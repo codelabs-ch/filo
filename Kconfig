@@ -132,7 +132,8 @@ config SLOW_SATA
 	depends on IDE_DISK
 	help
 	  SATA drives seem to have problems reporting their spinup.
-	  This will delay FILO start by 5s so the disks have some time to settle.
+	  This will delay FILO start by 5s so the disks have some time to
+	  settle.
 	  (required on some broken SATA controllers)
 	  NOTE: Slows down access significantly, so disable
 	  whenever possible.
