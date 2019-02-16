@@ -126,18 +126,6 @@ config IDE_DISK_POLL_DELAY
 	  NOTE: Slows down access significantly, so disable
 	  whenever possible. Set to 1 if you require this.
 
-config SLOW_SATA
-	bool "Extra delay for SATA"
-	default n
-	depends on IDE_DISK
-	help
-	  SATA drives seem to have problems reporting their spinup.
-	  This will delay FILO start by 5s so the disks have some time to
-	  settle.
-	  (required on some broken SATA controllers)
-	  NOTE: Slows down access significantly, so disable
-	  whenever possible.
-
 config PCMCIA_CF
 	bool "PCMCIA CF (Epia) support"
 	default n
@@ -160,6 +148,18 @@ config LIBPAYLOAD_STORAGE
 	help
 	  If selected, libpayloads storage drivers will be used to access
 	  hard disk and optical drives.
+
+config SATA_SPINUP_DELAY
+	int "Extra delay for (S)ATA (in seconds)" if \
+		IDE_DISK || IDE_NEW_DISK || LIBPAYLOAD_STORAGE
+	default 0
+	help
+	  SATA drives seem to have problems reporting their spinup.
+	  This will delay FILO start by the given number of seconds
+	  so the disks have some time to settle.
+	  (required on some broken SATA controllers)
+	  NOTE: Slows down access significantly, so keep as low as
+	  possible.
 
 config USB_DISK
 	bool "USB Stack"

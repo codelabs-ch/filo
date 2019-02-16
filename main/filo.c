@@ -94,9 +94,7 @@ static void init(void)
 #if IS_ENABLED(CONFIG_SUPPORT_SOUND)
     sound_init();
 #endif
-#if IS_ENABLED(CONFIG_SLOW_SATA)
-    delay(5);
-#endif
+    delay(CONFIG_SATA_SPINUP_DELAY);
 }
 
 int boot(const char *line)
