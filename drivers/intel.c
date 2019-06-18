@@ -26,6 +26,14 @@
 #define DEBUG_THIS CONFIG_DEBUG_INTEL
 #include <debug.h>
 
+enum chipset {
+	CHIPSET_UNKNOWN,
+	INTEL_ICH7,
+	INTEL_ICH9,
+	INTEL_EARLY_PCH,
+	INTEL_SUNRISEPOINT,
+};
+
 #define DEFAULT_RCBA            phys_to_virt(0xfed1c000)
 
 #define PM1_STS		0x00
@@ -103,6 +111,112 @@
 		    (SPI_OPTYPE_1 << 2) | (SPI_OPTYPE_0))
 
 #define SPI_OPPREFIX ((0x50 << 8) | 0x06) /* EWSR and WREN */
+
+static enum chipset detect_chipset(void)
+{
+	const uint32_t viddid = pci_read_config32(PCI_DEV(0, 0x1f, 0), 0);
+	const unsigned int vid = viddid & 0xffff;
+	const unsigned int did = viddid >> 16;
+
+	if (vid != 0x8086) {
+		printf("ERROR: Not a supported ICH or PCH southbridge: %04x:%04x\n", vid, did);
+		return CHIPSET_UNKNOWN;
+	}
+
+	switch (did) {
+	case 0x27b0:
+	case 0x27b8:
+	case 0x27b9:
+	case 0x27bd:
+		return INTEL_ICH7;
+	case 0x2912:
+	case 0x2914:
+	case 0x2916:
+	case 0x2917:
+	case 0x2918:
+	case 0x2919:
+		return INTEL_ICH9;
+	/* Cougar Point */
+	case 0x1c44:
+	case 0x1c46:
+	case 0x1c47:
+	case 0x1c49:
+	case 0x1c4a:
+	case 0x1c4b:
+	case 0x1c4c:
+	case 0x1c4d:
+	case 0x1c4e:
+	case 0x1c4f:
+	case 0x1c50:
+	case 0x1c52:
+	case 0x1c54:
+	case 0x1c56:
+	case 0x1c5c:
+	/* Panther Point */
+	case 0x1e44:
+	case 0x1e46:
+	case 0x1e47:
+	case 0x1e48:
+	case 0x1e49:
+	case 0x1e4a:
+	case 0x1e53:
+	case 0x1e55:
+	case 0x1e56:
+	case 0x1e57:
+	case 0x1e58:
+	case 0x1e59:
+	case 0x1e5d:
+	case 0x1e5e:
+	case 0x1e5f:
+		return INTEL_EARLY_PCH;
+	/* Skylake U/Y */
+	case 0x9d41:
+	case 0x9d43:
+	case 0x9d46:
+	case 0x9d48:
+	/* Kaby Lake U/Y */
+	case 0x9d4b:
+	case 0x9d4e:
+	case 0x9d50:
+	case 0x9d51:
+	case 0x9d53:
+	case 0x9d56:
+	case 0x9d58:
+	/* Sunrise Point PCH-H */
+	case 0xa141:
+	case 0xa142:
+	case 0xa143:
+	case 0xa144:
+	case 0xa145:
+	case 0xa146:
+	case 0xa147:
+	case 0xa148:
+	case 0xa149:
+	case 0xa14a:
+	case 0xa14b:
+	case 0xa14d:
+	case 0xa14e:
+	case 0xa150:
+	case 0xa151:
+	case 0xa152:
+	case 0xa153:
+	case 0xa154:
+	case 0xa155:
+	/* Union Point PCH-H */
+	case 0xa2c4:
+	case 0xa2c5:
+	case 0xa2c6:
+	case 0xa2c7:
+	case 0xa2c8:
+	case 0xa2c9:
+	case 0xa2ca:
+	case 0xa2cc:
+		return INTEL_SUNRISEPOINT;
+	default:
+		printf("ERROR: Not a supported ICH or PCH southbridge: %04x:%04x\n", vid, did);
+		return CHIPSET_UNKNOWN;
+	}
+}
 
 static void lockdown_flash_ich7(void)
 {
@@ -204,117 +318,27 @@ int intel_lockdown_flash(void)
 {
 	int ret = 0;
 
-	const u32 reg32 = pci_read_config32(PCI_DEV(0,0x1f, 0), 0);
-
-	switch (reg32) {
-
-		/* ICH7 */
-	case 0x27b08086:
-	case 0x27b88086:
-	case 0x27b98086:
-	case 0x27bd8086:
+	switch (detect_chipset()) {
+	case INTEL_ICH7:
 		lockdown_flash_ich7();
 		break;
-
-		/* ICH9 */
-	case 0x29128086:
-	case 0x29148086:
-	case 0x29168086:
-	case 0x29178086:
-	case 0x29188086:
-	case 0x29198086:
+	case INTEL_ICH9:
 		lockdown_flash_ich7();
 		/* Coreboot doesn't use flash regions for ICH9 based
 		   boards, so we just lock empty SPI opcodes instead
 		   of setting up any write protection. */
 		lockdown_flash_ich9_empty_ops();
 		break;
-
-		/* Cougar Point */
-	case 0x1c448086:
-	case 0x1c468086:
-	case 0x1c478086:
-	case 0x1c498086:
-	case 0x1c4a8086:
-	case 0x1c4b8086:
-	case 0x1c4c8086:
-	case 0x1c4d8086:
-	case 0x1c4e8086:
-	case 0x1c4f8086:
-	case 0x1c508086:
-	case 0x1c528086:
-	case 0x1c548086:
-	case 0x1c568086:
-	case 0x1c5c8086:
-		/* Panther Point */
-	case 0x1e448086:
-	case 0x1e468086:
-	case 0x1e478086:
-	case 0x1e488086:
-	case 0x1e498086:
-	case 0x1e4a8086:
-	case 0x1e538086:
-	case 0x1e558086:
-	case 0x1e568086:
-	case 0x1e578086:
-	case 0x1e588086:
-	case 0x1e598086:
-	case 0x1e5d8086:
-	case 0x1e5e8086:
-	case 0x1e5f8086:
+	case INTEL_EARLY_PCH:
 		lockdown_flash_pch();
 
 		/* Also trigger coreboot's SMM finalize() handlers. */
 		outb(0xcb, 0xb2);
 		break;
-
-		/* Skylake U/Y */
-	case 0x9d418086:
-	case 0x9d438086:
-	case 0x9d468086:
-	case 0x9d488086:
-		/* Kaby Lake U/Y */
-	case 0x9d4b8086:
-	case 0x9d4e8086:
-	case 0x9d508086:
-	case 0x9d518086:
-	case 0x9d538086:
-	case 0x9d568086:
-	case 0x9d588086:
-		/* Sunrise Point PCH-H */
-	case 0xa1418086:
-	case 0xa1428086:
-	case 0xa1438086:
-	case 0xa1448086:
-	case 0xa1458086:
-	case 0xa1468086:
-	case 0xa1478086:
-	case 0xa1488086:
-	case 0xa1498086:
-	case 0xa14a8086:
-	case 0xa14b8086:
-	case 0xa14d8086:
-	case 0xa14e8086:
-	case 0xa1508086:
-	case 0xa1518086:
-	case 0xa1528086:
-	case 0xa1538086:
-	case 0xa1548086:
-	case 0xa1558086:
-		/* Union Point PCH-H */
-	case 0xa2c48086:
-	case 0xa2c58086:
-	case 0xa2c68086:
-	case 0xa2c78086:
-	case 0xa2c88086:
-	case 0xa2c98086:
-	case 0xa2ca8086:
-	case 0xa2cc8086:
+	case INTEL_SUNRISEPOINT:
 		ret = lockdown_flash_spt();
 		break;
-
 	default:
-		printf("ERROR: Not a supported ICH or PCH southbridge\n");
 		ret = -1;
 		break;
 	}
