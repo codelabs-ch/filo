@@ -48,11 +48,15 @@ enum chipset {
 #define   SLP_TYP_S3	(5 << 10)
 #define   SLP_TYP_S4	(6 << 10)
 #define   SLP_TYP_S5	(7 << 10)
-#define GPE0_EN		0x2c
-#define GPE0_EN_31_0	0x90
-#define GPE0_EN_63_32	0x94
-#define GPE0_EN_95_64	0x98
-#define GPE0_EN_127_96	0x9c
+#define GPE0_EN			0x2c
+#define GPE0_EN_31_0		0x90
+#define GPE0_EN_63_32		0x94
+#define GPE0_EN_95_64		0x98
+#define GPE0_EN_127_96		0x9c
+#define CNP_GPE0_EN_31_0	0x70
+#define CNP_GPE0_EN_63_32	0x74
+#define CNP_GPE0_EN_95_64	0x78
+#define CNP_GPE0_EN_127_96	0x7c
 
 #define RCBA8(x) *((volatile u8 *)(DEFAULT_RCBA + x))
 #define RCBA16(x) *((volatile u16 *)(DEFAULT_RCBA + x))
@@ -421,13 +425,20 @@ void platform_poweroff(void)
 	u16 pmbase;
 	u32 reg32;
 
-	const u16 class = pci_read_config16(pmc_dev, PCI_CLASS_DEVICE);
-	const int is_pmc = class == PCI_CLASS_MEMORY_OTHER;
+	const enum chipset cs = detect_chipset();
 
-	if (is_pmc)
+	switch (cs) {
+	case INTEL_CANNONPOINT:
+		/* FIXME: I guess we are supposed to read FADT. */
+		pmbase = 0x1800;
+		break;
+	case INTEL_SUNRISEPOINT:
 		pmbase = pci_read_config16(pmc_dev, 0x40) & 0xff00;
-	else
+		break;
+	default:
 		pmbase = pci_read_config16(lpc_dev, 0x40) & 0xfffe;
+		break;
+	}
 
 	/* Mask interrupts */
 	asm("cli");
@@ -436,13 +447,22 @@ void platform_poweroff(void)
 	busmaster_disable();
 
 	/* avoid any GPI waking the system from S5 */
-	if (is_pmc) {
+	switch (cs) {
+	case INTEL_CANNONPOINT:
+		outl(0x00000000, pmbase + CNP_GPE0_EN_31_0);
+		outl(0x00000000, pmbase + CNP_GPE0_EN_63_32);
+		outl(0x00000000, pmbase + CNP_GPE0_EN_95_64);
+		outl(0x00000000, pmbase + CNP_GPE0_EN_127_96);
+		break;
+	case INTEL_SUNRISEPOINT:
 		outl(0x00000000, pmbase + GPE0_EN_31_0);
 		outl(0x00000000, pmbase + GPE0_EN_63_32);
 		outl(0x00000000, pmbase + GPE0_EN_95_64);
 		outl(0x00000000, pmbase + GPE0_EN_127_96);
-	} else {
+		break;
+	default:
 		outl(0x00000000, pmbase + GPE0_EN);
+		break;
 	}
 
 	/* Clear Power Button Status */
