@@ -32,6 +32,7 @@ enum chipset {
 	INTEL_ICH9,
 	INTEL_EARLY_PCH,
 	INTEL_SUNRISEPOINT,
+	INTEL_CANNONPOINT,
 };
 
 #define DEFAULT_RCBA            phys_to_virt(0xfed1c000)
@@ -212,6 +213,22 @@ static enum chipset detect_chipset(void)
 	case 0xa2ca:
 	case 0xa2cc:
 		return INTEL_SUNRISEPOINT;
+	/* Cannon/Coffee Lake U/Y */
+	case 0x9d83:
+	case 0x9d84:
+	case 0x9d85:
+	/* Cannon Lake PCH-H */
+	case 0xa303:
+	case 0xa304:
+	case 0xa305:
+	case 0xa306:
+	case 0xa308:
+	case 0xa309:
+	case 0xa30a:
+	case 0xa30c:
+	case 0xa30d:
+	case 0xa30e:
+		return INTEL_CANNONPOINT;
 	default:
 		printf("ERROR: Not a supported ICH or PCH southbridge: %04x:%04x\n", vid, did);
 		return CHIPSET_UNKNOWN;
