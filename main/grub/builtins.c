@@ -1360,6 +1360,15 @@ static struct builtin builtin_pause = {
 static int poweroff_func(char *arg, int flags)
 {
 	void __attribute__((weak)) platform_poweroff(void);
+
+	/*
+	 * platform_poweroff() may disable bus mastering. We should stop
+	 * controllers first to not confuse them. This helps the Cannon
+	 * Point PCH, for instance, to shut down properly.
+	 */
+	if (CONFIG(LP_USB))
+		usb_exit();
+
 	if (platform_poweroff)
 		platform_poweroff();
 	else
@@ -1409,6 +1418,10 @@ static struct builtin builtin_probe = {
 static int reboot_func(char *arg, int flags)
 {
 	void __attribute__((weak)) platform_reboot(void);
+
+	/* We should stop controllers first to not confuse them. */
+	if (CONFIG(LP_USB))
+		usb_exit();
 
 	if (platform_reboot)
 		platform_reboot();
