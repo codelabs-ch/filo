@@ -357,6 +357,7 @@ int intel_lockdown_flash(void)
 		outb(0xcb, 0xb2);
 		break;
 	case INTEL_SUNRISEPOINT:
+	case INTEL_CANNONPOINT:
 		ret = lockdown_flash_spt();
 		break;
 	default:
