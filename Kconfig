@@ -300,6 +300,13 @@ config ARTEC_BOOT
 	help
 	  Artecboot Loader Support
 
+config CSL_BOOT
+	bool "Command Stream Loader (CSL)"
+	default n
+	depends on TARGET_I386
+	help
+	  Add a loader for TLV command streams (CSL).
+
 endmenu
 
 menu "Debugging & Experimental"
