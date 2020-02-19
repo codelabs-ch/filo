@@ -136,6 +136,10 @@ int boot(const char *line)
     if (ret != LOADER_NOT_SUPPORT)
 	    goto out;
 
+    ret = csl_load(file, param);
+    if (ret != LOADER_NOT_SUPPORT)
+	    goto out;
+
     printf("Unsupported image format\n");
 
 out:

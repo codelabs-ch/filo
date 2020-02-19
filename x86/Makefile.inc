@@ -21,3 +21,4 @@ TARGETS-$(CONFIG_TARGET_I386) += x86/sys_info.o
 TARGETS-$(CONFIG_LINUX_LOADER) += x86/linux_load.o
 TARGETS-$(CONFIG_WINCE_LOADER) += x86/wince_load.o
 TARGETS-$(CONFIG_ARTEC_BOOT) += x86/artecboot.o
+TARGETS-$(CONFIG_CSL_BOOT) += x86/csl.o

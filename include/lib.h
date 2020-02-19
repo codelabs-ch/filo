@@ -30,4 +30,10 @@ long long simple_strtoll(const char *cp,char **endp,unsigned int base);
 
 struct sys_info;
 
+#if IS_ENABLED(CONFIG_CSL_BOOT)
+int csl_load(const char *filename, const char *cmdline);
+#else
+#define csl_load(x,y) LOADER_NOT_SUPPORT /* nop */
+#endif
+
 #endif /* LIB_H */
