@@ -32,6 +32,8 @@
 #include <grub/md5.h>
 #endif
 #include <pci.h>
+#include <csl.h>
+#include <sbs.h>
 
 /* The default entry.  */
 int default_entry = 0;
@@ -1596,6 +1598,28 @@ static struct builtin builtin_serial = {
 	    " default values are COM1, 9600, 8N1."
 };
 
+/* initialize sbs */
+static int
+sbs_init_func(char *arg, int flags)
+{
+	grub_printf("SBS - overriding CSL file ops...\n");
+	csl_fs_ops.open  = sbs_open;
+	csl_fs_ops.read  = sbs_read;
+	csl_fs_ops.size  = sbs_size;
+	csl_fs_ops.close = sbs_close;
+
+	return 0;
+}
+
+static struct builtin builtin_sbs_init =
+{
+	"sbs_init",
+	sbs_init_func,
+	BUILTIN_CMDLINE | BUILTIN_HELP_LIST,
+	"sbs_init",
+	"Initialize Signed Block Stream (SBS) processing."
+};
+
 #ifdef CONFIG_DEVELOPER_TOOLS
 #ifdef CONFIG_SUPPORT_PCI
 static int setpci_func(char *arg, int flags)
@@ -2006,6 +2030,7 @@ struct builtin *builtin_table[] = {
 #endif
 	&builtin_reboot,
 	&builtin_root,
+	&builtin_sbs_init,
 	&builtin_serial,
 #ifdef CONFIG_DEVELOPER_TOOLS
 #ifdef CONFIG_SUPPORT_PCI
