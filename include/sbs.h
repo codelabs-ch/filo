@@ -15,6 +15,8 @@
 #ifndef SBS_H
 #define SBS_H
 
+#include <stdint.h>
+
 int sbs_open(const char *filename);
 int sbs_read(void *buf, unsigned long len);
 unsigned long sbs_size(void);
@@ -41,20 +43,20 @@ enum
 
 struct sbs_header_t
 {
-	grub_uint32_t version_magic;
-	grub_uint32_t block_count;
-	grub_uint32_t block_size;
-	grub_uint32_t sig_len;
-	grub_uint16_t header_size;
-	grub_uint16_t hashsum_len;
-	grub_uint16_t hash_algo_id_1;
-	grub_uint16_t hash_algo_id_2;
-	grub_uint16_t hash_algo_id_3;
-	grub_uint16_t hash_algo_id_4;
-	grub_uint16_t sig_scheme_id;
-	grub_uint16_t reserved;
-	grub_uint32_t padding_len;
-	grub_uint8_t root_hash[SHA512_HASHSUM_LEN];
+	uint32_t version_magic;
+	uint32_t block_count;
+	uint32_t block_size;
+	uint32_t sig_len;
+	uint16_t header_size;
+	uint16_t hashsum_len;
+	uint16_t hash_algo_id_1;
+	uint16_t hash_algo_id_2;
+	uint16_t hash_algo_id_3;
+	uint16_t hash_algo_id_4;
+	uint16_t sig_scheme_id;
+	uint16_t reserved;
+	uint32_t padding_len;
+	uint8_t root_hash[SHA512_HASHSUM_LEN];
 } __attribute__ ((packed));
 
 #endif /* SBS_H */
