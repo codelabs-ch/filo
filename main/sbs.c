@@ -97,9 +97,17 @@ print_buffer (const uint8_t * const b, const unsigned len)
  */
 static unsigned verify (void)
 {
+	uint8_t signature[PGP_RSA4096_SIG_LEN];
+
 	/* DUMMY IMPLEMENTATION */
-	grub_printf ("SBS - dummy verify(), returning false\n");
-	return 0;
+	grub_printf ("SBS - dummy verify() WARNING\n");
+	if (file_read (signature, header.sig_len) != header.sig_len)
+	{
+		grub_printf ("SBS - unable to read signature\n");
+		return 0;
+	}
+	state.sbs_valid = 1;
+	return 1;
 }
 
 /* Read next block hash and data */
@@ -128,8 +136,8 @@ static unsigned
 hash_valid (const uint8_t * const h)
 {
 	/* DUMMY IMPLEMENTATION */
-	grub_printf ("SBS - dummy hash_valid(), returning false\n");
-	return 0;
+	grub_printf ("SBS - dummy hash_valid(), returning true\n");
+	return 1;
 }
 
 /* Read next block and verify hashsum */
