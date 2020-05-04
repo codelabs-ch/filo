@@ -16,6 +16,7 @@
 #include <debug.h>
 #include <libpayload.h>
 #include <grub/shared.h>
+#include <pae.h>
 #include <fs.h>
 #include <csl.h>
 
@@ -25,7 +26,7 @@
 /* protocol version magic */
 static const u64 my_vermagic = 0x8adc5fa2448cb65eULL;
 
-typedef unsigned long data_length_t;
+typedef u64 data_length_t;
 
 enum
 {
@@ -43,6 +44,7 @@ enum
 	CPUID_RESULT_EDX = 3,
 };
 
+#define INT_MAX 2147483647
 #define ULONG_MAX 4294967295UL
 
 #define CMD_SET_ENTRY_POINT_DATA_LEN	8
@@ -147,23 +149,18 @@ static int cls_read_address(const char * const cmd_name, u64 *address)
 		grub_printf("%s - unable to read address\n", cmd_name);
 		return -1;
 	}
-	if (*address > ULONG_MAX) {
-		grub_printf("%s - address out of range 0x%llx\n",
-				cmd_name, address);
-		return -1;
-	}
 
 	return 0;
 }
 
 static int csl_cmd_write(const data_length_t data_length)
 {
-	int err;
+	int64_t err;
 	u64 address = 0;
 	data_length_t content_len;
 
 	if (data_length < 9) {
-		grub_printf("%s - unexpected data length 0x%lx\n",
+		grub_printf("%s - unexpected data length 0x%llx\n",
 				cmd_names[CMD_WRITE], data_length);
 		return -1;
 	}
@@ -176,9 +173,18 @@ static int csl_cmd_write(const data_length_t data_length)
 	if (ram_region_check(address, content_len, cmd_names[CMD_WRITE]))
 		return -1;
 
-	if (csl_fs_ops.read(phys_to_virt(address), content_len) !=
-			(int) content_len) {
-		grub_printf("%s - unable to read 0x%lx content bytes\n",
+	/*
+	 * FILO's file_read function can only read (int) bytes because of return
+	 * type. We can just use the PAE path in this case as read_pae() supports
+	 * up to INT64_MAX bytes.
+	 */
+	if (content_len > INT_MAX || address + content_len > ULONG_MAX)
+		err = read_pae(address, content_len, csl_fs_ops.read);
+	else
+		err = csl_fs_ops.read(phys_to_virt(address), content_len);
+
+	if (err < 0 || err != (int64_t) content_len) {
+		grub_printf("%s - unable to read 0x%llx content bytes\n",
 				cmd_names[CMD_WRITE], content_len);
 		return -1;
 	}
@@ -192,7 +198,7 @@ static int csl_cmd_fill(const data_length_t data_length)
 	u64 address = 0, fill_length = 0, pattern = 0;
 
 	if (data_length != CMD_FILL_PATTERN_DATA_LEN) {
-		grub_printf("%s - unexpected data length 0x%lx\n",
+		grub_printf("%s - unexpected data length 0x%llx\n",
 				cmd_names[CMD_FILL], data_length);
 		return -1;
 	}
@@ -206,11 +212,6 @@ static int csl_cmd_fill(const data_length_t data_length)
 				cmd_names[CMD_FILL]);
 		return -1;
 	}
-	if (fill_length > ULONG_MAX) {
-		grub_printf("%s - fill length is out of range - 0x%llx\n",
-				cmd_names[CMD_FILL], fill_length);
-		return -1;
-	}
 
 	if (ram_region_check(address, fill_length, cmd_names[CMD_FILL]))
 		return -1;
@@ -221,7 +222,11 @@ static int csl_cmd_fill(const data_length_t data_length)
 		return -1;
 	}
 
-	memset(phys_to_virt(address), (int) pattern & 0xff, (size_t) fill_length);
+	if (address + fill_length > ULONG_MAX)
+		memset_pae(address, (int) pattern & 0xff, fill_length);
+	else
+		memset(phys_to_virt(address), (int) pattern & 0xff, (size_t) fill_length);
+
 	return 0;
 }
 
@@ -230,7 +235,7 @@ static int csl_cmd_set_entry_point(const data_length_t data_length)
 	u64 ep = 0;
 
 	if (data_length != CMD_SET_ENTRY_POINT_DATA_LEN) {
-		grub_printf("%s - unexpected data length 0x%lx\n",
+		grub_printf("%s - unexpected data length 0x%llx\n",
 				cmd_names[CMD_SET_ENTRY_POINT], data_length);
 		return -1;
 	}
@@ -266,7 +271,7 @@ static int csl_cmd_check_cpuid(const data_length_t data_length)
 	}
 
 	if (data_length != CMD_CHECK_CPUID_DATA_LEN) {
-		grub_printf("%s - unexpected data length 0x%lx\n",
+		grub_printf("%s - unexpected data length 0x%llx\n",
 				cmd_names[CMD_CHECK_CPUID], data_length);
 		return -1;
 	}
@@ -344,16 +349,6 @@ static int csl_dispatch(const u16 cmd, const u64 length)
 	u8 dummy;
 
 	debug("Dispatching cmd %u with data length 0x%llx\n", cmd, length);
-
-	/*
-	 * FILO's file_read function can only read (int) bytes because of return
-	 * type, be conservative and assume the whole data is read via
-	 * csl_fs_ops.read function.
-	 */
-	if ((int) length < 0) {
-		grub_printf("Data length out of range - 0x%llx\n", length);
-		return -1;
-	}
 
 	switch (cmd)
 	{
