@@ -16,6 +16,7 @@
 #include <debug.h>
 #include <libpayload.h>
 #include <grub/shared.h>
+#include <pae.h>
 #include <fs.h>
 #include <csl.h>
 
@@ -147,11 +148,6 @@ static int cls_read_address(const char * const cmd_name, u64 *address)
 		grub_printf("%s - unable to read address\n", cmd_name);
 		return -1;
 	}
-	if (*address > ULONG_MAX) {
-		grub_printf("%s - address out of range 0x%llx\n",
-				cmd_name, address);
-		return -1;
-	}
 
 	return 0;
 }
@@ -176,8 +172,12 @@ static int csl_cmd_write(const data_length_t data_length)
 	if (ram_region_check(address, content_len, cmd_names[CMD_WRITE]))
 		return -1;
 
-	if (csl_fs_ops.read(phys_to_virt(address), content_len) !=
-			(int) content_len) {
+	if (address + content_len >= ULONG_MAX)
+		err = read_pae(address, content_len, csl_fs_ops.read);
+	else
+		err = csl_fs_ops.read(phys_to_virt(address), content_len);
+
+	if (err != (int) content_len) {
 		grub_printf("%s - unable to read 0x%lx content bytes\n",
 				cmd_names[CMD_WRITE], content_len);
 		return -1;
@@ -206,11 +206,6 @@ static int csl_cmd_fill(const data_length_t data_length)
 				cmd_names[CMD_FILL]);
 		return -1;
 	}
-	if (fill_length > ULONG_MAX) {
-		grub_printf("%s - fill length is out of range - 0x%llx\n",
-				cmd_names[CMD_FILL], fill_length);
-		return -1;
-	}
 
 	if (ram_region_check(address, fill_length, cmd_names[CMD_FILL]))
 		return -1;
@@ -221,7 +216,11 @@ static int csl_cmd_fill(const data_length_t data_length)
 		return -1;
 	}
 
-	memset(phys_to_virt(address), (int) pattern & 0xff, (size_t) fill_length);
+	if (address + fill_length >= ULONG_MAX)
+		memset_pae(address, (int) pattern & 0xff, (size_t) fill_length);
+	else
+		memset(phys_to_virt(address), (int) pattern & 0xff, (size_t) fill_length);
+
 	return 0;
 }
 
