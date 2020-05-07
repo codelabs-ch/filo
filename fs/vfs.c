@@ -28,8 +28,8 @@
 #define DEBUG_THIS CONFIG_DEBUG_VFS
 #include <debug.h>
 
-int filepos;
-int filemax;
+u64 filepos;
+u64 filemax;
 grub_error_t errnum;
 void (*disk_read_hook) (int, int, int);
 void (*disk_read_func) (int, int, int);
