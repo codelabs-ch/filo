@@ -55,8 +55,8 @@ substring (const char *s1, const char *s2)
 extern char dev_name[256];
 extern unsigned long part_start;
 extern unsigned long part_length;
-extern int filepos;
-extern int filemax;
+extern u64 filepos;
+extern u64 filemax;
 extern int fsmax;
 
 /* Error codes (descriptions are in common.c) */
