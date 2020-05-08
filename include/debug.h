@@ -40,7 +40,7 @@
 
 #ifdef CONFIG_USE_GRUB
 extern int using_grub_interface;
-void grub_printf (const char *format,...);
+void grub_printf (const char *format,...) __attribute__((format(printf, 1, 2)));
 #define printf(x...) do { if (using_grub_interface) { grub_printf(x); } else { printf(x); } } while (0)
 #endif
 
