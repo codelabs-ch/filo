@@ -356,10 +356,10 @@ static void set_video_mode(struct linux_params *params)
 {
 #if IS_ENABLED(CONFIG_LP_COREBOOT_VIDEO_CONSOLE)
 	/* Are we running on a framebuffer console? */
-	if (!lib_sysinfo.framebuffer)
+	if (!lib_sysinfo.framebuffer.physical_address)
 		return;
 
-	struct cb_framebuffer *fb = phys_to_virt(lib_sysinfo.framebuffer);
+	struct cb_framebuffer *const fb = &lib_sysinfo.framebuffer;
 
 	params->lfb_width = fb->x_resolution;
 	params->lfb_height = fb->y_resolution;
