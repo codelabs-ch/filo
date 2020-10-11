@@ -29,7 +29,7 @@ void collect_sys_info(struct sys_info *info)
 const char *get_cb_version()
 {
 	const char *cb_version = lib_sysinfo.cb_version ?
-		lib_sysinfo.cb_version : "<unknown version>";
+		phys_to_virt(lib_sysinfo.cb_version) : "<unknown version>";
 
 	return cb_version;
 }

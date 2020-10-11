@@ -128,8 +128,8 @@ int flashupdate_func(char *arg, int flags)
 	const char *filename = argv[optind];
 
 	if (vendor && board &&
-		((strcmp(vendor, cb_mb_vendor_string(lib_sysinfo.mainboard)) != 0) ||
-		(strcmp(board, cb_mb_part_string(lib_sysinfo.mainboard)) != 0))) {
+		((strcmp(vendor, cb_mb_vendor_string(phys_to_virt(lib_sysinfo.cb_mainboard))) != 0) ||
+		(strcmp(board, cb_mb_part_string(phys_to_virt(lib_sysinfo.cb_mainboard))) != 0))) {
 		/* since flashupdate semantics is: iff board matches, write flash;
 		   it's a success not to flash on another board. */
 		result = 0;
@@ -182,9 +182,9 @@ int flashupdate_func(char *arg, int flags)
 	setup_cbfs_from_ram(new_rom_data, new_rom_size);
 
 	/* Step 2: Check Board IDs (that we work on the right image) */
-	const char *cur_version = lib_sysinfo.cb_version;
-	const char *cur_vendor = cb_mb_vendor_string(lib_sysinfo.mainboard);
-	const char *cur_board = cb_mb_part_string(lib_sysinfo.mainboard);
+	const char *cur_version = phys_to_virt(lib_sysinfo.cb_version);
+	const char *cur_vendor = cb_mb_vendor_string(phys_to_virt(lib_sysinfo.cb_mainboard));
+	const char *cur_board = cb_mb_part_string(phys_to_virt(lib_sysinfo.cb_mainboard));
 
 	/* Step 2a: check if this is a coreboot image by looking for a CBFS master header */
 	if (get_cbfs_header() != 0xffffffff) {
