@@ -155,7 +155,7 @@ config IDE_NEW_DISK
 
 config LIBPAYLOAD_STORAGE
 	bool "Use libpayload's storage drivers"
-	default n
+	default y
 	help
 	  If selected, libpayloads storage drivers will be used to access
 	  hard disk and optical drives.
