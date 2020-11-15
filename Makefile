@@ -59,14 +59,6 @@ ifneq ($(Q),)
 endif
 endif
 
-try-run = $(shell set -e;		\
-	TMP=".$$$$.tmp";		\
-	if ($(1)) > /dev/null 2>&1;	\
-	then echo "$(2)";		\
-	else echo "$(3)";		\
-	fi;				\
-	rm -rf "$$TMP")
-
 HOSTCC ?= gcc
 HOSTCXX ?= g++
 HOSTCFLAGS := -I$(srck) -I$(objk) -pipe
@@ -99,8 +91,6 @@ AR := $(AR_$(ARCH-y))
 
 CFLAGS += $(CFLAGS_$(ARCH-y))
 
-cc-option = $(call try-run,$(CC) $(1) -S -xc /dev/null -o "$$TMP",$(1),$(2))
-
 LIBPAYLOAD_PREFIX ?= $(obj)/libpayload
 LIBPAYLOAD = $(LIBPAYLOAD_PREFIX)/lib/libpayload.a
 INCPAYLOAD = $(LIBPAYLOAD_PREFIX)/include
@@ -119,7 +109,6 @@ CPPFLAGS += -I$(GCCINCDIR) -include $(INCPAYLOAD)/kconfig.h
 
 CFLAGS := -Wall -Wshadow -Os -pipe
 CFLAGS += -fomit-frame-pointer -fno-common -ffreestanding -fno-strict-aliasing
-CFLAGS += $(call cc-option, -fno-stack-protector,)
 
 LIBS := $(LIBPAYLOAD) $(LIBGCC)
 
