@@ -111,17 +111,19 @@ endif
 ################################################################################
 # Libpayload integration
 
-LIB_CONFIG  := $(src)/lib.config
-
-LIBPAYLOAD ?= $(wildcard $(LIBPAYLOAD_PREFIX)/lib/libpayload.a)
-ifeq ($(LIBPAYLOAD),)
-libpayload_config_%:
-	echo "Libpayload config for FILO."
-	$(MAKE) -C $(LIBCONFIG_PATH) KCONFIG_CONFIG=$(LIB_CONFIG) $*
-	echo "Libpayload config done."
-else
+ifneq ($(wildcard $(LIBPAYLOAD_PREFIX)/lib/libpayload.a),)
 libpayload_config_%:
 	echo "Using binary libpayload, nothing to configure"
+else
+ifneq ($(LIBPAYLOAD_DEFCONFIG),)
+libpayload_config_%:
+	echo "Using libpayload defconfig, nothing to configure"
+else
+libpayload_config_%:
+	echo "Libpayload config for FILO."
+	$(MAKE) -C $(LIBPAYLOAD_SRC) KCONFIG_CONFIG=$(LIBPAYLOAD_DOTCONFIG) $(patsubst libpayload_config_%,%,$@)
+	echo "Libpayload config done."
+endif
 endif
 
 $(foreach c, config menuconfig nconfig gconfig xconfig defconfig $(simple-targets), \

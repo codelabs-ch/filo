@@ -1,4 +1,6 @@
 .config
 .config.old
+.lp.config
+.lp.config.old
 .xcompile
 build/
