@@ -325,7 +325,7 @@ static void set_memory_size(struct linux_params *params)
 			linux_map->addr = filo_map->base;
 			linux_map->size = filo_map->size;
 			linux_map->type = filo_map->type;
-			debug("%016llx - %016llx (%d)\n", linux_map->addr,
+			debug("%016llx - %016llx (%lu)\n", linux_map->addr,
 			      linux_map->addr + linux_map->size,
 			      linux_map->type);
 			params->e820_map_nr = i + 1;
