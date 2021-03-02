@@ -45,6 +45,6 @@ void collect_linuxbios_info(struct sys_info *info);
 const char *get_cb_version(void);
 
 /* Our name and version. I want to see single instance of these in the image */
-extern const char *program_name, *program_version;
+extern const char *const program_name, *const program_version;
 
 #endif /* SYS_INFO_H */
