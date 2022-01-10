@@ -102,7 +102,7 @@ LPAS = $(LIBPAYLOAD_PREFIX)/bin/lpas
 ARCHDIR-$(CONFIG_TARGET_I386) := x86
 ARCHDIR-$(CONFIG_TARGET_ARM) := arm
 
-CPPFLAGS := -nostdinc -imacros $(obj)/config.h
+CPPFLAGS := -imacros $(obj)/config.h
 CPPFLAGS += -I$(INCPAYLOAD) -I$(INCPAYLOAD)/$(ARCHDIR-y)
 CPPFLAGS += -I$(ARCHDIR-y)/include -Iinclude -I$(obj)
 CPPFLAGS += -I$(GCCINCDIR) -include $(INCPAYLOAD)/kconfig.h
