@@ -43,6 +43,10 @@ LIBPAYLOAD_OBJ := $(obj)/libpayload
 LIBPAYLOAD_PREFIX ?= $(LIBPAYLOAD_OBJ)
 LIBPAYLOAD_DEFCONFIG ?=
 
+ifeq ($(CONFIG_CCACHE),y)
+CCACHE := $(word 1,$(wildcard $(addsuffix /ccache,$(subst :, ,$(PATH)))))
+endif
+
 all: real-all
 
 # $(LIBPAYLOAD_PREFIX) decides if we build against an installed libpayload.

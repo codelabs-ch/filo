@@ -18,7 +18,7 @@ LPAS = $(LIBPAYLOAD_PREFIX)/bin/lpas
 
 CFLAGS = -Wall -Os -ffreestanding $(CFLAGS_$(ARCH-y))
 
-CC = $(CC_$(ARCH-y))
+CC = $(CCACHE) $(CC_$(ARCH-y))
 AS = $(AS_$(ARCH-y))
 NM = $(NM_$(ARCH-y))
 STRIP = $(STRIP_$(ARCH-y))

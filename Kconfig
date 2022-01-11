@@ -24,6 +24,12 @@ config MULTIBOOT_IMAGE
 	  Including a MultiBoot header makes FILO chainloadable by MultiBoot
 	  compliant boot loaders like GRUB.
 
+config CCACHE
+	bool "Use ccache if available"
+	default y
+	help
+	  Try to find `ccache` in $PATH and use it if found.
+
 menu "Interface Options"
 
 config USE_GRUB
