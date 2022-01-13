@@ -124,7 +124,7 @@ int boot(const char *line)
     if (ret != LOADER_NOT_SUPPORT)
 	    goto out;
 
-    ret = elf_load(file, param);
+    ret = elf_boot(file, param);
     if (ret != LOADER_NOT_SUPPORT)
 	    goto out;
 

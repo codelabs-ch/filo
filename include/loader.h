@@ -19,10 +19,11 @@
 #define LOADER_NOT_SUPPORT 0xbadf11e
 
 #ifdef CONFIG_ELF_BOOT
-int elf_load(const char *filename, const char *cmdline);
+int elf_boot(const char *filename, const char *cmdline);
 #else
-#define elf_load(x,y) LOADER_NOT_SUPPORT /* nop */
+#define elf_boot(x,y) LOADER_NOT_SUPPORT /* nop */
 #endif
+int elf_load(uintptr_t *entry, bool elfboot);
 
 #ifdef CONFIG_LINUX_LOADER
 int linux_load(const char *filename, const char *cmdline);

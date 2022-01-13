@@ -297,21 +297,18 @@ static Elf_Bhdr *build_boot_notes(const char *cmdline)
 	return bhdr;
 }
 
-int elf_load(const char *filename, const char *cmdline)
+int elf_load(uintptr_t *const entry, const bool elfboot)
 {
 	Elf_ehdr ehdr;
 	Elf_phdr *phdr = NULL;
 	unsigned long phdr_size;
-	unsigned long checksum_offset;
+	unsigned long checksum_offset = 0;
 	unsigned short checksum = 0;
-	Elf_Bhdr *boot_notes = NULL;
 	int retval = -1;
-	int image_retval;
 
 	image_name = image_version = 0;
 
-	if (!file_open(filename))
-		goto out;
+	file_seek(0);
 
 	if (file_read(&ehdr, sizeof ehdr) != sizeof ehdr) {
 		debug("Can't read ELF header\n");
@@ -346,7 +343,8 @@ int elf_load(const char *filename, const char *cmdline)
 	if (!check_mem_ranges(phdr, ehdr.e_phnum))
 		goto out;
 
-	checksum_offset = process_image_notes(phdr, ehdr.e_phnum, &checksum);
+	if (elfboot)
+		checksum_offset = process_image_notes(phdr, ehdr.e_phnum, &checksum);
 
 	printf("Loading %s", image_name ? image_name : "image");
 	if (image_version)
@@ -361,33 +359,54 @@ int elf_load(const char *filename, const char *cmdline)
 			goto out;
 	}
 
-	file_close();
-
-	boot_notes = build_boot_notes(cmdline);
-
-	if (prepare_for_jump())
-		goto out;
-
-	debug("current time: %lu\n", currticks());
-
-	debug("entry point is %#x\n", ehdr.e_entry);
-	printf("Jumping to entry point...\n");
-	image_retval = start_elf(ehdr.e_entry, virt_to_phys(boot_notes));
-
-	restore_after_jump();
-
-	printf("Image returned with return value %#x\n", image_retval);
+	*entry = ehdr.e_entry;
 	retval = 0;
 
 out:
 	if (phdr)
 		free(phdr);
-	if (boot_notes)
-		free(boot_notes);
 	if (image_name)
 		free(image_name);
 	if (image_version)
 		free(image_version);
-	file_close();
 	return retval;
 }
+
+#ifdef CONFIG_ELF_BOOT
+int elf_boot(const char *filename, const char *cmdline)
+{
+	uintptr_t entry;
+	int ret;
+
+	if (!file_open(filename))
+		return -1;
+
+	ret = elf_load(&entry, true);
+	if (ret)
+		return ret;
+
+	file_close();
+
+	Elf_Bhdr *const boot_notes = build_boot_notes(cmdline);
+
+	if (prepare_for_jump()) {
+		free(boot_notes);
+		return -1;
+	}
+
+	debug("current time: %lu\n", currticks());
+
+	debug("entry point is %#lx\n", entry);
+	printf("Jumping to entry point...\n");
+	ret = start_elf(entry, virt_to_phys(boot_notes));
+
+	/* Usually not reached, but continue gracefully
+	   in case the program returned: */
+	restore_after_jump();
+
+	printf("Image returned with return value %#x\n", ret);
+
+	free(boot_notes);
+	return 0;
+}
+#endif /* CONFIG_ELF_BOOT */
