@@ -1010,9 +1010,11 @@ static int sb600_probe_spi(struct pci_dev *dev)
 	struct pci_dev *smbus_dev;
 	uint32_t tmp;
 	uint8_t reg;
+#ifdef DEBUG
 	static const char *const speed_names[4] = {
 		"Reserved", "33", "22", "16.5"
 	};
+#endif
 
 	/* Read SPI_BaseAddr */
 	tmp = pci_read_long(dev, 0xa0);
