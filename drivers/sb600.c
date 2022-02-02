@@ -388,10 +388,7 @@ static int spi_rdid(unsigned char *readarr, int bytes)
 
 static void spi_prettyprint_status_register(struct flashchip *flash)
 {
-	uint8_t status;
-
-	status = spi_read_status_register();
-	msg_cdbg("Chip status register is %02x\n", status);
+	msg_cdbg("Chip status register is %02x\n", spi_read_status_register());
 }
 
 
