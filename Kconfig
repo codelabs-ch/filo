@@ -286,6 +286,12 @@ endmenu
 
 menu "Loaders"
 
+config ELF_BOOT
+	bool "ELF loader"
+	default y
+	help
+	  Supports simple ELF files and "ELFBoot".
+
 config LINUX_LOADER
 	bool "Standard Linux Loader"
 	default y
