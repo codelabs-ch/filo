@@ -94,7 +94,7 @@ static unsigned long process_image_notes(
 			continue;
 		buf = malloc(phdr[i].p_filesz);
 		file_seek(phdr[i].p_offset);
-		if (file_read(buf, phdr[i].p_filesz) != phdr[i].p_filesz) {
+		if (file_read(buf, phdr[i].p_filesz) != (int)phdr[i].p_filesz) {
 			printf("Can't read note segment\n");
 			goto out;
 		}
@@ -151,7 +151,7 @@ static int load_segments(Elf_phdr *phdr, int phnum, unsigned long checksum_offse
 		file_seek(phdr[i].p_offset);
 		debug("loading... ");
 		if (file_read(phys_to_virt(phdr[i].p_paddr), phdr[i].p_filesz)
-				!= phdr[i].p_filesz) {
+				!= (int)phdr[i].p_filesz) {
 			printf("Can't read program segment %d\n", i);
 			return 0;
 		}
@@ -338,7 +338,7 @@ int elf_load(const char *filename, const char *cmdline)
 	phdr_size = ehdr.e_phnum * sizeof *phdr;
 	phdr = malloc(phdr_size);
 	file_seek(ehdr.e_phoff);
-	if (file_read(phdr, phdr_size) != phdr_size) {
+	if (file_read(phdr, phdr_size) != (int)phdr_size) {
 		printf("Can't read program header\n");
 		goto out;
 	}
