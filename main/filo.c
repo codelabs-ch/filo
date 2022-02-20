@@ -19,7 +19,7 @@
 #include <libpayload-config.h>
 #include <config.h>
 #include <version.h>
-#include <lib.h>
+#include <loader.h>
 #include <fs.h>
 #include <sys_info.h>
 #include <sound.h>

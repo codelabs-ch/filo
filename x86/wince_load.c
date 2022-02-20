@@ -25,6 +25,7 @@
 #include <lib.h>
 #include <fs.h>
 #include <arch/io.h>
+#include <loader.h>
 #include "context.h"
 #include "segment.h"
 

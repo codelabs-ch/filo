@@ -24,6 +24,7 @@
 #include <config.h>
 #include <timer.h>
 #include <sys_info.h>
+#include <loader.h>
 #include <elf.h>
 #include <arch/elf.h>
 #include <elf_boot.h>

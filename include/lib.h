@@ -29,27 +29,6 @@ long long simple_strtoll(const char *cp,char **endp,unsigned int base);
 
 #define abort() halt()
 
-#define LOADER_NOT_SUPPORT 0xbadf11e
-
 struct sys_info;
-int elf_load(const char *filename, const char *cmdline);
-
-#ifdef CONFIG_LINUX_LOADER
-int linux_load(const char *filename, const char *cmdline);
-#else
-#define linux_load(x,y) LOADER_NOT_SUPPORT /* nop */
-#endif
-
-#ifdef CONFIG_WINCE_LOADER
-int wince_load(const char *filename, const char *cmdline);
-#else
-#define wince_load(x,y) LOADER_NOT_SUPPORT /* nop */
-#endif
-
-#ifdef CONFIG_ARTEC_BOOT
-int artecboot_load(const char *filename, const char *cmdline);
-#else
-#define artecboot_load(x,y) LOADER_NOT_SUPPORT /* nop */
-#endif
 
 #endif /* LIB_H */

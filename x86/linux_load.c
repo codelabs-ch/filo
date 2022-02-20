@@ -31,6 +31,7 @@
 #include <config.h>
 #include <fs.h>
 #include <flashlock.h>
+#include <loader.h>
 #include "context.h"
 #include "segment.h"
 

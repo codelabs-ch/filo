@@ -25,7 +25,7 @@
 #include <config.h>
 #include <fs.h>
 #include <flashlock.h>
-#include <lib.h>
+#include <loader.h>
 #include <grub/shared.h>
 #include <timer.h>
 #ifdef CONFIG_USE_MD5_PASSWORDS

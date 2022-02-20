@@ -24,6 +24,7 @@
 #include <libpayload.h>
 #include <config.h>
 #include <fs.h>
+#include <loader.h>
 #include "artecboot.h"
 #include "../fs/filesys.h"
 
