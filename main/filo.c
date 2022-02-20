@@ -141,6 +141,8 @@ int boot(const char *line)
 out:
     free(file);
 
+    clear_boot_modules();
+
     return ret;
 }
 

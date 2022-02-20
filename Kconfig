@@ -327,6 +327,7 @@ config EXPERIMENTAL
 
 config DEBUG_ALL
 	bool "DEBUG_ALL"
+	select DEBUG_LOADER
 	select DEBUG_ELFBOOT
 	select DEBUG_SEGMENT
 	select DEBUG_SYS_INFO
@@ -342,6 +343,12 @@ config DEBUG_ALL
 	select DEBUG_FLASH
 	select DEBUG_ARTECBOOT
 	default n
+
+config DEBUG_LOADER
+	bool "DEBUG_LOADER"
+	default n
+	help
+	  Provide debug output in generic loader code.
 
 config DEBUG_ELFBOOT
 	bool "DEBUG_ELFBOOT"
