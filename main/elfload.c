@@ -306,10 +306,6 @@ int elf_load(const char *filename, const char *cmdline)
     Elf_Bhdr *boot_notes = NULL;
     int retval = -1;
     int image_retval;
-#ifdef CONFIG_PCMCIA_CF
-    unsigned char *cf_bar;
-    int i;
-#endif
 
     image_name = image_version = 0;
 
@@ -368,12 +364,8 @@ int elf_load(const char *filename, const char *cmdline)
 
     boot_notes = build_boot_notes(cmdline);
 
-#if CONFIG_PCMCIA_CF
-    cf_bar = phys_to_virt(pci_read_config32(PCI_DEV(0, 0xa, 1), 0x10));
-    for( i = 0x836 ; i < 0x840 ; i++){
-        cf_bar[i] = 0;
-    }
-#endif
+    if (prepare_for_jump())
+	goto out;
 
     debug("current time: %lu\n", currticks());
 
@@ -381,7 +373,8 @@ int elf_load(const char *filename, const char *cmdline)
     printf("Jumping to entry point...\n");
     image_retval = start_elf(ehdr.e_entry, virt_to_phys(boot_notes));
 
-    console_init();
+    restore_after_jump();
+
     printf("Image returned with return value %#x\n", image_retval);
     retval = 0;
 

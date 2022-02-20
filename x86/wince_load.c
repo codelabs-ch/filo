@@ -380,7 +380,13 @@ int wince_load(const char *file, const char *cmdline)
 	// note that the last segment size carries the launch address
 	wince_init_bootarg(segInfo.segSize);
 
+	if (prepare_for_jump())
+		return -1;
+
 	// finally, call the generic launch() function
-	return wince_launch(g_imageStart, g_imageSize, segInfo.segSize,
-			    pROMHeader);
+	const int ret = wince_launch(g_imageStart, g_imageSize, segInfo.segSize, pROMHeader);
+
+	restore_after_jump();
+
+	return ret;
 }

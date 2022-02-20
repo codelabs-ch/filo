@@ -38,4 +38,16 @@ int artecboot_load(const char *filename, const char *cmdline);
 #define artecboot_load(x,y) LOADER_NOT_SUPPORT /* nop */
 #endif
 
+/*
+ * Perform generic preparations like exiting device drivers before
+ * jumping to a loaded program.
+ */
+int prepare_for_jump(void);
+
+/*
+ * Perform generic tasks to continue execution after a loaded
+ * program returned.
+ */
+void restore_after_jump(void);
+
 #endif /* LOADER_H */

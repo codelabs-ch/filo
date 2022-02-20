@@ -816,17 +816,14 @@ int linux_load(const char *file, const char *cmdline)
 
 	file_close();
 
-	if (IS_ENABLED(CONFIG_FLASHROM_LOCKDOWN)) {
-		if (lockdown_flash())
-			return -1;
-	}
-
-#if IS_ENABLED(CONFIG_LP_USB)
-	usb_exit();
-#endif
+	if (prepare_for_jump())
+		return -1;
 
 	hardware_setup();
 
 	start_linux(kern_addr, params);
+
+	restore_after_jump();
+
 	return 0;
 }
