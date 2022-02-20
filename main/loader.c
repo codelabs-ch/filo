@@ -25,6 +25,9 @@ int prepare_for_jump(void) {
 	if (IS_ENABLED(CONFIG_LP_USB))
 		usb_exit();
 
+	if (IS_ENABLED(CONFIG_LP_PC_KEYBOARD))
+		keyboard_disconnect();
+
 	if (IS_ENABLED(CONFIG_PCMCIA_CF)) {
 		unsigned char *cf_bar;
 		int i;
