@@ -127,7 +127,7 @@ int fat_dir (char *dirname);
 #ifdef CONFIG_FSYS_CBFS
 int cbfs_mount (void);
 int cbfs_read (char *buf, int len);
-int cbfs_dir (char *dirname);
+int cbfs_dir (const char *dirname);
 #endif
 
 #ifdef CONFIG_FSYS_EXT2FS
