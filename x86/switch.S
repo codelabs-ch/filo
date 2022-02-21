@@ -45,13 +45,6 @@ __switch_context:
 	movw	%ss, (%esp) /* 0 */
 	sgdt	2(%esp)	    /* 2 */
 
-#if 0
-	/* Swap %cs and %eip on the stack, so lret will work */
-	movl	60(%esp), %eax
-	xchgl	%eax, 64(%esp)
-	movl	%eax, 60(%esp)
-#endif
-
 	/* At this point we don't know if we are on flat segment
 	 * or relocated. So compute the address offset from %eip.
 	 * Assuming CS.base==DS.base==SS.base.
