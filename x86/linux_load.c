@@ -143,7 +143,9 @@ struct linux_params {
 	u8 reserved4[12];	/* 0x34 -- 0x3f reserved for future expansion */
 
 	//struct apm_bios_info apm_bios_info;   /* 0x40 */
-	u8 apm_bios_info[0x40];
+	u8 apm_bios_info[0x30];
+	u64 acpi_rsdp_addr;	/* 0x70 */
+	u8 reserved4_2[8];	/* 0x78 */
 	//struct drive_info_struct drive_info;  /* 0x80 */
 	u8 drive_info[0x20];
 	//struct sys_desc_table sys_desc_table; /* 0xa0 */
@@ -379,6 +381,12 @@ static void set_video_mode(struct linux_params *params)
 	params->rsvd_size = fb->reserved_mask_size;
 	params->rsvd_pos = fb->reserved_mask_pos;
 #endif
+}
+
+static void set_acpi_rsdp(struct linux_params *params)
+{
+	struct sysinfo_t *info = &lib_sysinfo;
+	params->acpi_rsdp_addr = info->acpi_rsdp;
 }
 
 /*
@@ -794,6 +802,7 @@ int linux_load(const char *file, const char *cmdline)
 	init_linux_params(params, &hdr);
 	set_memory_size(params);
 	set_video_mode(params);
+	set_acpi_rsdp(params);
 	initrd_file =
 	    parse_command_line(cmdline, phys_to_virt(COMMAND_LINE_LOC));
 	set_command_line_loc(params, &hdr);
