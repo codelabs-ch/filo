@@ -304,7 +304,7 @@ static int directory_lookup_1(const struct squashfs_dir_header *dir_header,
  * @result_inode_block:@result_inode_offset.
  *
  * @param inode_block: inode block location of the directory
- * @param inode_offset: inode offset location of the direcotry
+ * @param inode_offset: inode offset location of the directory
  * @param dir_size: the directory size. We need this inforamtion because a
  *                  directory can be composed of a list of directory_header
  * @param entryname: entry to find (ended by a nul character)
@@ -403,14 +403,14 @@ static int directory_lookup(unsigned int  inode_block,
  * If the inode is not a directory, then return 0.
  *
  * @param inode_block: inode block location of the directory
- * @param inode_offset: inode offset location of the direcotry
+ * @param inode_offset: inode offset location of the directory
  * @param entryname: entry to find (ended by a nul character)
  * @param result_inode_block: if the entry is present, return in this variable,
  *                            the inode_block number in the inode_table
  * @param result_inode_offset: if the entry is present, return in this variable,
  *                            the offset position in the block_inode_table.
  *
- * @return 0 the entry was not found or an error occured
+ * @return 0 the entry was not found or an error occurred
  *         1 the entry is found, and @result_inode_block, @result_inode_offset is filled
  *
  */
@@ -555,9 +555,9 @@ static int inode_read(unsigned int inode_block, unsigned int inode_offset)
  * all fragment_table in severall calls.
  *
  * @param fragment_index: the fragment data block.
- * @param fragment_data: where to ouput the data. Need to be SQUASHFS_FILE_MAX_SIZE long.
+ * @param fragment_data: where to output the data. Need to be SQUASHFS_FILE_MAX_SIZE long.
  *
- * @return 0 if an error occured, or the fragment_block was not found
+ * @return 0 if an error occurred, or the fragment_block was not found
  *        >0 the size of the fragment_data block
  *
  *

@@ -207,7 +207,7 @@ int aboot_dir (char *dirname);
 #define PC_SLICE_TYPE_DELL_UTIL		0xde
 #define PC_SLICE_TYPE_LINUX_RAID	0xfd
 
-/* For convinience.  */
+/* For convenience.  */
 /* Check if TYPE is a FAT partition type. Clear the hidden flag before
    the check, to allow the user to mount a hidden partition in GRUB.  */
 #define IS_PC_SLICE_TYPE_FAT(type)	\

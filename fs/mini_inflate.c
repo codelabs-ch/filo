@@ -261,7 +261,7 @@ static void decompress_dynamic(struct bitstream *stream, unsigned char *dest)
 	}
 	fill_code_tables(codes);
 
-	/* Do the same for the length codes, being carefull of wrap through
+	/* Do the same for the length codes, being careful of wrap through
 	 * to the distance table */
 	curr_code = 0;
 	while (curr_code < hlit) {
@@ -360,7 +360,7 @@ static void decompress_fixed(struct bitstream *stream, unsigned char *dest)
 }
 
 /* returns the number of bytes decoded, < 0 if there was an error. Note that
- * this function assumes that the block starts on a byte boundry
+ * this function assumes that the block starts on a byte boundary
  * (non-compliant, but I don't see where this would happen). section 3.2.3 */
 long decompress_block(unsigned char *dest, unsigned char *source,
 		      void *(*inflate_memcpy)(void *, const void *, size_t))

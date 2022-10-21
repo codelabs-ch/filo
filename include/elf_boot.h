@@ -27,7 +27,7 @@
  *
  * All of the information must be Position Independent Data.
  * That is it must be safe to relocate the whole ELF boot parameter
- * block without changing the meaning or correctnes of the data.
+ * block without changing the meaning or correctness of the data.
  * Additionally it must be safe to permute the order of the ELF notes
  * to any possible permutation without changing the meaning or correctness
  * of the data.

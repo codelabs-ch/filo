@@ -638,7 +638,7 @@ reiserfs_mount (void)
   if (INFO->tree_depth == DISK_LEAF_NODE_LEVEL)
     {
       /* There is only one node in the whole filesystem,
-       * which is simultanously leaf and root */
+       * which is simultaneously leaf and root */
       memcpy (LEAF, ROOT, INFO->blocksize);
     }
   return 1;

@@ -275,7 +275,7 @@ cramfs_read (char *buf, int len)
 int
 cramfs_dir(char *dirname)
 {
-	int str_chk;			     /* used ot hold the results of a string
+	int str_chk;			     /* used to hold the results of a string
 					        compare */
 
 	u32 current_ino;  		     /* inode info for current_ino */

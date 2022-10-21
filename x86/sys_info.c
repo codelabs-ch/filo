@@ -24,7 +24,7 @@
 
 void collect_sys_info(struct sys_info *info)
 {
-	/* Pick up paramters given by bootloader to us */
+	/* Pick up parameters given by bootloader to us */
 	info->boot_type = boot_ctx->eax;
 	info->boot_data = boot_ctx->ebx;
 	info->boot_arg = boot_ctx->param[0];

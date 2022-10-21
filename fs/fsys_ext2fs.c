@@ -128,7 +128,7 @@ struct ext2_super_block
 	__u32	s_r_blocks_count_hi;/* Reserved blocks count */
 	__u32	s_free_blocks_count_hi;	/* Free blocks count */
 	__u16	s_min_extra_isize;	/* All inodes have at least # bytes */
-	__u16	s_max_extra_isize;	/* New inodes should reverve # bytes */
+	__u16	s_max_extra_isize;	/* New inodes should reserve # bytes */
 	__u32	s_flags;	/* Miscellaneous flags */
 	__u16	s_raid_stride;		/* Raid stride */
 	__u16	s_mmp_interval;		/* # seconds to wait MMP checking */

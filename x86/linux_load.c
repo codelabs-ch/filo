@@ -105,7 +105,7 @@ struct linux_header {
 	u32 init_size;		/* 0x260 */
 } __attribute__ ((packed));
 
-/* Paramters passed to 32-bit part of Linux
+/* Parameters passed to 32-bit part of Linux
  * This is another view of the structure above.. */
 struct linux_params {
 	u8 orig_x;		/* 0x00 */
@@ -283,7 +283,7 @@ static u32 load_linux_header(struct linux_header *hdr)
 static void
 init_linux_params(struct linux_params *params, struct linux_header *hdr)
 {
-	debug("Setting up paramters at %#lx\n", virt_to_phys(params));
+	debug("Setting up parameters at %#lx\n", virt_to_phys(params));
 	memset(params, 0, sizeof *params);
 
 	/* Copy some useful values from header */
@@ -444,7 +444,7 @@ static char *parse_command_line(const char *orig_cmdline,
 		}
 
 		/* Only initrd= and mem= are handled here. vga= is not,
-		 * which I believe is a paramter to the realmode part of Linux,
+		 * which I believe is a parameter to the realmode part of Linux,
 		 * which we don't execute.
 		 */
 		if (strcmp(name, "initrd") == 0) {

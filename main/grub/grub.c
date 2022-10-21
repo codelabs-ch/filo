@@ -494,7 +494,7 @@ static void run_menu(char *menu_entries, char *config_entries, int num_entries, 
 		   in grub if interrupt driven I/O is done).  */
 		if (checkkey() >= 0 || grub_timeout < 0) {
 			/* Key was pressed, show which entry is selected before GETKEY,
-			   since we're comming in here also on GRUB_TIMEOUT == -1 and
+			   since we're coming in here also on GRUB_TIMEOUT == -1 and
 			   hang in GETKEY */
 
 			c = ASCII_CHAR(getkey());
@@ -1138,7 +1138,7 @@ restart:
 				break;
 			}
 
-			/* This is necessary, because the menu must be overrided.  */
+			/* This is necessary, because the menu must be overridden.  */
 			reset();
 
 			cmdline = (char *) CMDLINE_BUF;

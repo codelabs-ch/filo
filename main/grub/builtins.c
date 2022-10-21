@@ -1333,7 +1333,7 @@ static struct builtin builtin_password = {
 	    " FILE as a new config file and restarts the GRUB Stage 2. If you"
 	    " omit the argument FILE, then GRUB just unlocks privileged"
 	    " instructions.  You can also use it in the script section, in"
-	    " which case it will ask for the password, before continueing."
+	    " which case it will ask for the password, before continuing."
 	    " The option --md5 tells GRUB that PASSWD is encrypted with" " md5crypt."
 };
 

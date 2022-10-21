@@ -36,7 +36,7 @@ static gboolean show_range = TRUE;
 static gboolean show_value = TRUE;
 static gboolean show_all = FALSE;
 static gboolean show_debug = FALSE;
-static gboolean resizeable = FALSE;
+static gboolean resizable = FALSE;
 
 GtkWidget *main_wnd = NULL;
 GtkWidget *tree1_w = NULL;	// left  frame
@@ -436,7 +436,7 @@ void init_right_tree(void)
 	column = gtk_tree_view_get_column(view, COL_VALUE);
 	gtk_tree_view_column_set_visible(column, show_value);
 
-	if (resizeable) {
+	if (resizable) {
 		for (i = 0; i < COL_VALUE; i++) {
 			column = gtk_tree_view_get_column(view, i);
 			gtk_tree_view_column_set_resizable(column, TRUE);
@@ -1212,7 +1212,7 @@ static gchar **fill_row(struct menu *menu)
 	sym_calc_value(sym);
 	sym->flags &= ~SYMBOL_CHANGED;
 
-	if (sym_is_choice(sym)) {	// parse childs for getting final value
+	if (sym_is_choice(sym)) {	// parse children for getting final value
 		struct menu *child;
 		struct symbol *def_sym = sym_get_choice_value(sym);
 		struct menu *def_menu = NULL;

@@ -297,7 +297,7 @@ minix_dir (char *dirname)
   int updir_ino = current_ino;	     /* the parent of the current directory */
   int ino_blk;			     /* fs pointer of the inode's info */
 
-  int str_chk = 0;		     /* used ot hold the results of a string
+  int str_chk = 0;		     /* used to hold the results of a string
 				        compare */
 
   struct minix_inode * raw_inode;    /* inode info for current_ino */

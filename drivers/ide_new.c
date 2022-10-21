@@ -203,7 +203,7 @@ ob_ide_error(struct ide_drive *drive, unsigned char stat, char *msg)
 }
 
 /*
- * wait for 'stat' to be set. returns 1 if failed, 0 if succesful
+ * wait for 'stat' to be set. returns 1 if failed, 0 if successful
  */
 static int
 ob_ide_wait_stat(struct ide_drive *drive, unsigned char ok_stat,
@@ -850,7 +850,7 @@ ob_ide_read_sectors(struct ide_drive *drive, unsigned long long block,
 }
 
 /*
- * byte swap the string if necessay, and strip leading/trailing blanks
+ * byte swap the string if necessary, and strip leading/trailing blanks
  */
 static void
 ob_ide_fixup_string(unsigned char *s, unsigned int len)

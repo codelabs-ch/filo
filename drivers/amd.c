@@ -39,7 +39,7 @@ int amd_lockdown_flash(void)
 	int spi, lpc;
 	int reg;
 
-	/* for now we only suppport the SB600 chipset */
+	/* for now we only support the SB600 chipset */
 	reg32 = pci_read_config32(SB600_LPC_BRIDGE, REG_VENDOR_ID);
 	switch (reg32) {
 		case 0x438d1002:
