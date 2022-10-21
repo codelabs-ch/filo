@@ -91,15 +91,15 @@ struct ext2_super_block
 	 * feature set, it must abort and not try to meddle with
 	 * things it doesn't understand...
 	 */
-	__u32	s_first_ino; 		/* First non-reserved inode */
-	__u16   s_inode_size; 		/* size of inode structure */
-	__u16	s_block_group_nr; 	/* block group # of this superblock */
-	__u32	s_feature_compat; 	/* compatible feature set */
-	__u32	s_feature_incompat; 	/* incompatible feature set */
-	__u32	s_feature_ro_compat; 	/* readonly-compatible feature set */
+	__u32	s_first_ino;		/* First non-reserved inode */
+	__u16   s_inode_size;		/* size of inode structure */
+	__u16	s_block_group_nr;	/* block group # of this superblock */
+	__u32	s_feature_compat;	/* compatible feature set */
+	__u32	s_feature_incompat;	/* incompatible feature set */
+	__u32	s_feature_ro_compat;	/* readonly-compatible feature set */
 	__u8	s_uuid[16];		/* 128-bit uuid for volume */
-	char	s_volume_name[16]; 	/* volume name */
-	char	s_last_mounted[64]; 	/* directory where last mounted */
+	char	s_volume_name[16];	/* volume name */
+	char	s_last_mounted[64];	/* directory where last mounted */
 	__u32	s_algorithm_usage_bitmap; /* For compression */
 	/*
 	 * Performance hints.  Directory preallocation should only
@@ -120,7 +120,7 @@ struct ext2_super_block
 	__u8	s_jnl_backup_type;	/* Default type of journal backup */
 	__u16	s_desc_size;	/* size of group descriptor */
 	__u32	s_default_mount_opts;
- 	__u32	s_first_meta_bg; 	/* First metablock block group */
+	__u32	s_first_meta_bg;	/* First metablock block group */
 	__u32	s_mkfs_time;	/* When the filesystem was created */
 	__u32	s_jnl_blocks[17];	/* Backup of journal inode */
 	/* 64bit desc support valid if EXT4_FEATURE_INCOMPAT_64BIT */
@@ -288,7 +288,7 @@ struct ext4_extent_idx
   {
     __u32  ei_block;   /* index covers logical blocks from 'block' */
     __u32  ei_leaf_lo; /* pointer to the physical block of the next *
-	                     * level. leaf or next index could be there */
+			     * level. leaf or next index could be there */
     __u16  ei_leaf_hi; /* high 16 bits of physical block */
     __u16  ei_unused;
   };
@@ -308,15 +308,14 @@ struct ext4_extent_header
 #define EXT4_EXT_MAGIC      (0xf30a)
 #define EXT_FIRST_EXTENT(__hdr__) \
     ((struct ext4_extent *) (((char *) (__hdr__)) +     \
-                 sizeof(struct ext4_extent_header)))
+		 sizeof(struct ext4_extent_header)))
 #define EXT_FIRST_INDEX(__hdr__) \
     ((struct ext4_extent_idx *) (((char *) (__hdr__)) + \
-                 sizeof(struct ext4_extent_header)))
+		 sizeof(struct ext4_extent_header)))
 #define EXT_LAST_EXTENT(__hdr__) \
     (EXT_FIRST_EXTENT((__hdr__)) + (__u16)((__hdr__)->eh_entries) - 1)
 #define EXT_LAST_INDEX(__hdr__) \
     (EXT_FIRST_INDEX((__hdr__)) + (__u16)((__hdr__)->eh_entries) - 1)
-
 
 
 /* linux/ext2fs.h */
@@ -328,8 +327,7 @@ struct ext4_extent_header
 #define EXT2_DIR_PAD                    4
 #define EXT2_DIR_ROUND                  (EXT2_DIR_PAD - 1)
 #define EXT2_DIR_REC_LEN(name_len)      (((name_len) + 8 + EXT2_DIR_ROUND) & \
-                                         ~EXT2_DIR_ROUND)
-
+					 ~EXT2_DIR_ROUND)
 
 /* ext2/super.c */
 #define EXT2_SUPER_MAGIC      0xEF53	/* include/linux/ext2_fs.h */
@@ -361,7 +359,7 @@ struct ext4_extent_header
 #define EXT2_ADDR_PER_BLOCK_BITS(s)	(log2(EXT2_ADDR_PER_BLOCK(s)))
 
 #define EXT2_INODE_SIZE(s)             (((s)->s_rev_level == EXT2_OLD_REV) ? \
-                                       EXT2_OLD_INODE_SIZE : (s)->s_inode_size)
+				       EXT2_OLD_INODE_SIZE : (s)->s_inode_size)
 #define EXT2_INODES_PER_BLOCK(s)       (EXT2_BLOCK_SIZE(s)/EXT2_INODE_SIZE(s))
 
 /* linux/ext2_fs.h */
@@ -442,6 +440,7 @@ dump_inode_data(unsigned char *inode, int len)
 {
   static char hexdigit[] = "0123456789abcdef";
   unsigned char *i;
+
   for (i = inode;
        i < (inode + len);
        i++)
@@ -534,6 +533,7 @@ ext2fs_block_map (int logical_block)
   if (logical_block < (1 << (EXT2_ADDR_PER_BLOCK_BITS (SUPERBLOCK) * 2)))
     {
       int bnum;
+
       if (mapblock1 != 2
 	  && !ext2_rdfsb (le32toh(INODE->i_block[EXT2_DIND_BLOCK]), DATABLOCK1))
 	{
@@ -591,6 +591,7 @@ static struct ext4_extent_idx*
 ext4_ext_binsearch_idx(struct ext4_extent_header* eh, int logical_block)
 {
   struct ext4_extent_idx *r, *l, *m;
+
   l = EXT_FIRST_INDEX(eh) + 1;
   r = EXT_LAST_INDEX(eh);
   while (l <= r)
@@ -612,6 +613,7 @@ static struct ext4_extent*
 ext4_ext_binsearch(struct ext4_extent_header* eh, int logical_block)
 {
   struct ext4_extent *r, *l, *m;
+
   l = EXT_FIRST_EXTENT(eh) + 1;
   r = EXT_LAST_EXTENT(eh);
   while (l <= r)
@@ -638,6 +640,7 @@ ext4fs_block_map (int logical_block)
 
 #ifdef E2DEBUG
   unsigned char *i;
+
   for (i = (unsigned char *) INODE;
        i < ((unsigned char *) INODE + sizeof (struct ext2_inode));
        i++)
@@ -658,14 +661,14 @@ ext4fs_block_map (int logical_block)
   eh = (struct ext4_extent_header*)INODE->i_block;
   if (eh->eh_magic != EXT4_EXT_MAGIC)
   {
-          errnum = ERR_FSYS_CORRUPT;
-          return -1;
+	  errnum = ERR_FSYS_CORRUPT;
+	  return -1;
   }
   while((depth = eh->eh_depth) != 0)
-  	{ /* extent index */
+	{ /* extent index */
 	  if (eh->eh_magic != EXT4_EXT_MAGIC)
 	  {
-	          errnum = ERR_FSYS_CORRUPT;
+		  errnum = ERR_FSYS_CORRUPT;
 		  return -1;
 	  }
 	  ei = ext4_ext_binsearch_idx(eh, logical_block);
@@ -681,7 +684,7 @@ ext4fs_block_map (int logical_block)
 	}
 	  printf("next level\n");
 	  eh = (struct ext4_extent_header*)DATABLOCK1;
-  	}
+	}
 
   /* depth==0, we come to the leaf */
   ex = ext4_ext_binsearch(eh, logical_block);
@@ -721,10 +724,10 @@ ext2fs_read (char *buf, int len)
       offset = filepos & (EXT2_BLOCK_SIZE (SUPERBLOCK) - 1);
       /* map logical block of an extents enabled file into a physical block on the disk */
       if (EXT4_HAS_INCOMPAT_FEATURE(SUPERBLOCK,EXT4_FEATURE_INCOMPAT_EXTENTS)
-                    && INODE->i_flags & EXT4_EXTENTS_FL)
-          map = ext4fs_block_map (logical_block);
+		    && INODE->i_flags & EXT4_EXTENTS_FL)
+	  map = ext4fs_block_map (logical_block);
       else
-          map = ext2fs_block_map (logical_block);
+	  map = ext2fs_block_map (logical_block);
 #ifdef E2DEBUG
       printf ("map=%d\n", map);
 #endif /* E2DEBUG */
@@ -737,14 +740,14 @@ ext2fs_read (char *buf, int len)
 	size = len;
 
       if (map == 0) {
-        memset ((char *) buf, 0, size);
+	memset ((char *) buf, 0, size);
       } else {
-        disk_read_func = disk_read_hook;
+	disk_read_func = disk_read_hook;
 
-        devread (map * (EXT2_BLOCK_SIZE (SUPERBLOCK) / DEV_BSIZE),
-	         offset, size, buf);
+	devread (map * (EXT2_BLOCK_SIZE (SUPERBLOCK) / DEV_BSIZE),
+		 offset, size, buf);
 
-        disk_read_func = NULL;
+	disk_read_func = NULL;
       }
 
       buf += size;
@@ -758,7 +761,6 @@ ext2fs_read (char *buf, int len)
 
   return ret;
 }
-
 
 /* Based on:
    def_blk_fops points to
@@ -787,6 +789,7 @@ static inline
 int ext2_is_fast_symlink (void)
 {
   int ea_blocks;
+
   ea_blocks = le32toh(INODE->i_file_acl) ? EXT2_BLOCK_SIZE (SUPERBLOCK) / DEV_BSIZE : 0;
   return le32toh(INODE->i_blocks) == ea_blocks;
 }
@@ -865,10 +868,10 @@ ext2fs_dir (char *dirname)
 		      desc * EXT2_DESC_SIZE(SUPERBLOCK));
       if (EXT4_HAS_INCOMPAT_FEATURE(SUPERBLOCK, EXT4_FEATURE_INCOMPAT_64BIT)
 		      && ext4_gdp->bg_inode_table_hi)
-        {/* 64bit itable not supported */
+	{/* 64bit itable not supported */
 	  errnum = ERR_FILELENGTH;
 	  return 0;
-        }
+	}
       ino_blk = ext4_gdp->bg_inode_table +
 	(((current_ino - 1) % le32toh(SUPERBLOCK->s_inodes_per_group))
 	 >> log2 (EXT2_INODES_PER_BLOCK (SUPERBLOCK)));
@@ -888,8 +891,8 @@ ext2fs_dir (char *dirname)
       mapblock2 = mapblock1 = -1;
 
       raw_inode = (struct ext2_inode *)( (unsigned long)INODE +
-        ((current_ino - 1) & (EXT2_INODES_PER_BLOCK (SUPERBLOCK) - 1))
-	                                 * EXT2_INODE_SIZE(SUPERBLOCK));
+	((current_ino - 1) & (EXT2_INODES_PER_BLOCK (SUPERBLOCK) - 1))
+					 * EXT2_INODE_SIZE(SUPERBLOCK));
 #ifdef E2DEBUG
       printf ("ext2fs_dir: ipb=%d, sizeof(inode)=%d\n",
 	      EXT2_INODES_PER_BLOCK (SUPERBLOCK),
@@ -913,6 +916,7 @@ ext2fs_dir (char *dirname)
       if (S_ISLNK (le16toh(INODE->i_mode)))
 	{
 	  int len;
+
 	  if (++link_count > MAX_LINK_COUNT)
 	    {
 	      errnum = ERR_SYMLINK_LOOP;
@@ -935,7 +939,7 @@ ext2fs_dir (char *dirname)
 	  if (len)
 	    {
 	      /* Copy the remaining name to the end of the symlink data.
-	         Note that DIRNAME and LINKBUF may overlap! */
+		 Note that DIRNAME and LINKBUF may overlap! */
 	      memmove (linkbuf + filemax, dirname, len);
 	    }
 	  linkbuf[filemax + len] = '\0';

@@ -135,6 +135,7 @@ int print_completions(int is_filename, int is_completion)
 						for (j = 0; j < 8; j++) {
 							if ((disk_choice)) { // TODO check geometry
 								char dev_name[8];
+
 								sprintf (dev_name, "%cd%d", i ?  'h':'f', j);
 								print_a_completion(dev_name);
 							}

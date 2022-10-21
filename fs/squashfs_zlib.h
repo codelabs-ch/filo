@@ -13,7 +13,7 @@
 #define _ZCONF_H
 
 /* The memory requirements for deflate are (in bytes):
-            (1 << (windowBits+2)) +  (1 << (memLevel+9))
+	    (1 << (windowBits+2)) +  (1 << (memLevel+9))
  that is: 128K for windowBits=15  +  128K for memLevel = 8  (default values)
  plus a few kilobytes for small objects. For example, if you want to reduce
  the default memory requirements from 256K to 128K, compile with
@@ -51,7 +51,7 @@
 #  define DEF_MEM_LEVEL  MAX_MEM_LEVEL
 #endif
 
-                        /* Type declarations */
+			/* Type declarations */
 
 typedef unsigned char  Byte;  /* 8 bits */
 typedef unsigned int   uInt;  /* 16 bits or more */
@@ -81,7 +81,6 @@ typedef void     *voidp;
 
   Jean-loup Gailly        Mark Adler
   jloup@gzip.org          madler@alumni.caltech.edu
-
 
   The data format used by the zlib library is described by RFCs (Request for
   Comments) 1950 to 1952 in the files http://www.ietf.org/rfc/rfc1950.txt
@@ -193,7 +192,7 @@ typedef z_stream *z_streamp;
    a single step).
 */
 
-                        /* constants */
+			/* constants */
 
 #define Z_NO_FLUSH      0
 #define Z_PARTIAL_FLUSH 1 /* will be removed, use Z_SYNC_FLUSH instead */
@@ -236,7 +235,7 @@ typedef z_stream *z_streamp;
 #define Z_DEFLATED   8
 /* The deflate compression method (the only one supported in this version) */
 
-                        /* basic functions */
+			/* basic functions */
 
 extern int zlib_deflate_workspacesize (void);
 /*
@@ -266,7 +265,6 @@ extern int deflateInit (z_streamp strm, int level);
    msg is set to null if there is no error message.  deflateInit does not
    perform any compression: this will be done by deflate().
 */
-
 
 extern int zlib_deflate (z_streamp strm, int flush);
 /*
@@ -345,7 +343,6 @@ extern int zlib_deflate (z_streamp strm, int flush);
   (for example avail_in or avail_out was zero).
 */
 
-
 extern int zlib_deflateEnd (z_streamp strm);
 /*
      All dynamically allocated data structures for this stream are freed.
@@ -358,7 +355,6 @@ extern int zlib_deflateEnd (z_streamp strm);
    msg may be set but then points to a static string (which must not be
    deallocated).
 */
-
 
 extern int zlib_inflate_workspacesize (void);
 /*
@@ -386,7 +382,6 @@ extern int zlib_inflateInit (z_streamp strm);
    the zlib header if present: this will be done by inflate().  (So next_in and
    avail_in may be modified, but next_out and avail_out are unchanged.)
 */
-
 
 extern int zlib_inflate (z_streamp strm, int flush);
 /*
@@ -486,7 +481,6 @@ extern int zlib_inflate (z_streamp strm, int flush);
   of the data is desired.
 */
 
-
 extern int zlib_inflateEnd (z_streamp strm);
 /*
      All dynamically allocated data structures for this stream are freed.
@@ -498,7 +492,7 @@ extern int zlib_inflateEnd (z_streamp strm);
    static string (which must not be deallocated).
 */
 
-                        /* Advanced functions */
+			/* Advanced functions */
 
 /*
     The following functions are needed only in some special applications.
@@ -506,11 +500,11 @@ extern int zlib_inflateEnd (z_streamp strm);
 
 /*
 extern int deflateInit2 (z_streamp strm,
-                                     int  level,
-                                     int  method,
-                                     int  windowBits,
-                                     int  memLevel,
-                                     int  strategy);
+				     int  level,
+				     int  method,
+				     int  windowBits,
+				     int  memLevel,
+				     int  strategy);
 
      This is another version of deflateInit with more compression options. The
    fields next_in, zalloc, zfree and opaque must be initialized before by
@@ -547,7 +541,7 @@ extern int deflateInit2 (z_streamp strm,
    method). msg is set to null if there is no error message.  deflateInit2 does
    not perform any compression: this will be done by deflate().
 */
-          
+
 #if 0
 extern int zlib_deflateSetDictionary (z_streamp strm,
 						     const Byte *dictionary,
@@ -750,8 +744,8 @@ extern int zlib_inflateIncomp (z_stream *strm);
 	zlib_inflateInit2((strm), DEF_WBITS)
 
 extern int zlib_deflateInit2(z_streamp strm, int  level, int  method,
-                                      int windowBits, int memLevel,
-                                      int strategy);
+				      int windowBits, int memLevel,
+				      int strategy);
 extern int zlib_inflateInit2(z_streamp strm, int  windowBits);
 
 #if !defined(_Z_UTIL_H) && !defined(NO_DUMMY_DECL)
@@ -759,7 +753,6 @@ extern int zlib_inflateInit2(z_streamp strm, int  windowBits);
 #endif
 
 #endif /* _ZLIB_H */
-
 
 /* zutil.h -- internal interface and configuration of the compression library
  * Copyright (C) 1995-1998 Jean-loup Gailly.
@@ -776,12 +769,11 @@ extern int zlib_inflateInit2(z_streamp strm, int  windowBits);
 #ifndef _Z_UTIL_H
 #define _Z_UTIL_H
 
-
 typedef unsigned char  uch;
 typedef unsigned short ush;
 typedef unsigned long  ulg;
 
-        /* common constants */
+	/* common constants */
 
 #define STORED_BLOCK 0
 #define STATIC_TREES 1
@@ -794,21 +786,20 @@ typedef unsigned long  ulg;
 
 #define PRESET_DICT 0x20 /* preset dictionary flag in zlib header */
 
-        /* target dependencies */
+	/* target dependencies */
 
-        /* Common defaults */
+	/* Common defaults */
 
 #ifndef OS_CODE
 #  define OS_CODE  0x03  /* assume Unix */
 #endif
 
-         /* functions */
+	 /* functions */
 
 typedef uLong (*check_func) (uLong check, const Byte *buf,
 				       uInt len);
 
-
-                        /* checksum functions */
+			/* checksum functions */
 
 #define BASE 65521L /* largest prime smaller than 65536 */
 #define NMAX 5552
@@ -846,19 +837,19 @@ static inline uLong zlib_adler32(uLong adler,
     if (buf == NULL) return 1L;
 
     while (len > 0) {
-        k = len < NMAX ? len : NMAX;
-        len -= k;
-        while (k >= 16) {
-            DO16(buf);
+	k = len < NMAX ? len : NMAX;
+	len -= k;
+	while (k >= 16) {
+	    DO16(buf);
 	    buf += 16;
-            k -= 16;
-        }
-        if (k != 0) do {
-            s1 += *buf++;
+	    k -= 16;
+	}
+	if (k != 0) do {
+	    s1 += *buf++;
 	    s2 += s1;
-        } while (--k);
-        s1 %= BASE;
-        s2 %= BASE;
+	} while (--k);
+	s1 %= BASE;
+	s2 %= BASE;
     }
     return (s2 << 16) | s1;
 }
@@ -918,9 +909,8 @@ typedef enum {
 } codetype;
 
 extern int zlib_inflate_table (codetype type, unsigned short *lens,
-                             unsigned codes, code **table,
-                             unsigned *bits, unsigned short *work);
-
+			     unsigned codes, code **table,
+			     unsigned *bits, unsigned short *work);
 
 /* inflate.h -- internal inflate state definition
  * Copyright (C) 1995-2004 Mark Adler
@@ -945,19 +935,19 @@ typedef enum {
     HCRC,       /* i: waiting for header crc (gzip) */
     DICTID,     /* i: waiting for dictionary check value */
     DICT,       /* waiting for inflateSetDictionary() call */
-        TYPE,       /* i: waiting for type bits, including last-flag bit */
-        TYPEDO,     /* i: same, but skip check to exit inflate on new block */
-        STORED,     /* i: waiting for stored size (length and complement) */
-        COPY,       /* i/o: waiting for input or output to copy stored block */
-        TABLE,      /* i: waiting for dynamic block table lengths */
-        LENLENS,    /* i: waiting for code length code lengths */
-        CODELENS,   /* i: waiting for length/lit and distance code lengths */
-            LEN,        /* i: waiting for length/lit code */
-            LENEXT,     /* i: waiting for length extra bits */
-            DIST,       /* i: waiting for distance code */
-            DISTEXT,    /* i: waiting for distance extra bits */
-            MATCH,      /* o: waiting for output space to copy string */
-            LIT,        /* o: waiting for output space to write literal */
+	TYPE,       /* i: waiting for type bits, including last-flag bit */
+	TYPEDO,     /* i: same, but skip check to exit inflate on new block */
+	STORED,     /* i: waiting for stored size (length and complement) */
+	COPY,       /* i/o: waiting for input or output to copy stored block */
+	TABLE,      /* i: waiting for dynamic block table lengths */
+	LENLENS,    /* i: waiting for code length code lengths */
+	CODELENS,   /* i: waiting for length/lit and distance code lengths */
+	    LEN,        /* i: waiting for length/lit code */
+	    LENEXT,     /* i: waiting for length extra bits */
+	    DIST,       /* i: waiting for distance code */
+	    DISTEXT,    /* i: waiting for distance extra bits */
+	    MATCH,      /* o: waiting for output space to copy string */
+	    LIT,        /* o: waiting for output space to write literal */
     CHECK,      /* i: waiting for 32-bit check value */
     LENGTH,     /* i: waiting for 32-bit length (gzip) */
     DONE,       /* finished check, done -- remain here until reset */
@@ -972,21 +962,21 @@ typedef enum {
     (most modes can go to the BAD or MEM mode -- not shown for clarity)
 
     Process header:
-        HEAD -> (gzip) or (zlib)
-        (gzip) -> FLAGS -> TIME -> OS -> EXLEN -> EXTRA -> NAME
-        NAME -> COMMENT -> HCRC -> TYPE
-        (zlib) -> DICTID or TYPE
-        DICTID -> DICT -> TYPE
+	HEAD -> (gzip) or (zlib)
+	(gzip) -> FLAGS -> TIME -> OS -> EXLEN -> EXTRA -> NAME
+	NAME -> COMMENT -> HCRC -> TYPE
+	(zlib) -> DICTID or TYPE
+	DICTID -> DICT -> TYPE
     Read deflate blocks:
-            TYPE -> STORED or TABLE or LEN or CHECK
-            STORED -> COPY -> TYPE
-            TABLE -> LENLENS -> CODELENS -> LEN
+	    TYPE -> STORED or TABLE or LEN or CHECK
+	    STORED -> COPY -> TYPE
+	    TABLE -> LENLENS -> CODELENS -> LEN
     Read deflate codes:
-                LEN -> LENEXT or LIT or TYPE
-                LENEXT -> DIST -> DISTEXT -> MATCH -> LEN
-                LIT -> LEN
+		LEN -> LENEXT or LIT or TYPE
+		LENEXT -> DIST -> DISTEXT -> MATCH -> LEN
+		LIT -> LEN
     Process trailer:
-        CHECK -> LENGTH -> DONE
+	CHECK -> LENGTH -> DONE
  */
 
 /* state maintained between inflate() calls.  Approximately 7K bytes. */
@@ -1000,26 +990,26 @@ struct inflate_state {
     unsigned long check;        /* protected copy of check value */
     unsigned long total;        /* protected copy of output count */
  /*   gz_headerp head; */           /* where to save gzip header information */
-        /* sliding window */
+	/* sliding window */
     unsigned wbits;             /* log base 2 of requested window size */
     unsigned wsize;             /* window size or zero if not using window */
     unsigned whave;             /* valid bytes in the window */
     unsigned write;             /* window write index */
     unsigned char *window;  /* allocated sliding window, if needed */
-        /* bit accumulator */
+	/* bit accumulator */
     unsigned long hold;         /* input bit accumulator */
     unsigned bits;              /* number of bits in "in" */
-        /* for string and stored block copying */
+	/* for string and stored block copying */
     unsigned length;            /* literal or length of data to copy */
     unsigned offset;            /* distance back to copy string from */
-        /* for table and code decoding */
+	/* for table and code decoding */
     unsigned extra;             /* extra bits needed */
-        /* fixed and dynamic code tables */
+	/* fixed and dynamic code tables */
     code const *lencode;    /* starting table for length/literal codes */
     code const *distcode;   /* starting table for distance codes */
     unsigned lenbits;           /* index bits for lencode */
     unsigned distbits;          /* index bits for distcode */
-        /* dynamic table building */
+	/* dynamic table building */
     unsigned ncode;             /* number of code length code lengths */
     unsigned nlen;              /* number of length code lengths */
     unsigned ndist;             /* number of distance code lengths */
@@ -1029,7 +1019,6 @@ struct inflate_state {
     unsigned short work[288];   /* work area for code table building */
     code codes[ENOUGH];         /* space for code tables */
 };
-
 
 /* infutil.h -- types and macros common to blocks and codes
  * Copyright (C) 1995-1998 Mark Adler
@@ -1055,10 +1044,8 @@ struct inflate_workspace {
 
 #endif
 
-
 int squashfs_uncompress(void *dest,   unsigned int *destlen,
-                        void *source, unsigned int  sourcelen);
-
+			void *source, unsigned int  sourcelen);
 
 #endif
 

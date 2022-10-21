@@ -100,6 +100,7 @@ int artecboot_load(const char *file, const char *cmdline)
 		if(bootHdr.bitFlags & FLAG_INITRD)
 		{
 			char initrdParam[100];
+
 			if(bootHdr.bitFlags & FLAG_FILESYSTEM)
 			{
 				// we are using a real filesystem, so format the initrd file as usually

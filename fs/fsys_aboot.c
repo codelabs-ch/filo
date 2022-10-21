@@ -52,7 +52,7 @@ int aboot_devread(char* pData, int nSize)
 	{
 		printf("Error: read outside of device device/partition\n");
 		debug("sector=%lu, partition size=%lu, read length=%lu\n",
-			(unsigned long)sector, 	(unsigned long)part_length, (unsigned long)nSize);
+			(unsigned long)sector,	(unsigned long)part_length, (unsigned long)nSize);
 		return 0;
     }
 

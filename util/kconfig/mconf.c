@@ -322,7 +322,7 @@ static void get_symbol_str(struct gstr *r, struct symbol *sym)
 
 	if (sym && sym->name)
 		str_printf(r, "Symbol: %s [=%s]\n", sym->name,
-		                                    sym_get_string_value(sym));
+						    sym_get_string_value(sym));
 	for_all_prompts(sym, prop)
 		get_prompt_str(r, prop);
 	hit = false;
@@ -367,8 +367,8 @@ static void set_config_filename(const char *config_filename)
 	sym = sym_lookup("KERNELVERSION", 0);
 	sym_calc_value(sym);
 	size = snprintf(menu_backtitle, sizeof(menu_backtitle),
-	                _("%s - FILO v%s Configuration"),
-		        config_filename, getenv("KERNELVERSION"));
+			_("%s - FILO v%s Configuration"),
+			config_filename, getenv("KERNELVERSION"));
 	if (size >= sizeof(menu_backtitle))
 		menu_backtitle[sizeof(menu_backtitle)-1] = '\0';
 	set_dialog_backtitle(menu_backtitle);
@@ -377,7 +377,6 @@ static void set_config_filename(const char *config_filename)
 	if (size >= sizeof(filename))
 		filename[sizeof(filename)-1] = '\0';
 }
-
 
 static void search_conf(void)
 {
@@ -430,6 +429,7 @@ static void build_conf(struct menu *menu)
 	if (!sym) {
 		if (prop && menu != current_menu) {
 			const char *prompt = menu_get_prompt(menu);
+
 			switch (prop->type) {
 			case P_MENU:
 				child_count++;
@@ -726,6 +726,7 @@ static void conf_choice(struct menu *menu)
 	while (1) {
 		int res;
 		int selected;
+
 		item_reset();
 
 		current_menu = menu;
@@ -812,6 +813,7 @@ static void conf_load(void)
 
 	while (1) {
 		int res;
+
 		dialog_clear();
 		res = dialog_inputbox(NULL, load_config_text,
 				      11, 55, filename);
@@ -839,6 +841,7 @@ static void conf_save(void)
 {
 	while (1) {
 		int res;
+
 		dialog_clear();
 		res = dialog_inputbox(NULL, save_config_text,
 				      11, 55, filename);

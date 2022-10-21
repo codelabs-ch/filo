@@ -29,7 +29,7 @@
 # define debug_cramfs(str, args...) do {;} while(0)
 #endif
 
-#define BLOCK_SIZE 	SECTOR_SIZE
+#define BLOCK_SIZE	SECTOR_SIZE
 
 #define CRAMFS_MAGIC		0x28cd3d45	/* some random number */
 #define CRAMFS_SIGNATURE	"Compressed ROMFS"
@@ -42,7 +42,7 @@ struct cramfs_inode {
 	/* SIZE for device files is i_rdev */
 	u32 size:24, gid:8;
 	/* NAMELEN is the length of the file name, divided by 4 and
-           rounded up.  (cramfs doesn't support hard links.) */
+	   rounded up.  (cramfs doesn't support hard links.) */
 	/* OFFSET: For symlinks and non-empty regular files, this
 	   contains the offset (divided by 4) of the file data in
 	   compressed form (starting with an array of block pointers;
@@ -58,7 +58,7 @@ struct cramfs_inode {
 struct cramfs_super {
 	u32 magic;		/* 0x28cd3d45 - random number */
 	u32 size;		/* Not used.  mkcramfs currently
-                                   writes a constant 1<<16 here. */
+				   writes a constant 1<<16 here. */
 	u32 flags;		/* 0 */
 	u32 future;		/* 0 */
 	u8 signature[16];	/* "Compressed ROMFS" */
@@ -137,7 +137,6 @@ cramfs_memcmp (const char *s1, const char *s2, int n)
   return 0;
 }
 
-
 int
 cramfs_strlen (const char *str)
 {
@@ -149,7 +148,6 @@ cramfs_strlen (const char *str)
   return len;
 }
 
-
 #endif
 /* check filesystem types and read superblock into memory buffer */
 int
@@ -160,7 +158,7 @@ cramfs_mount(void)
 	cramfs_buf = (struct cramfs_buf *) FSYS_BUF;
 	if (part_length < sizeof(struct cramfs_super) / BLOCK_SIZE) {
 		debug_cramfs("partition too short\n");
-       		return 0;
+		return 0;
 	}
 
 	if (!devread(0, 0, sizeof(struct cramfs_super), (char *) &cramfs_buf->super)) {
@@ -276,12 +274,12 @@ int
 cramfs_dir(char *dirname)
 {
 	int str_chk;			     /* used to hold the results of a string
-					        compare */
+						compare */
 
-	u32 current_ino;  		     /* inode info for current_ino */
+	u32 current_ino;		     /* inode info for current_ino */
 	u32 parent_ino;
 
-	char linkbuf[PATH_MAX];	  	   /* buffer for following sym-links */
+	char linkbuf[PATH_MAX];		   /* buffer for following sym-links */
 	int link_count = 0;
 
 	char *rest;
@@ -439,7 +437,6 @@ cramfs_dir(char *dirname)
 				print_a_completion(cramfs_buf->name);
 			}
 # endif
-
 
 		} while (str_chk || (print_possibilities && ch != '/'));
 

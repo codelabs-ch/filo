@@ -217,7 +217,7 @@ struct squashfs_dir_index {
 	unsigned int		uid:8;		\
 	unsigned int		guid:8;		\
 	unsigned int		mtime;		\
-	unsigned int 		inode_number;
+	unsigned int		inode_number;
 
 struct squashfs_base_inode_header {
 	SQUASHFS_BASE_INODE_HEADER;
@@ -799,6 +799,7 @@ struct squashfs_fragment_entry_2 {
 	SQUASHFS_SWAP((s)->start_block, d, 27, 29);\
 	SQUASHFS_SWAP((s)->size, d, 56, 8);\
 }
+
 #define SQUASHFS_SWAP_DIR_HEADER_2(s, d) {\
 	SQUASHFS_SWAP_START\
 	SQUASHFS_MEMSET(s, d, sizeof(struct squashfs_dir_header_2));\

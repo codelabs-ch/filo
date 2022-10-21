@@ -159,7 +159,7 @@ struct linux_params {
 	u16 mount_root_rdonly;	/* 0x1f2 */
 	u8 reserved7[4];	/* 0x1f4 */
 	u16 ramdisk_flags;	/* 0x1f8 */
-#define RAMDISK_IMAGE_START_MASK  	0x07FF
+#define RAMDISK_IMAGE_START_MASK	0x07FF
 #define RAMDISK_PROMPT_FLAG		0x8000
 #define RAMDISK_LOAD_FLAG		0x4000
 	u8 reserved8[2];	/* 0x1fa */
@@ -237,6 +237,7 @@ static u32 load_linux_header(struct linux_header *hdr)
 
 	if (hdr->protocol_version >= 0x200 && hdr->kver_addr) {
 		char kver[256];
+
 		file_seek(hdr->kver_addr + 0x200);
 		if (file_read(kver, sizeof kver) != 0) {
 			kver[255] = 0;
@@ -388,6 +389,7 @@ static void set_video_mode(struct linux_params *params)
 static void set_acpi_rsdp(struct linux_params *params)
 {
 	struct sysinfo_t *info = &lib_sysinfo;
+
 	params->acpi_rsdp_addr = info->acpi_rsdp;
 }
 
@@ -579,7 +581,6 @@ static int load_initrd(struct linux_header *hdr,
 		return -1;
 	}
 	size = file_size();
-
 
 	/* Find out the kernel's restriction on how high the initrd can be
 	 * placed */

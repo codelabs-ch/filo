@@ -50,7 +50,6 @@ typedef __int64_t	xfs_daddr_t;
 typedef __int64_t	xfs_off_t;
 typedef __uint8_t	uuid_t[16];
 
-
 /* those are from xfs_types.h */
 
 typedef __uint32_t	xfs_agblock_t;	/* blockno in alloc. group */
@@ -74,7 +73,6 @@ typedef	__uint64_t	xfs_dfiloff_t;	/* block number in a file */
 typedef	__uint64_t	xfs_fsblock_t;	/* blockno in filesystem (agno|agbno) */
 typedef	__uint64_t	xfs_fileoff_t;	/* block number in a file */
 typedef	__uint64_t	xfs_filblks_t;	/* number of blocks in a file */
-
 
 /* those are from xfs_sb.h */
 
@@ -134,9 +132,8 @@ typedef struct xfs_sb
 	__uint32_t	sb_unit;	/* stripe or raid unit */
 	__uint32_t	sb_width;	/* stripe or raid width */
 	__uint8_t	sb_dirblklog;	/* log2 of dir block size (fsbs) */
-        __uint8_t       sb_dummy[7];    /* padding */
+	__uint8_t       sb_dummy[7];    /* padding */
 } xfs_sb_t;
-
 
 /* those are from xfs_btree.h */
 
@@ -233,7 +230,6 @@ typedef xfs_dfsbno_t xfs_bmbt_ptr_t, xfs_bmdr_ptr_t;	/* btree pointer type */
 					/* btree block header type */
 typedef	struct xfs_btree_lblock xfs_bmbt_block_t;
 
-
 /* those are from xfs_dir2.h */
 /*
  * Directory version 2.
@@ -303,7 +299,6 @@ typedef struct xfs_da_intnode {
 	} btree[1];			/* variable sized array of keys */
 } xfs_da_intnode_t;
 
-
 /* those are from xfs_dir2_data.h */
 /*
  * Directory format 2, data block structures.
@@ -367,7 +362,6 @@ typedef union {
 	xfs_dir2_data_unused_t	unused;
 } xfs_dir2_data_union_t;
 
-
 /* those are from xfs_dir2_leaf.h */
 /*
  * Directory version 2, leaf block structures.
@@ -381,7 +375,6 @@ typedef struct xfs_dir2_leaf_hdr {
 	__uint16_t		count;		/* count of entries */
 	__uint16_t		stale;		/* count of stale entries */
 } xfs_dir2_leaf_hdr_t;
-
 
 /* those are from xfs_dir2_block.h */
 /*
@@ -403,7 +396,6 @@ typedef struct xfs_dir2_block_tail {
 	__uint32_t	count;			/* count of leaf entries */
 	__uint32_t	stale;			/* count of stale lf entries */
 } xfs_dir2_block_tail_t;
-
 
 /* those are from xfs_dir2_sf.h */
 
@@ -534,7 +526,7 @@ typedef enum xfs_dinode_fmt
 					/* LNK: di_symlink */
 	XFS_DINODE_FMT_EXTENTS,		/* DIR, REG, LNK: di_bmx */
 	XFS_DINODE_FMT_BTREE,		/* DIR, REG, LNK: di_bmbt */
-	XFS_DINODE_FMT_UUID 		/* MNT: di_uuid */
+	XFS_DINODE_FMT_UUID		/* MNT: di_uuid */
 } xfs_dinode_fmt_t;
 
 /*

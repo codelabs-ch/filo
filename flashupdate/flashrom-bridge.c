@@ -19,6 +19,7 @@ int print(int type, const char *fmt, ...)
 	if (type > MSG_INFO) return 0;
 	int ret;
 	va_list args;
+
 	va_start(args, fmt);
 	ret = vprintf(fmt, args);
 	va_end(args);
@@ -50,6 +51,7 @@ int read_flash_to_file(struct flashctx *flash, const char *filename)
 {
 	int ret = 0;
 	unsigned long size = flash->total_size * 1024;
+
 	if (size > old_rom_size) {
 		msg_cerr("old rom buffer not large enough for flash\n");
 		ret = 1;

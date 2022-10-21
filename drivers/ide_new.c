@@ -806,6 +806,7 @@ ob_ide_read_ata_lba48(struct ide_drive *drive, unsigned long long block,
 
 	return ob_ide_pio_data_in(drive, cmd);
 }
+
 /*
  * read 'sectors' sectors from ata device
  */
@@ -1129,8 +1130,10 @@ int
 ob_ide_read_blocks(struct ide_drive *drive, int n, u32 blk, unsigned char* dest)
 {
 	int cnt = n;
+
 	while (n) {
 		int len = n;
+
 		if (len > drive->max_sectors)
 			len = drive->max_sectors;
 
@@ -1156,7 +1159,7 @@ static int pci_find_ata_device_on_bus(int bus, pcidev_t * dev, int *index, int s
 	unsigned char hdr;
 	u32 class;
 
-        for (slot = 0; slot < 0x20; slot++) {
+	for (slot = 0; slot < 0x20; slot++) {
 		for (func = 0; func < 8; func++) {
 			pcidev_t currdev = PCI_DEV(bus, slot, func);
 
@@ -1189,6 +1192,7 @@ static int pci_find_ata_device_on_bus(int bus, pcidev_t * dev, int *index, int s
 
 			if (hdr == HEADER_TYPE_BRIDGE || hdr == HEADER_TYPE_CARDBUS) {
 				unsigned int new_bus;
+
 				new_bus = (pci_read_config32(currdev, REG_PRIMARY_BUS) >> 8) & 0xff;
 				if (new_bus == 0) {
 					debug("Misconfigured bridge at %02x:%02x.%02x skipped.\n",
@@ -1211,10 +1215,10 @@ int pci_find_ata_device(pcidev_t *dev, int *index, int sata, int pata)
 }
 #endif
 
-
 static void fixupregs(struct ide_channel *chan)
 {
 	int i;
+
 	for (i = 1; i < 8; i++)
 		chan->io_regs[i] = chan->io_regs[0] + i;
 	chan->io_regs[9] = chan->io_regs[8] + 1;
@@ -1384,6 +1388,7 @@ int ob_ide_init(int driveno)
 		for (j = 0; j < 2; j++) {
 			struct ide_drive *drive = &chan->drives[j];
 			const char *media = "UNKNOWN";
+
 			if (!drive->present)
 				continue;
 			printf("* hd%c [ATA%s ", chan_index * 2 + j + 'a',
@@ -1413,6 +1418,7 @@ int ob_ide_init(int driveno)
 int ide_probe(int drive)
 {
 	struct ide_drive *curr_drive = & ob_ide_channels[drive / 2].drives[drive % 2];
+
 	ob_ide_init(drive);
 
 	if (!curr_drive->present)
@@ -1433,7 +1439,6 @@ int ide_probe_verbose(int drive)
 		return -1;
 	}
 	printf("ata%d %s ", drive / 2, (drive % 2)?"slave ":"master");
-
 
 	printf("[ATA%s ", curr_drive->type == ide_type_atapi ? "PI" : "");
 	switch (curr_drive->media) {
@@ -1458,6 +1463,7 @@ int ide_probe_verbose(int drive)
 int ide_read(int drive, sector_t sector, void *buffer)
 {
 	int ret;
+
 	ret = ob_ide_read_blocks(&ob_ide_channels[drive / 2].drives[drive % 2], 1, sector, buffer);
 	if (ret!=1) { // right now only one block at a time.. bummer
 		return -1;
@@ -1468,6 +1474,7 @@ int ide_read(int drive, sector_t sector, void *buffer)
 int ide_read_blocks(int drive, sector_t sector, int count, void *buffer)
 {
 	int ret;
+
 	ret = ob_ide_read_blocks(&ob_ide_channels[drive / 2].drives[drive % 2],
 			count, sector, buffer);
 	if (ret!=count) { // right now only one block at a time.. bummer

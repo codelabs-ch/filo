@@ -149,6 +149,7 @@ static int open_pc_partition(int part, unsigned long *start_p,
 static void flush_cache(void)
 {
 	int i;
+
 	for (i = 0; i < NUM_CACHE; i++)
 		cache_sect[i] = (unsigned long) -1;
 }
@@ -250,6 +251,7 @@ int devopen(const char *name, int *reopen)
 	}
 
 	int tmp_drive = drive;
+
 	switch (type) {
 #if (IS_ENABLED(CONFIG_LIBPAYLOAD_STORAGE) && IS_ENABLED(CONFIG_LP_STORAGE)) || \
 		IS_ENABLED(CONFIG_IDE_DISK) || IS_ENABLED(CONFIG_IDE_NEW_DISK)
@@ -315,6 +317,7 @@ int devopen(const char *name, int *reopen)
 	if (part != 0) {
 		/* partition is specified */
 		int ret;
+
 		ret =
 		    open_pc_partition(part - 1, &part_start, &part_length);
 		if (ret == PARTITION_UNKNOWN) {
@@ -399,6 +402,7 @@ static void *read_sector(unsigned long sector)
 #if IS_ENABLED(CONFIG_LIBPAYLOAD_STORAGE) && IS_ENABLED(CONFIG_LP_STORAGE)
 			if (dev_drive < storage_device_count()) {
 				int count = (NUM_CACHE-hash>8)?8:(NUM_CACHE-hash);
+
 				if (storage_probe(tmp_drive) == POLL_NO_MEDIUM) {
 					printf("No disk in drive.\n");
 					goto err_out;
@@ -420,6 +424,7 @@ static void *read_sector(unsigned long sector)
 #elif IS_ENABLED(CONFIG_IDE_NEW_DISK)
 			int count = (NUM_CACHE-hash>8)?8:(NUM_CACHE-hash);
 			int ret;
+
 			ret = ide_read_blocks(tmp_drive, sector, count, buf);
 			if (ret == 2) {
 				printf("No disk in drive.\n");
@@ -438,6 +443,7 @@ static void *read_sector(unsigned long sector)
 		case DISK_USB:
 		{
 			int count = (NUM_CACHE-hash>8)?8:(NUM_CACHE-hash);
+
 			if (usb_read(dev_drive, sector, count, buf) != 0)
 				goto readerr;
 			while (--count>0) {

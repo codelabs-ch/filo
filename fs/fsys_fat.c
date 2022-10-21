@@ -45,7 +45,7 @@ struct fat_superblock
 
 /* pointer(s) into filesystem info buffer for DOS stuff */
 #define FAT_SUPER ( (struct fat_superblock *) \
- 		    ( FSYS_BUF + 32256) )/* 512 bytes long */
+		    ( FSYS_BUF + 32256) )/* 512 bytes long */
 #define FAT_BUF   ( FSYS_BUF + 30208 )	/* 4 sector FAT buffer */
 #define NAME_BUF  ( FSYS_BUF + 29184 )	/* Filename buffer (833 bytes) */
 
@@ -113,12 +113,13 @@ fat_mount (void)
 
       /* FAT32 should have 0 in this field, as its root directory can grow dynamically now */
       if (FAT_CVT_U16(bpb.dir_entries))
- 	return 0;
+	return 0;
 
       if (bpb.extended.fat32.flags & 0x0080)
 	{
 	  /* FAT mirroring is disabled, get active FAT */
 	  int active_fat = bpb.extended.fat32.flags & 0x000f;
+
 	  if (active_fat >= bpb.num_fats)
 	    return 0;
 	  FAT_SUPER->fat_offset += active_fat * FAT_SUPER->fat_length;
@@ -133,7 +134,7 @@ fat_mount (void)
   else
     {
       if (!FAT_SUPER->root_max)
- 	return 0;
+	return 0;
 
       FAT_SUPER->root_cluster = -1;
       if (FAT_SUPER->num_clust > FAT_MAX_12BIT_CLUST)
@@ -153,16 +154,16 @@ fat_mount (void)
   if (FAT_CVT_U16(bpb.bytes_per_sect) != (1 << FAT_SUPER->sectsize_bits)
       || FAT_CVT_U16(bpb.bytes_per_sect) != SECTOR_SIZE
       || bpb.sects_per_clust != (1 << (FAT_SUPER->clustsize_bits
- 				       - FAT_SUPER->sectsize_bits))
+				       - FAT_SUPER->sectsize_bits))
       || FAT_SUPER->num_clust <= 2
       || (FAT_SUPER->fat_size * FAT_SUPER->num_clust / (2 * SECTOR_SIZE)
- 	  > FAT_SUPER->fat_length))
+	  > FAT_SUPER->fat_length))
     return 0;
 
   /* kbs: Media check on first FAT entry [ported from PUPA] */
 
   if (!devread(FAT_SUPER->fat_offset, 0,
-               sizeof(first_fat), (char *)&first_fat))
+	       sizeof(first_fat), (char *)&first_fat))
     return 0;
 
   if (FAT_SUPER->fat_size == 8)
@@ -205,9 +206,9 @@ fat_read (char *buf, int len)
       /* root directory for fat16 */
       size = FAT_SUPER->root_max - filepos;
       if (size > len)
- 	size = len;
+	size = len;
       if (!devread(FAT_SUPER->root_offset, filepos, size, buf))
- 	return 0;
+	return 0;
       filepos += size;
       return size;
     }
@@ -223,6 +224,7 @@ fat_read (char *buf, int len)
   while (len > 0)
     {
       int sector;
+
       while (logical_clust > FAT_SUPER->current_cluster_num)
 	{
 	  /* calculate next cluster */
@@ -265,7 +267,7 @@ fat_read (char *buf, int len)
 
       sector = FAT_SUPER->data_offset +
 	((FAT_SUPER->current_cluster - 2) << (FAT_SUPER->clustsize_bits
- 					      - FAT_SUPER->sectsize_bits));
+					      - FAT_SUPER->sectsize_bits));
       size = (1 << FAT_SUPER->clustsize_bits) - offset;
       if (size > len)
 	size = len;

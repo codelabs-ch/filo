@@ -156,7 +156,6 @@ struct ide_pio_command
 #define IDE_CTRL_SRST	0x04	/* soft reset */
 #define IDE_CTRL_NIEN	0x02	/* disable interrupts */
 
-
 /* Most mandtory and optional ATA commands (from ATA-3), */
 
 #define IDE_CMD_CFA_ERASE_SECTORS            0xC0
@@ -249,6 +248,7 @@ static int await_ide(int (*done)(struct controller *ctrl),
 	struct controller *ctrl, u64 timeout)
 {
 	int result;
+
 	for(;;) {
 		result = done(ctrl);
 #if CONFIG_IDE_DISK_POLL_DELAY
@@ -395,7 +395,6 @@ static void pio_set_registers(
 	outb(cmd->command,         IDE_REG_COMMAND(ctrl));
 }
 
-
 static int pio_non_data(struct controller *ctrl, const struct ide_pio_command *cmd)
 {
 	/* Wait until the busy bit is clear */
@@ -539,6 +538,7 @@ static inline int ide_read_sector_lba(
 	struct harddisk_info *info, void *buffer, unsigned long sector)
 {
 	struct ide_pio_command cmd;
+
 	memset(&cmd, 0, sizeof(cmd));
 
 	cmd.sector_count = 1;
@@ -558,6 +558,7 @@ static inline int ide_read_sector_lba48(
 	struct harddisk_info *info, void *buffer, sector_t sector)
 {
 	struct ide_pio_command cmd;
+
 	memset(&cmd, 0, sizeof(cmd));
 	//debug("ide_read_sector_lba48: sector= %ld.\n",(unsigned long) sector);
 
@@ -697,12 +698,10 @@ static int init_drive(struct harddisk_info *info, struct controller *ctrl,
 	cmd.device = IDE_DH_DEFAULT | IDE_DH_HEAD(0) | IDE_DH_CHS | info->slave;
 	cmd.command = ident_command;
 
-
 	if (pio_data_in(ctrl, &cmd, buffer, IDE_SECTOR_SIZE) < 0) {
 		/* Well, if that command didn't work, we probably don't have drive. */
 		return 1;
 	}
-
 
 	/* Now suck the data out */
 	drive_info = (uint16_t *)buffer;
@@ -940,6 +939,7 @@ static int init_controller(struct controller *ctrl, int drive, unsigned char *bu
 
 	/* Now initialize the individual drives */
 	int master_drive = drive & ~1;
+
 	info = &harddisk_info[master_drive];
 
 	/* master */
@@ -1105,7 +1105,7 @@ static int pci_find_ata_device_on_bus(int bus, pcidev_t * dev, int *index, int s
 	unsigned char hdr;
 	u32 class;
 
-        for (slot = 0; slot < 0x20; slot++) {
+	for (slot = 0; slot < 0x20; slot++) {
 		for (func = 0; func < 8; func++) {
 			pcidev_t currdev = PCI_DEV(bus, slot, func);
 
@@ -1131,6 +1131,7 @@ static int pci_find_ata_device_on_bus(int bus, pcidev_t * dev, int *index, int s
 
 			if (hdr == HEADER_TYPE_BRIDGE || hdr == HEADER_TYPE_CARDBUS) {
 				unsigned int new_bus;
+
 				new_bus = (pci_read_config32(currdev, REG_PRIMARY_BUS) >> 8) & 0xff;
 				if (new_bus == 0) {
 					debug("Misconfigured bridge at %02x:%02x.%02x skipped.\n",
@@ -1152,7 +1153,6 @@ int pci_find_ata_device(pcidev_t *dev, int *index, int sata, int pata)
 	return pci_find_ata_device_on_bus(0, dev, index, sata, pata);
 }
 #endif
-
 
 static int find_ide_controller_compat(struct controller *ctrl, int index)
 {

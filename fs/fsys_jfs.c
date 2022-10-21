@@ -69,7 +69,7 @@ first_extent (dinode_t *di)
 	xtp = (xtpage_t *)&di->di_btroot;
 	jfs.xad = &xtp->xad[2];
 	if (xtp->header.flag & BT_LEAF) {
-	    	jfs.xlastindex = xtp->header.nextindex;
+		jfs.xlastindex = xtp->header.nextindex;
 	} else {
 		do {
 			devread (addressXAD (jfs.xad) << jfs.bdlog, 0,
@@ -97,7 +97,6 @@ next_extent (void)
 	}
 	return ++jfs.xad;
 }
-
 
 static void
 di_read (u32 inum, dinode_t *di)
@@ -183,7 +182,6 @@ first_dentry (void)
 
 	return next_dentry ();
 }
-
 
 static dtslot_t *
 next_dslot (int next)
@@ -364,7 +362,7 @@ jfs_dir (char *dirname)
 			if (cmp == 0) {
 				parent_inum = inum;
 				inum = de->inumber;
-		        	*(dirname = rest) = ch;
+				*(dirname = rest) = ch;
 				break;
 			}
 			de = next_dentry ();

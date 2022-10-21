@@ -145,7 +145,7 @@ iso9660_dir (char *dirname)
 	      if (name_len == 1)
 	      {
 		  if ((name[0] == 0) ||	/* self */
-		      (name[0] == 1)) 	/* parent */
+		      (name[0] == 1))	/* parent */
 		    continue;
 	      }
 	      if (name_len > 2 && CHECK2(name + name_len - 2, ';', '1'))
@@ -235,7 +235,7 @@ iso9660_dir (char *dirname)
 	      if (name_len >= pathlen
 		  && !__builtin_memcmp(name, dirname, pathlen))
 	      {
-                if (dirname[pathlen] == '/' || !print_possibilities)
+		if (dirname[pathlen] == '/' || !print_possibilities)
 		{
 		  /*
 		   *  DIRNAME is directory component of pathname,
@@ -245,17 +245,17 @@ iso9660_dir (char *dirname)
 		  {
 		      if (dirname[pathlen] == '/')
 		      {
-		          if (file_type != ISO_DIRECTORY)
-		          {
+			  if (file_type != ISO_DIRECTORY)
+			  {
 			      errnum = ERR_BAD_FILETYPE;
 			      return 0;
 			  }
-                          goto next_dir_level;
+			  goto next_dir_level;
 		      }
 		      if (file_type != ISO_REGULAR)
 		      {
-		          errnum = ERR_BAD_FILETYPE;
-		          return 0;
+			  errnum = ERR_BAD_FILETYPE;
+			  return 0;
 		      }
 		      ISO_SUPER->file_start = idr->extent.l;
 		      filepos = 0;
@@ -263,16 +263,16 @@ iso9660_dir (char *dirname)
 		      return 1;
 		  }
 		}
-	        else	/* Completion */
-	        {
+		else	/* Completion */
+		{
 #ifndef STAGE1_5
- 		  if (print_possibilities > 0)
+		  if (print_possibilities > 0)
 		      print_possibilities = -print_possibilities;
 		  memcpy(NAME_BUF, name, name_len);
 		  NAME_BUF[name_len] = '\0';
-            	  print_a_completion ((char *)NAME_BUF);
+		  print_a_completion ((char *)NAME_BUF);
 #endif
-	        }
+		}
 	      }
 	  } /* for */
 
@@ -308,7 +308,7 @@ iso9660_read (char *buf, int len)
   {
     size = ISO_SECTOR_SIZE - blkoffset;
     if (size > len)
-        size = len;
+	size = len;
 
     disk_read_func = disk_read_hook;
 

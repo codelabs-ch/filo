@@ -28,9 +28,9 @@ u64 currticks(void)
 int getrtsecs (void)
 {
 	u64 t;
+
 	t=timer_raw_value();
 	t=t / timer_hz();
 	return (int)t;
 }
-
 

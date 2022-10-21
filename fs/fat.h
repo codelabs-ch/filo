@@ -18,7 +18,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
 /*
  *  Defines for the FAT BIOS Parameter Block (embedded in the first block
  *  of the partition.
@@ -30,7 +29,6 @@ typedef __signed__ short __s16;
 typedef unsigned short __u16;
 typedef __signed__ int __s32;
 typedef unsigned int __u32;
-
 
 struct fat16_extended_bpb {
 	__u8    drive_number;	/* Physical Drive Number */
@@ -58,7 +56,6 @@ struct fat32_extended_bpb {
 	__u8    volumelabel[11];/* volume label */
 	__s8    type[8];	/* Padded with blanks: "FAT32" */
 } __attribute__((packed));
-
 
 /* Note that some shorts are not aligned, and must therefore
  * be declared as array of two bytes.

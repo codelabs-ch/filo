@@ -36,7 +36,6 @@
 
 #define print(x,...)	debug(__VA_ARGS__)
 
-
 /*
  * spi.h
  */
@@ -75,7 +74,6 @@
 #define SPI_INVALID_LENGTH	-4
 #define SPI_FLASHROM_BUG	-5
 #define SPI_PROGRAMMER_ERROR	-6
-
 
 /*
  * flashchips.h
@@ -243,7 +241,6 @@ struct spi_command {
 	unsigned char *readarr;
 };
 
-
 /*
  * programmer.h
  */
@@ -272,19 +269,15 @@ static int sb600_spi_send_command(unsigned int writecnt, unsigned int readcnt,
 static int sb600_spi_read(struct flashchip *flash, uint8_t *buf, int start, int len);
 static int sb600_spi_write_256(struct flashchip *flash, uint8_t *buf, int start, int len);
 
-
 /*
  * chipdrivers.h
  */
 
-
 static uint8_t spi_read_status_register(void);
-
 
 /*
  * hwaccess.h
  */
-
 
 #define OUTB outb
 #define OUTW outw
@@ -292,7 +285,6 @@ static uint8_t spi_read_status_register(void);
 #define INB  inb
 #define INW  inw
 #define INL  inl
-
 
 /*
  * jedec.c
@@ -305,7 +297,6 @@ static uint8_t oddparity(uint8_t val)
 	val = (val ^ (val >> 2)) & 0x3;
 	return (val ^ (val >> 1)) & 0x1;
 }
-
 
 /*
  * spi.c
@@ -358,13 +349,13 @@ static int spi_send_multicommand(struct spi_command *cmds)
 static int default_spi_send_multicommand(struct spi_command *cmds)
 {
 	int result = 0;
+
 	for (; (cmds->writecnt || cmds->readcnt) && !result; cmds++) {
 		result = spi_send_command(cmds->writecnt, cmds->readcnt,
 					  cmds->writearr, cmds->readarr);
 	}
 	return result;
 }
-
 
 /*
  * spi25.c
@@ -390,7 +381,6 @@ static void spi_prettyprint_status_register(struct flashchip *flash)
 {
 	msg_cdbg("Chip status register is %02x\n", spi_read_status_register());
 }
-
 
 static int probe_spi_rdid_generic(struct flashchip *flash, int bytes)
 {
@@ -619,7 +609,6 @@ static int spi_enable_blockprotect_at25df(struct flashchip *flash)
 	return 0;
 }
 
-
 /*
  * hwaccess.c
  */
@@ -654,13 +643,12 @@ static inline uint32_t mmio_readl(void *addr)
 	return *(volatile uint32_t *) addr;
 }
 
-
 /*
  * physmap.c
  */
 
 static inline void *physmap(const char *descr, unsigned long phys_addr,
-                            size_t len)
+			    size_t len)
 {
 	return phys_to_virt(phys_addr);
 }
@@ -668,7 +656,6 @@ static inline void *physmap(const char *descr, unsigned long phys_addr,
 static inline void physunmap(void *virt_addr, size_t len)
 {
 }
-
 
 /*
  * internal.c
@@ -697,11 +684,9 @@ static struct pci_dev *pci_dev_find(uint16_t vendor, uint16_t device)
 	return NULL;
 }
 
-
 /*
  * flashchips.c
  */
-
 
 /**
  * List of supported flash chips.
@@ -751,9 +736,8 @@ static struct flashchip flashchips[] = {
 #endif
 	},
 
-	{ NULL 	}
+	{ NULL	}
 };
-
 
 /*
  * flashrom.c
@@ -834,7 +818,6 @@ notfound:
 
 	return flash;
 }
-
 
 /*
  * sb600spi.c
@@ -1124,7 +1107,6 @@ static int sb600_probe_spi(struct pci_dev *dev)
 	return 0;
 }
 
-
 /*
  * chipset_enable.c
  */
@@ -1198,7 +1180,6 @@ static int enable_flash_sb600(struct pci_dev *dev)
 
 	return ret;
 }
-
 
 int sb600_spi_lockdown(void) {
 	struct flashchip *flash;

@@ -101,6 +101,7 @@ inline unsigned long pull_bits(struct bitstream *stream,
 inline int pull_bit(struct bitstream *stream)
 {
 	int ret = ((*(stream->data) >> stream->bit) & 1);
+
 	if (stream->bit++ == 7) {
 		stream->bit = 0;
 		stream->data++;
@@ -137,6 +138,7 @@ static int read_symbol(struct bitstream *stream, struct huffman_set *set)
 {
 	int bits = 0;
 	int code = 0;
+
 	while (!(set->count[bits] && code < set->first[bits] +
 					     set->count[bits])) {
 		code = (code << 1) + pull_bit(stream);
@@ -351,10 +353,8 @@ static void decompress_fixed(struct bitstream *stream, unsigned char *dest)
 	cramfs_memset(distance->lengths, 5, 32);
 	distance->count[5] = 32;
 
-
 	fill_code_tables(lengths);
 	fill_code_tables(distance);
-
 
 	decompress_huffman(stream, dest);
 }

@@ -347,8 +347,8 @@ int wince_load(const char *file, const char *cmdline)
 			// check to make sure this record really contains the ROMHDR.
 			if ((pROMhdr->physfirst == (g_imageStart - tempOffset)) &&
 					(pROMhdr->physlast == (g_imageStart - tempOffset + g_imageSize)) &&
-			    		(u32) (((pROMhdr-> dllfirst << 16) & 0xffff0000) <= pROMhdr->dlllast) &&
-			    		(u32) (((pROMhdr-> dllfirst << 16) & 0x0000ffff) <= pROMhdr->dlllast)) {
+					(u32) (((pROMhdr-> dllfirst << 16) & 0xffff0000) <= pROMhdr->dlllast) &&
+					(u32) (((pROMhdr-> dllfirst << 16) & 0x0000ffff) <= pROMhdr->dlllast)) {
 				g_romOffset = tempOffset;
 				debug("\nROM offset = 0x%x\n", g_romOffset);
 			}

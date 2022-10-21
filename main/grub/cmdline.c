@@ -143,6 +143,7 @@ void enter_cmdline(char *heap, int forever)
 		errnum = ERR_NONE;
 
 		short col1, col2, col3, col4;
+
 		pair_content(1, &col1, &col2);
 		pair_content(2, &col3, &col4);
 		/* reset to light-gray-on-black on console */

@@ -15,10 +15,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-
 #ifndef ELF_BOOT_H
 #define ELF_BOOT_H
-
 
 /* This defines the structure of a table of parameters useful for ELF
  * bootable images.  These parameters are all passed and generated
@@ -75,7 +73,6 @@ typedef struct Elf_Nhdr
 #define EIN_PROGRAM_CHECKSUM	0x00000003
 /* ip style checksum of the memory image. */
 
-
 /* Linux image notes for booting... The name for all of these is Linux */
 
 #define LIN_COMMAND_LINE	0x00000001
@@ -106,7 +103,6 @@ typedef struct Elf_Nhdr
 #define EBN_LOADED_IMAGE	0x00000006
 /* An ASCIZ string naming the loaded image */
 
-
 /* Etherboot specific notes */
 #define EB_PARAM_NOTE		"Etherboot"
 #define EB_IA64_SYSTAB		0x00000001
@@ -117,6 +113,5 @@ typedef struct Elf_Nhdr
 #define EB_HEADER		0x00000006
 #define EB_IA64_IMAGE_HANDLE	0x00000007
 #define EB_I386_MEMMAP		0x00000008
-
 
 #endif /* ELF_BOOT_H */

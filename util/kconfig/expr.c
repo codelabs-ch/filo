@@ -15,6 +15,7 @@
 struct expr *expr_alloc_symbol(struct symbol *sym)
 {
 	struct expr *e = malloc(sizeof(*e));
+
 	memset(e, 0, sizeof(*e));
 	e->type = E_SYMBOL;
 	e->left.sym = sym;
@@ -24,6 +25,7 @@ struct expr *expr_alloc_symbol(struct symbol *sym)
 struct expr *expr_alloc_one(enum expr_type type, struct expr *ce)
 {
 	struct expr *e = malloc(sizeof(*e));
+
 	memset(e, 0, sizeof(*e));
 	e->type = type;
 	e->left.expr = ce;
@@ -33,6 +35,7 @@ struct expr *expr_alloc_one(enum expr_type type, struct expr *ce)
 struct expr *expr_alloc_two(enum expr_type type, struct expr *e1, struct expr *e2)
 {
 	struct expr *e = malloc(sizeof(*e));
+
 	memset(e, 0, sizeof(*e));
 	e->type = type;
 	e->left.expr = e1;
@@ -43,6 +46,7 @@ struct expr *expr_alloc_two(enum expr_type type, struct expr *e1, struct expr *e
 struct expr *expr_alloc_comp(enum expr_type type, struct symbol *s1, struct symbol *s2)
 {
 	struct expr *e = malloc(sizeof(*e));
+
 	memset(e, 0, sizeof(*e));
 	e->type = type;
 	e->left.sym = s1;
@@ -617,6 +621,7 @@ static void expr_eliminate_dups2(enum expr_type type, struct expr **ep1, struct 
 struct expr *expr_eliminate_dups(struct expr *e)
 {
 	int oldcount;
+
 	if (!e)
 		return e;
 
@@ -825,12 +830,13 @@ bool expr_depends_symbol(struct expr *dep, struct symbol *sym)
 	default:
 		;
 	}
- 	return false;
+	return false;
 }
 
 struct expr *expr_extract_eq_and(struct expr **ep1, struct expr **ep2)
 {
 	struct expr *tmp = NULL;
+
 	expr_extract_eq(E_AND, &tmp, ep1, ep2);
 	if (tmp) {
 		*ep1 = expr_eliminate_yn(*ep1);
@@ -842,6 +848,7 @@ struct expr *expr_extract_eq_and(struct expr **ep1, struct expr **ep2)
 struct expr *expr_extract_eq_or(struct expr **ep1, struct expr **ep2)
 {
 	struct expr *tmp = NULL;
+
 	expr_extract_eq(E_OR, &tmp, ep1, ep2);
 	if (tmp) {
 		*ep1 = expr_eliminate_yn(*ep1);
@@ -1076,6 +1083,7 @@ void expr_print(struct expr *e, void (*fn)(void *, struct symbol *, const char *
 	default:
 	  {
 		char buf[32];
+
 		sprintf(buf, "<unknown type %d>", e->type);
 		fn(data, NULL, buf);
 		break;

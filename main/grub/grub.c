@@ -139,7 +139,6 @@ void manual_grub_menulst(void)
 		}
 	}
 
-
 }
 
 int probe_menulst(char *bootdevice, char *filename)
@@ -634,6 +633,7 @@ static void run_menu(char *menu_entries, char *config_entries, int num_entries, 
 
 					if (!check_password(entered, password, password_type)) {
 						char *new_file = config_file;
+
 						while (isspace(*pptr))
 							pptr++;
 
@@ -726,6 +726,7 @@ static void run_menu(char *menu_entries, char *config_entries, int num_entries, 
 #ifndef CONFIG_NON_INTERACTIVE
 				if (c == 'c') {
 					extern int keep_cmdline_running;
+
 					enter_cmdline(heap, 0);
 					if (keep_cmdline_running)
 						goto restart;
@@ -873,7 +874,6 @@ static void run_menu(char *menu_entries, char *config_entries, int num_entries, 
 	goto restart;
 }
 
-
 static int get_line_from_config(char *cmdline, int maxlen, int read_from_file)
 {
 	int pos = 0, literal = 0, comment = 0;
@@ -951,6 +951,7 @@ static int rewrite_isolinux_config(void)
 	    !memcmp(CMDLINE_BUF, "kernel ", 7)) {
 		char *spos;
 		int pstart = 7, plen = 0;
+
 		strcpy(CMDLINE_TMP, "kernel ");
 
 		/* Find path of kernel */
@@ -978,6 +979,7 @@ static int rewrite_isolinux_config(void)
 
 		if (spos) {
 			char sback = spos[0];
+
 			spos[0]=0;
 			strlcat(CMDLINE_TMP, config_file, NEW_HEAPSIZE);
 			plen = strlen(CMDLINE_TMP) - pstart; // path name len

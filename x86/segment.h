@@ -15,7 +15,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-
 /* Segment indexes. Must match the gdt definition in segment.c. */
 enum {
 	NULL_SEG,

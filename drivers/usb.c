@@ -25,7 +25,6 @@
 #include <usb/usb.h>
 #include <usb/usbmsc.h>
 
-
 // FIXME: should be dynamic?
 #define maxdevs 4
 static usbdev_t* devs[maxdevs];
@@ -40,6 +39,7 @@ void usbdisk_create (usbdev_t* dev)
 void usbdisk_remove (usbdev_t* dev)
 {
 	int i;
+
 	if (count == -1) return;
 	if (devs[count] == dev) {
 		count--;

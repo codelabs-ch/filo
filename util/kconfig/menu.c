@@ -18,6 +18,7 @@ struct file *current_file;
 void menu_warn(struct menu *menu, const char *fmt, ...)
 {
 	va_list ap;
+
 	va_start(ap, fmt);
 	fprintf(stderr, "%s:%d:warning: ", menu->file->name, menu->lineno);
 	vfprintf(stderr, fmt, ap);
@@ -28,6 +29,7 @@ void menu_warn(struct menu *menu, const char *fmt, ...)
 static void prop_warn(struct property *prop, const char *fmt, ...)
 {
 	va_list ap;
+
 	va_start(ap, fmt);
 	fprintf(stderr, "%s:%d:warning: ", prop->file->name, prop->lineno);
 	vfprintf(stderr, fmt, ap);
@@ -188,6 +190,7 @@ void sym_check_prop(struct symbol *sym)
 {
 	struct property *prop;
 	struct symbol *sym2;
+
 	for (prop = sym->prop; prop; prop = prop->next) {
 		switch (prop->type) {
 		case P_DEFAULT:
@@ -204,8 +207,8 @@ void sym_check_prop(struct symbol *sym)
 				    "config symbol '%s' uses select, but is "
 				    "not boolean or tristate", sym->name);
 			else if (sym2->type != S_UNKNOWN &&
-			         sym2->type != S_BOOLEAN &&
-			         sym2->type != S_TRISTATE)
+				 sym2->type != S_BOOLEAN &&
+				 sym2->type != S_TRISTATE)
 				prop_warn(prop,
 				    "'%s' has wrong type. 'select' only "
 				    "accept arguments of boolean and "
@@ -214,7 +217,7 @@ void sym_check_prop(struct symbol *sym)
 		case P_RANGE:
 			if (sym->type != S_INT && sym->type != S_HEX)
 				prop_warn(prop, "range is only allowed "
-				                "for int or hex symbols");
+						"for int or hex symbols");
 			if (!menu_range_valid_sym(sym, prop->expr->left.sym) ||
 			    !menu_range_valid_sym(sym, prop->expr->right.sym))
 				prop_warn(prop, "range is invalid");
@@ -273,6 +276,7 @@ void menu_finalize(struct menu *parent)
 				prop->visible.expr = dep;
 				if (prop->type == P_SELECT) {
 					struct symbol *es = prop_get_symbol(prop);
+
 					es->rev_dep.expr = expr_alloc_or(es->rev_dep.expr,
 							expr_alloc_and(expr_alloc_symbol(menu->sym), expr_copy(dep)));
 				}
@@ -350,6 +354,7 @@ void menu_finalize(struct menu *parent)
 					prop->visible.expr = dep;
 					if (prop->type == P_SELECT) {
 						struct symbol *es = prop_get_symbol(prop);
+
 						dep2 = expr_alloc_symbol(menu->sym);
 						dep = expr_alloc_and(dep2,
 								     expr_copy(dep));

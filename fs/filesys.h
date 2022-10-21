@@ -189,19 +189,19 @@ int aboot_dir (char *dirname);
 /* This is not a flag actually, but used as if it were a flag.  */
 #define PC_SLICE_TYPE_HIDDEN_FLAG	0x10
 
-#define PC_SLICE_TYPE_NONE         	0
-#define PC_SLICE_TYPE_FAT12        	1
-#define PC_SLICE_TYPE_FAT16_LT32M  	4
-#define PC_SLICE_TYPE_EXTENDED     	5
-#define PC_SLICE_TYPE_FAT16_GT32M  	6
+#define PC_SLICE_TYPE_NONE		0
+#define PC_SLICE_TYPE_FAT12		1
+#define PC_SLICE_TYPE_FAT16_LT32M	4
+#define PC_SLICE_TYPE_EXTENDED	5
+#define PC_SLICE_TYPE_FAT16_GT32M	6
 #define PC_SLICE_TYPE_FAT32		0xb
 #define PC_SLICE_TYPE_FAT32_LBA		0xc
 #define PC_SLICE_TYPE_FAT16_LBA		0xe
 #define PC_SLICE_TYPE_WIN95_EXTENDED	0xf
-#define PC_SLICE_TYPE_EZD        	0x55
+#define PC_SLICE_TYPE_EZD		0x55
 #define PC_SLICE_TYPE_MINIX		0x80
 #define PC_SLICE_TYPE_LINUX_MINIX	0x81
-#define PC_SLICE_TYPE_EXT2FS       	0x83
+#define PC_SLICE_TYPE_EXT2FS	0x83
 #define PC_SLICE_TYPE_LINUX_EXTENDED	0x85
 #define PC_SLICE_TYPE_VSTAFS		0x9e
 #define PC_SLICE_TYPE_DELL_UTIL		0xde

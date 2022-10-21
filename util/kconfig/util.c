@@ -71,11 +71,11 @@ int file_write_dep(const char *name)
 	return 0;
 }
 
-
 /* Allocate initial growable sting */
 struct gstr str_new(void)
 {
 	struct gstr gs;
+
 	gs.s = malloc(sizeof(char) * 64);
 	gs.len = 16;
 	strcpy(gs.s, "\0");
@@ -86,6 +86,7 @@ struct gstr str_new(void)
 struct gstr str_assign(const char *s)
 {
 	struct gstr gs;
+
 	gs.s = strdup(s);
 	gs.len = strlen(s) + 1;
 	return gs;
@@ -104,6 +105,7 @@ void str_free(struct gstr *gs)
 void str_append(struct gstr *gs, const char *s)
 {
 	size_t l;
+
 	if (s) {
 		l = strlen(gs->s) + strlen(s) + 1;
 		if (l > gs->len) {
@@ -119,6 +121,7 @@ void str_printf(struct gstr *gs, const char *fmt, ...)
 {
 	va_list ap;
 	char s[10000]; /* big enough... */
+
 	va_start(ap, fmt);
 	vsnprintf(s, sizeof(s), fmt, ap);
 	str_append(gs, s);

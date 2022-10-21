@@ -13,6 +13,7 @@ typedef struct msr_struct
 static inline msr_t rdmsr(unsigned index)
 {
 	msr_t result;
+
 	__asm__ __volatile__ (
 		"rdmsr"
 		: "=a" (result.lo), "=d" (result.hi)

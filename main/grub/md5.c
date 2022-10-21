@@ -155,6 +155,7 @@ static void md5_init(void)
 static void md5_update(const char *input, int inputlen)
 {
 	int buflen = length & 63;
+
 	length += inputlen;
 	if (buflen + inputlen < 64) {
 		memcpy(buffer + buflen, input, inputlen);
@@ -221,6 +222,7 @@ int md5_password(const char *key, char *crypted, int check)
 		saltlen = strstr(salt, "$") - salt;
 	} else {
 		char *end = strstr(salt, "$");
+
 		if (end && end - salt < 8)
 			saltlen = end - salt;
 		else
@@ -288,6 +290,7 @@ int md5_password(const char *key, char *crypted, int check)
 	}
 	{
 		unsigned int w = digest[11];
+
 		for (n = 2; n-- > 0;) {
 			if (check) {
 				if (*p++ != b64t[w & 0x3f])

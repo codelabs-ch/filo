@@ -228,7 +228,6 @@ static int
 ob_ide_atapi_request_sense(struct ide_drive *drive);
 int ob_ide_init(int driveno);
 
-
 /* FILO compat */
 #define CONFIG_IDE_LBA48
 

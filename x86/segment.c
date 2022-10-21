@@ -15,7 +15,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-
 /* Segmentation of the i386 architecture.
  *
  * 2003-07 by SONE Takeshi

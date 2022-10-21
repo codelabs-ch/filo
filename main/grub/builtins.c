@@ -124,6 +124,7 @@ int to_argc_argv(char *args, char ***argvp)
 	 */
 	char **argv = malloc(sizeof(char*)*(strlen(args)/2+3));
 	int argc = 0;
+
 	argv[argc++] = NULL;
 	while (*args) {
 		int skipbytes = 0;
@@ -221,7 +222,6 @@ static struct builtin builtin_boot = {
 	"boot",
 	"Boot the OS/chain-loader which has been loaded."
 };
-
 
 /* color */
 /* Set new colors used for the menu interface. Support two methods to
@@ -393,6 +393,7 @@ static struct builtin builtin_configfile = {
 static int default_func(char *arg, int flags)
 {
 	unsigned char buf[1];
+
 	if (get_option(buf, "boot_default"))
 		buf[0] = 0xff;
 
@@ -444,6 +445,7 @@ static int dumpmem_func(char *arg, int flags)
 		if (((unsigned long)i & 0x0f) == 0)
 			grub_printf("\n%08x:", i);
 		unsigned char val = *((unsigned char *)i);
+
 		grub_printf(" %02x", val);
 	}
 	grub_printf("\n");
@@ -626,7 +628,6 @@ static int help_func(char *arg, int flags)
 			for (; i < MAX_SHORT_DOC_LEN; i++)
 				grub_putchar(' ');
 
-
 			if (!left)
 				grub_putchar('\n');
 
@@ -775,18 +776,21 @@ void copy_path_to_filo_bootline(char *arg, char *path, int use_rootdev, int appe
 
 		if (isdigit(arg[i])) {
 			char *postnum;
+
 			disk = strtoul(arg+i, &postnum, 10);
 			i = postnum - arg;
 		}
 
 		if (arg[i] == ',') {
 			char *postnum;
+
 			part = strtoul(arg+i+1, &postnum, 10) + 1;
 			i = postnum - arg;
 		}
 
 		if (arg[i] == '@') {
 			char *postnum;
+
 			addr = strtoul(arg+i+1, &postnum, 0);
 			i = postnum - arg;
 		}
@@ -801,12 +805,14 @@ void copy_path_to_filo_bootline(char *arg, char *path, int use_rootdev, int appe
 
 		if (isdigit(arg[i])) {
 			char *postnum;
+
 			part = strtoul(arg+i, &postnum, 10);
 			i = postnum - arg;
 		}
 
 		if (arg[i] == '@') {
 			char *postnum;
+
 			addr = strtoul(arg+i+1, &postnum, 0);
 			i = postnum - arg;
 		}
@@ -826,6 +832,7 @@ void copy_path_to_filo_bootline(char *arg, char *path, int use_rootdev, int appe
 		strlcat(path, root_device, BOOT_LINE_LENGTH);
 	} else {
 		char buffer[32];
+
 		strlcat(path, drivername, BOOT_LINE_LENGTH);
 		if (disk != -1) {
 			snprintf(buffer, 31, "%c", 'a'+disk);
@@ -869,7 +876,6 @@ static struct builtin builtin_initrd = {
 	"Load an initial ramdisk FILE for a Linux format boot image and set the"
 	    " appropriate parameters in the Linux setup area in memory."
 };
-
 
 #ifdef CONFIG_DEVELOPER_TOOLS
 #ifdef CONFIG_TARGET_I386
@@ -1242,12 +1248,12 @@ static int nvram_func(char *arg, int flags)
 		int i;
 		int range_start = lib_sysinfo.cmos_range_start / 8;
 		int range_end = lib_sysinfo.cmos_range_end / 8;
+
 		for (i= range_start; i<range_end; i++)
 			nvram_write(0, i);
 		fix_options_checksum();
 		return 0;
 	}
-
 
 	if (!strlen(arg)) {
 		grub_printf("NVRAM Settings:\n");
@@ -1871,7 +1877,6 @@ static struct builtin builtin_timeout = {
 #endif
 };
 
-
 static int keymap_func(char *arg, int flags)
 {
 #if IS_ENABLED(CONFIG_LP_PC_KEYBOARD)
@@ -1927,6 +1932,7 @@ static int cat_func(char *arg, int flags)
 
 	while ((len = file_read(buf, sizeof(buf))) != 0) {
 		int cnt;
+
 		for (cnt = 0; cnt < len; cnt++) {
 			grub_putchar(buf[cnt]);
 		}

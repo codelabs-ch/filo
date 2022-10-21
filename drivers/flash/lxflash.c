@@ -72,7 +72,6 @@ static const u8 nand_ecc_precalc_table[] = {
 	0x00, 0x55, 0x56, 0x03, 0x59, 0x0c, 0x0f, 0x5a, 0x5a, 0x0f, 0x0c, 0x59, 0x03, 0x56, 0x55, 0x00
 };
 
-
 /**
  * nand_trans_result - [GENERIC] create non-inverted ECC
  * @reg2:	line parity reg 2
@@ -389,7 +388,6 @@ u8 NAND_getStatus(u32 dwLoops)
 //
 // Retrieve the flash chip manufacturer and ID
 
-
 u32 NAND_readFlashID()
 {
 	u32 dwID=0;
@@ -505,6 +503,7 @@ __inline int IsECCWritten(u8 *pECC)
 {
 	// FIXME: check only 6 first bytes
 	static u8 abNoECC[] = {0xff,0xff,0xff,0xff,0xff,0xff};
+
 	return (memcmp(pECC, abNoECC, sizeof(abNoECC)) != 0);
 }
 
@@ -708,6 +707,7 @@ int NAND_readPage(u32 pageAddr, u8 *pPageBuff)
 		else if(g_flashInfo.dataBytesPerPage == PAGE_SIZE_2048)
 		{
 			int i;
+
 			for(i=0; i<40; i++) NAND_readDataByte();	// skip stuff
 			// Read the ECC info according to Linux MTD format (2048 byte page)
 			NAND_readData(g_eccTest, eccSize);

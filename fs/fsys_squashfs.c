@@ -24,7 +24,7 @@
 
 #define SUPERBLOCK ((struct squashfs_super_block *) (FSYS_BUF))
 #define INODE_DATA ((union squashfs_inode_header *)\
-    			((int)SUPERBLOCK + (((sizeof(struct squashfs_super_block)>>5)+1)*32)))
+			((int)SUPERBLOCK + (((sizeof(struct squashfs_super_block)>>5)+1)*32)))
 /*
  * We need to allocate two buffers of SQUASHFS_FILE_MAX_SIZE.
  * One will be used to lad the compressed data (that can be as large as
@@ -44,7 +44,6 @@ static unsigned char file_data[SQUASHFS_FILE_MAX_SIZE] = {1};
 /* Use to cache the block data that is in FILE_DATA */
 static int squashfs_old_block = -1;
 
-
 #undef SQUASHFS_TRACE
 
 #ifdef SQUASHFS_TRACE
@@ -58,7 +57,6 @@ static const char *get_type(int type);
 static void dump_memory(const void *buffer, int len);
 static void inode_print(union squashfs_inode_header *inode);
 static int inode_read(unsigned int inode_block, unsigned int inode_offset);
-
 
 /*
  * Read a raw block at @address, length @len and put data in @output_data
@@ -79,7 +77,6 @@ static int read_bytes(long long address, unsigned int len, void *output_data)
   disk_read_func = NULL;
   return ret;
 }
-
 
 /*
  * Read a block located at @start and uncompress it into @output_data
@@ -105,7 +102,7 @@ static int read_block(long long start, int *compressed_size, void *output_data)
    }
 
   TRACE("read_block: block @0x%x, %d %s bytes\n",
-        (int)start,
+	(int)start,
 	SQUASHFS_COMPRESSED_SIZE(c_byte),
 	SQUASHFS_COMPRESSED(c_byte) ? "compressed\0" : "uncompressed\0");
 
@@ -177,7 +174,7 @@ static int read_data_block(long long start, unsigned int size, void *output_data
   int c_byte = SQUASHFS_COMPRESSED_SIZE_BLOCK(size);
 
   TRACE("block @0x%x, %d %s bytes\n",
-        (int)start,
+	(int)start,
 	SQUASHFS_COMPRESSED_SIZE_BLOCK(c_byte),
 	SQUASHFS_COMPRESSED_BLOCK(c_byte) ? "compressed" : "uncompressed");
 
@@ -210,7 +207,6 @@ static int read_data_block(long long start, unsigned int size, void *output_data
      return c_byte;
    }
 }
-
 
 /*
  * Parse one directory header, and the return the corresponding inode for entry
@@ -248,7 +244,7 @@ static int read_data_block(long long start, unsigned int size, void *output_data
  *   |-----------------------------------|
   */
 static int directory_lookup_1(const struct squashfs_dir_header *dir_header,
-    			      const char   *entry_name,
+			      const char   *entry_name,
 			      unsigned int *result_inode_block,
 			      unsigned int *result_inode_offset)
 {
@@ -263,7 +259,7 @@ static int directory_lookup_1(const struct squashfs_dir_header *dir_header,
   offset = sizeof(struct squashfs_dir_header);
   dir_count = dir_header->count + 1;
   TRACE("Searching for %s in this directory (entries:%d inode:%d)\n",
-        entry_name, dir_count, dir_header->inode_number);
+	entry_name, dir_count, dir_header->inode_number);
 
   while (dir_count--)
    {
@@ -338,7 +334,7 @@ static int directory_lookup_1(const struct squashfs_dir_header *dir_header,
  *
  */
 static int directory_lookup(unsigned int  inode_block,
-                            unsigned int  inode_offset,
+			    unsigned int  inode_offset,
 			    unsigned int  dir_size,
 			    const char   *entryname,
 			    unsigned int *result_inode_block,
@@ -381,7 +377,7 @@ static int directory_lookup(unsigned int  inode_block,
      struct squashfs_dir_header *dir_header;
 
      dir_header = (struct squashfs_dir_header *)
-        		(FILE_DATA+inode_offset+bytes);
+			(FILE_DATA+inode_offset+bytes);
      res = directory_lookup_1(dir_header,
 			      entryname,
 			      result_inode_block,
@@ -415,8 +411,8 @@ static int directory_lookup(unsigned int  inode_block,
  *
  */
 static int squashfs_lookup_directory(int inode_block,
-    				     int inode_offset,
-    				     const char *entryname,
+				     int inode_offset,
+				     const char *entryname,
 				     int *result_inode_block,
 				     int *result_inode_offset)
 {
@@ -472,7 +468,6 @@ static int squashfs_lookup_directory(int inode_block,
   return 1;
 }
 
-
 /*
  * Read the given inode (inode_block:inode_offset) and write the inode data
  * into INODE_DATA.
@@ -520,7 +515,7 @@ static int inode_read(unsigned int inode_block, unsigned int inode_offset)
   long long end = SUPERBLOCK->directory_table_start;
 
   TRACE("start=0x%x  end=0x%x (len=%d/0x%x)   inode_wanted:%d:%d (0x%x:0x%x)\n",
-        (int)start, (int)end, (int)(end-start), (int)(end-start),
+	(int)start, (int)end, (int)(end-start), (int)(end-start),
 	inode_block, inode_offset, inode_block, inode_offset);
 
   while (start < end)
@@ -631,9 +626,8 @@ static int fragment_read(unsigned int fragment_index, void *fragment_data)
 
   fragment_entry = (struct squashfs_fragment_entry *)(fragments_table + offset);
   TRACE("fragment %d: start_block=0x%x size=%d pending=%d\n",
-        fragment_index, (int)fragment_entry->start_block,
+	fragment_index, (int)fragment_entry->start_block,
 	fragment_entry->size, fragment_entry->pending);
-
 
   i = read_data_block(fragment_entry->start_block, fragment_entry->size, fragment_data);
   if (i == 0)
@@ -722,7 +716,6 @@ static int squashfs_read_file_one_block(int block_number)
 
   return 0;
 }
-
 
 /*
  *
@@ -879,7 +872,6 @@ squashfs_dir (char *dirname)
   return 1;
 }
 
-
 /*
  *
  *
@@ -924,7 +916,6 @@ squashfs_read(char *buf, int len)
 }
 
 
-
 /*
  *
  *
@@ -958,6 +949,7 @@ static unsigned int fmt_xlong(char *dest, unsigned long i, int precision)
   if (precision)
    {
      int x = 0;
+
      for (x=0; x<(precision-len); x++)
        *dest++='0';
    }
@@ -976,6 +968,7 @@ static unsigned int fmt_xlong(char *dest, unsigned long i, int precision)
 static void print_fmt_xlong(int i, int precision)
 {
   char temp[48];
+
   fmt_xlong(temp, i, precision);
   printf("%s", temp);
 }
@@ -1033,7 +1026,7 @@ static const char *get_type(int type)
 static void print_inode_directory(struct squashfs_dir_inode_header *inode)
 {
   TRACE("inode DIR: inode_number=%d nlink=%d file_size=%d start_block=%d\n",
-        inode->inode_number,
+	inode->inode_number,
 	inode->nlink,
 	inode->file_size,
 	inode->start_block);
@@ -1044,7 +1037,7 @@ static void print_inode_directory(struct squashfs_dir_inode_header *inode)
 static void print_inode_file(struct squashfs_reg_inode_header *inode)
 {
   TRACE("inode FILE: inode_number=%d mode=%d uid=%d gid=%d file_size=%d ",
-        inode->inode_number,
+	inode->inode_number,
 	inode->mode,
 	inode->uid,
 	inode->guid,
@@ -1065,7 +1058,6 @@ static void print_inode_file(struct squashfs_reg_inode_header *inode)
 	   inode->file_size >> SUPERBLOCK->block_log);
    }
 }
-
 
 
 static void inode_print(union squashfs_inode_header *inode)

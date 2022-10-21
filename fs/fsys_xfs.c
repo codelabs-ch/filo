@@ -107,7 +107,7 @@ static inline __const__ __uint32_t
 le32 (__uint32_t x)
 {
 #if 0
-        /* 386 doesn't have bswap.  */
+	/* 386 doesn't have bswap.  */
 	__asm__("bswap %0" : "=r" (x) : "0" (x));
 #else
 	/* This is slower but this works on all x86 architectures.  */
@@ -123,10 +123,10 @@ static inline __const__ __uint64_t
 le64 (__uint64_t x)
 {
 	__uint32_t h = x >> 32;
-        __uint32_t l = x & ((1ULL<<32)-1);
-        return (((__uint64_t)le32(l)) << 32) | ((__uint64_t)(le32(h)));
-}
+	__uint32_t l = x & ((1ULL<<32)-1);
 
+	return (((__uint64_t)le32(l)) << 32) | ((__uint64_t)(le32(h)));
+}
 
 static xfs_fsblock_t
 xt_start (xfs_bmbt_rec_32_t *r)
@@ -261,6 +261,7 @@ next_extent (void)
 	case XFS_DINODE_FMT_BTREE:
 		if (xfs.nextents == 0) {
 			xfs_btree_lblock_t h;
+
 			if (xfs.next == 0)
 				return NULL;
 			xfs.daddr = xfs.next;
@@ -602,7 +603,7 @@ xfs_dir (char *dirname)
 				parent_ino = ino;
 				if (new_ino)
 					ino = new_ino;
-		        	*(dirname = rest) = ch;
+				*(dirname = rest) = ch;
 				break;
 			}
 			name = next_dentry (&new_ino);

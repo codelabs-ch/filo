@@ -35,7 +35,7 @@ static int mapblock1, mapblock2, namelen;
 
 /* include/linux/fs.h */
 #define BLOCK_SIZE_BITS 10
-#define BLOCK_SIZE 	(1<<BLOCK_SIZE_BITS)
+#define BLOCK_SIZE	(1<<BLOCK_SIZE_BITS)
 
 /* made up, defaults to 1 but can be passed via mount_opts */
 #define WHICH_SUPER 1
@@ -113,21 +113,21 @@ struct minix2_inode {
  * minix super-block data on disk
  */
 struct minix_super_block {
-        __u16 s_ninodes;
-        __u16 s_nzones;
-        __u16 s_imap_blocks;
-        __u16 s_zmap_blocks;
-        __u16 s_firstdatazone;
-        __u16 s_log_zone_size;
-        __u32 s_max_size;
-        __u16 s_magic;
-        __u16 s_state;
-        __u32 s_zones;
+	__u16 s_ninodes;
+	__u16 s_nzones;
+	__u16 s_imap_blocks;
+	__u16 s_zmap_blocks;
+	__u16 s_firstdatazone;
+	__u16 s_log_zone_size;
+	__u32 s_max_size;
+	__u16 s_magic;
+	__u16 s_state;
+	__u32 s_zones;
 };
 
 struct minix_dir_entry {
-        __u16 inode;
-        char name[0];
+	__u16 inode;
+	char name[0];
 };
 
 /* made up, these are pointers into FSYS_BUF */
@@ -298,7 +298,7 @@ minix_dir (char *dirname)
   int ino_blk;			     /* fs pointer of the inode's info */
 
   int str_chk = 0;		     /* used to hold the results of a string
-				        compare */
+					compare */
 
   struct minix_inode * raw_inode;    /* inode info for current_ino */
 
@@ -375,7 +375,7 @@ minix_dir (char *dirname)
 	  if (len)
 	    {
 	      /* Copy the remaining name to the end of the symlink data.
-	         Note that DIRNAME and LINKBUF may overlap! */
+		 Note that DIRNAME and LINKBUF may overlap! */
 	      memmove (linkbuf + filemax, dirname, len);
 	    }
 	  linkbuf[filemax + len] = '\0';

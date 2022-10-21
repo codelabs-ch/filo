@@ -33,6 +33,7 @@ const char conf_defname[] = "arch/$ARCH/defconfig";
 static void conf_warning(const char *fmt, ...)
 {
 	va_list ap;
+
 	va_start(ap, fmt);
 	fprintf(stderr, "%s:%d:warning: ", conf_filename, conf_lineno);
 	vfprintf(stderr, fmt, ap);
@@ -292,6 +293,7 @@ load:
 		}
 		if (sym && sym_is_choice_value(sym)) {
 			struct symbol *cs = prop_get_symbol(sym_get_choice_prop(sym));
+
 			switch (sym->def[def].tri) {
 			case no:
 				break;
@@ -420,6 +422,7 @@ int conf_write(const char *name)
 			basename = conf_get_configname();
 		} else if ((slash = strrchr(name, '/'))) {
 			int size = slash - name + 1;
+
 			memcpy(dirname, name, size);
 			dirname[size] = 0;
 			if (slash[1])
@@ -804,6 +807,7 @@ static void (*conf_changed_callback)(void);
 void sym_set_change_count(int count)
 {
 	int _sym_change_count = sym_change_count;
+
 	sym_change_count = count;
 	if (conf_changed_callback &&
 	    (bool)_sym_change_count != (bool)count)

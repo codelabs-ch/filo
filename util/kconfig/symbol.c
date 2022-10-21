@@ -349,6 +349,7 @@ void sym_calc_value(struct symbol *sym)
 		prop = sym_get_default_prop(sym);
 		if (prop) {
 			struct symbol *ds = prop_get_symbol(prop);
+
 			if (ds) {
 				sym->flags |= SYMBOL_WRITE;
 				sym_calc_value(ds);
@@ -755,6 +756,7 @@ struct symbol **sym_re_search(const char *pattern)
 			continue;
 		if (cnt + 1 >= size) {
 			void *tmp = sym_arr;
+
 			size += 16;
 			sym_arr = realloc(sym_arr, size * sizeof(struct symbol *));
 			if (!sym_arr) {
@@ -770,7 +772,6 @@ struct symbol **sym_re_search(const char *pattern)
 
 	return sym_arr;
 }
-
 
 struct symbol *sym_check_deps(struct symbol *sym);
 
@@ -812,7 +813,7 @@ struct symbol *sym_check_deps(struct symbol *sym)
 
 	if (sym->flags & SYMBOL_CHECK) {
 		fprintf(stderr, "%s:%d:error: found recursive dependency: %s",
-		        sym->prop->file->name, sym->prop->lineno, sym->name);
+			sym->prop->file->name, sym->prop->lineno, sym->name);
 		return sym;
 	}
 	if (sym->flags & SYMBOL_CHECKED)

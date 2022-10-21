@@ -15,7 +15,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-
 // Artecboot header, gives information to loader
 
 #define ARTECBOOT_HEADER_MAGIC		0x10ADFACE

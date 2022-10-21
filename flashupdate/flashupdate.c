@@ -21,6 +21,7 @@ struct flashctx flashchip;
 static void beep_success()
 {
 	int i;
+
 	for (i = 0; i < 5; i++) {
 		speaker_tone(440, 200); mdelay(300);
 		speaker_tone(660, 200); mdelay(300);
@@ -32,6 +33,7 @@ static void beep_success()
 static void beep_fail()
 {
 	int i;
+
 	for (i = 0; i < 5; i++) {
 		speaker_tone(1200, 200); mdelay(300);
 		speaker_tone( 660, 200); mdelay(300);
@@ -42,6 +44,7 @@ static void beep_fail()
 static int init_flash(const char* flashtype)
 {
 	int j;
+
 	verbose++;
 	if (programmer_init(PROGRAMMER_INTERNAL, NULL)) {
 		grub_printf("Could not initialize programmer\n");
@@ -49,6 +52,7 @@ static int init_flash(const char* flashtype)
 	}
 	for (j = 0; j < registered_programmer_count; j++) {
 		int current_chip = -1;
+
 		do {
 			current_chip = probe_flash(&registered_programmers[j], ++current_chip, &flashchip, 0);
 			if ((current_chip != -1) && ((flashtype == NULL) || (strcasecmp(flashchip.name, flashtype) == 0))) {
@@ -77,7 +81,7 @@ static int test_id_section(void *romarea, unsigned int romsize, int offset, char
 	*vendor = romarea+romsize-data[-3];
 	*model = romarea+romsize-data[-2];
 	/* Assume that data[-1] matches filesize, and that vendor and model are laid out without extra space.
-           DO NOT assume that model aligns to the offsets, there may be future additions. */
+	   DO NOT assume that model aligns to the offsets, there may be future additions. */
 	return ((data[-1] == romsize) && (*vendor+strnlen(*vendor, data[-2])+1 == *model));
 }
 
@@ -96,6 +100,7 @@ int flashupdate_func(char *arg, int flags)
 	new_rom_data = NULL;
 
 	char opt;
+
 	optreset = optind = 1;
 	while ((opt = getopt(argc, argv, "fc:v:b:i:")) != -1) {
 		switch (opt) {
@@ -162,6 +167,7 @@ int flashupdate_func(char *arg, int flags)
 	}
 	void *readbuf = new_rom_data;
 	int len;
+
 	grub_printf("Loading image file... ");
 	while ((len = file_read(readbuf, 16384)) != 0) {
 		readbuf += len;
@@ -195,6 +201,7 @@ int flashupdate_func(char *arg, int flags)
 		char *new_vendor;
 		char *new_board;
 		char *new_version;
+
 		if (!test_id_section(new_rom_data, new_rom_size, 0x10, &new_vendor, &new_board, &new_version))
 			if (!test_id_section(new_rom_data, new_rom_size, 0x80, &new_vendor, &new_board, &new_version)) {
 				grub_printf("Could not detect if file supports this system.\n");
@@ -225,9 +232,11 @@ int flashupdate_func(char *arg, int flags)
 			if (options_checksum_valid(use_nvram)) {
 				/* Step 4c: Iterate over current CMOS data */
 				struct cb_cmos_entries *cmos_entry = first_cmos_entry(get_system_option_table());
+
 				do {
 					/* Step 4c1: Attempt to update new CMOS data with current values. Ignore failures */
 					char *val = NULL;
+
 					get_option_as_string(use_nvram, get_system_option_table(), &val, cmos_entry->name);
 					if (val) {
 						set_option_from_string(use_mem, cmos_layout, val, cmos_entry->name);
@@ -238,6 +247,7 @@ int flashupdate_func(char *arg, int flags)
 			/* Step 5: Write merged CMOS image to CMOS */
 			/* TODO: do we need to skip 0x32 (RTC century)? */
 			int i;
+
 			for (i = 14; i < 256; i++)
 				nvram_write(((u8*)cmos_defaults)[i], i);
 

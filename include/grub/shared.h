@@ -260,6 +260,7 @@ typedef enum
   KERNEL_TYPE_NETBSD,		/* NetBSD.  */
   KERNEL_TYPE_CHAINLOADER	/* Chainloader.  */
 }
+
 kernel_t;
 
 extern kernel_t kernel_type;

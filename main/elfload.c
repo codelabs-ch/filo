@@ -169,6 +169,7 @@ static int load_segments(Elf_phdr *phdr, int phnum,
     }
 #if defined(DEBUG) && (DEBUG == 1)
     u64 time = (timer_raw_value() - start_time) / (timer_hz() * 1000);
+
     debug("Loaded %lu bytes in %lldms (%luKB/s)\n", bytes, time,
 	    time? bytes/time : 0);
 #endif

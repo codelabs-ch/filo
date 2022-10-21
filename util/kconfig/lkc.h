@@ -37,7 +37,6 @@ extern "C" {
 #define _(text) gettext(text)
 #define N_(text) (text)
 
-
 #define TF_COMMAND	0x0001
 #define TF_PARAM	0x0002
 #define TF_OPTION	0x0004
@@ -97,6 +96,7 @@ struct gstr {
 	size_t len;
 	char  *s;
 };
+
 struct gstr str_new(void);
 struct gstr str_assign(const char *s);
 void str_free(struct gstr *gs);
@@ -120,7 +120,6 @@ static inline tristate sym_get_tristate_value(struct symbol *sym)
 {
 	return sym->curr.tri;
 }
-
 
 static inline struct symbol *sym_get_choice_value(struct symbol *sym)
 {

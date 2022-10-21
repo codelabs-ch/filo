@@ -44,19 +44,19 @@ struct reiserfs_super_block
 {
   __u32 s_block_count;			/* blocks count         */
   __u32 s_free_blocks;                  /* free blocks count    */
-  __u32 s_root_block;           	/* root block number    */
-  __u32 s_journal_block;           	/* journal block number    */
-  __u32 s_journal_dev;           	/* journal device number  */
-  __u32 s_journal_size; 		/* size of the journal on FS creation.  used to make sure they don't overflow it */
+  __u32 s_root_block;		/* root block number    */
+  __u32 s_journal_block;		/* journal block number    */
+  __u32 s_journal_dev;		/* journal device number  */
+  __u32 s_journal_size;		/* size of the journal on FS creation.  used to make sure they don't overflow it */
   __u32 s_journal_trans_max;            /* max number of blocks in a transaction.  */
   __u32 s_journal_magic;                /* random value made on fs creation */
   __u32 s_journal_max_batch;            /* max number of blocks to batch into a trans */
   __u32 s_journal_max_commit_age;       /* in seconds, how old can an async commit be */
   __u32 s_journal_max_trans_age;        /* in seconds, how old can a transaction be */
-  __u16 s_blocksize;                   	/* block size           */
+  __u16 s_blocksize;			/* block size           */
   __u16 s_oid_maxsize;			/* max size of object id array  */
   __u16 s_oid_cursize;			/* current size of object id array */
-  __u16 s_state;                       	/* valid or error       */
+  __u16 s_state;			/* valid or error       */
   char s_magic[16];                     /* reiserfs magic string indicates that file system is reiserfs */
   __u16 s_tree_height;                  /* height of disk tree */
   __u16 s_bmap_nr;                      /* amount of bitmap blocks needed to address each block of file system */
@@ -109,7 +109,6 @@ struct reiserfs_journal_header {
 /* magic string to find desc blocks in the journal */
 #define JOURNAL_DESC_MAGIC "ReIsErLB"
 
-
 /*
  * directories use this key as well as old files
  */
@@ -147,7 +146,6 @@ struct offset_v2
   __u64 k_type: 4;
 };
 
-
 struct key
 {
   /* packing locality: by default parent directory object id */
@@ -175,12 +173,13 @@ struct block_head
   struct key  blk_right_delim_key; /* Right delimiting key for this block (supported for leaf level nodes
 				      only) */
 };
+
 #define BLKH_SIZE (sizeof (struct block_head))
 #define DISK_LEAF_NODE_LEVEL  1 /* Leaf node level.                       */
 
 struct item_head
 {
-  struct key ih_key; 	/* Everything in the tree is found by searching for it based on its key.*/
+  struct key ih_key;	/* Everything in the tree is found by searching for it based on its key.*/
 
   union
   {
@@ -197,8 +196,9 @@ struct item_head
   __u16 ih_version;	       /* ITEM_VERSION_1 for all old items,
 				  ITEM_VERSION_2 for new ones.
 				  Highest bit is set by fsck
-                                  temporary, cleaned after all done */
+				  temporary, cleaned after all done */
 };
+
 /* size of item header     */
 #define IH_SIZE (sizeof (struct item_head))
 
@@ -239,7 +239,7 @@ struct reiserfs_de_head
   __u32 deh_dir_id;  /* objectid of the parent directory of the
 			object, that is referenced by directory entry */
   __u32 deh_objectid;/* objectid of the object, that is referenced by
-                        directory entry */
+			directory entry */
   __u16 deh_location;/* offset of name in the whole item */
   __u16 deh_state;   /* whether 1) entry contains stat data (for
 			future), and 2) whether entry is hidden
@@ -380,10 +380,12 @@ block_read (int blockNr, int start, int len, char *buffer)
   int journal_mask = INFO->journal_block_count - 1;
   int translatedNr = blockNr;
   __u32 *journal_table = JOURNAL_START;
+
   while (transactions-- > 0)
     {
       int i = 0;
       int j_len;
+
       if (*journal_table != 0xffffffff)
 	{
 	  /* Search for the blockNr in cached journal */
@@ -416,6 +418,7 @@ block_read (int blockNr, int start, int len, char *buffer)
 	  if (j_len >= JOURNAL_TRANS_HALF)
 	    {
 	      int commit_block = (desc_block + 1 + j_len) & journal_mask;
+
 	      if (! journal_read (commit_block,
 				  sizeof (commit), (char *) &commit))
 		return 0;
@@ -673,6 +676,7 @@ read_tree_node (unsigned int blockNr, int depth)
 {
   char* cache = CACHE(depth);
   int num_cached = INFO->cached_slots;
+
   if (depth < num_cached)
     {
       /* This is the cached part of the path.  Check if same block is
@@ -814,6 +818,7 @@ search_stat (__u32 dir_id, __u32 objectid)
   while (depth > DISK_LEAF_NODE_LEVEL)
     {
       struct key *key;
+
       nr_item = BLOCKHEAD (cache)->blk_nr_item;
 
       key = KEY (cache);
@@ -962,7 +967,6 @@ reiserfs_read (char *buf, int len)
   return errnum ? 0 : buf - prev_buf;
 }
 
-
 /* preconditions: reiserfs_mount already executed, therefore
  *   INFO block is valid
  * returns: 0 if error, nonzero iff we were able to find the file successfully
@@ -1008,6 +1012,7 @@ reiserfs_dir (char *dirname)
       if (S_ISLNK (mode))
 	{
 	  int len;
+
 	  if (++link_count > MAX_LINK_COUNT)
 	    {
 	      errnum = ERR_SYMLINK_LOOP;
@@ -1034,7 +1039,7 @@ reiserfs_dir (char *dirname)
 
 	  INFO->fileinfo.k_dir_id = dir_id;
 	  INFO->fileinfo.k_objectid = objectid;
-  	  filepos = 0;
+	  filepos = 0;
 	  if (! next_key ()
 	      || reiserfs_read (linkbuf, filemax) != filemax)
 	    {
@@ -1133,6 +1138,7 @@ reiserfs_dir (char *dirname)
 	    {
 	      char *filename = INFO->current_item + de_head->deh_location;
 	      char  tmp = *name_end;
+
 	      if ((de_head->deh_state & DEH_Visible))
 		{
 		  int cmp;

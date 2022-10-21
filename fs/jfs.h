@@ -34,7 +34,7 @@
 #define JFS_OS2		0x40000000	/* OS/2 support */
 /*	case-insensitive name/directory support */
 
-#define JFS_LINUX      	0x10000000	/* Linux support */
+#define JFS_LINUX	0x10000000	/* Linux support */
 /*	case-sensitive name/directory support */
 
 /* directory option */
@@ -42,7 +42,6 @@
 
 /* bba */
 #define	JFS_SWAP_BYTES		0x00100000	/* running on big endian computer */
-
 
 /*
  *	buffer cache configuration
@@ -162,10 +161,9 @@ typedef struct dasd {
 	u32 used_lo;		/* DASD usage (in logical blocks)       */
 } dasd_t;
 
-
 /* from jfs_superblock.h */
 
-#define JFS_MAGIC 	0x3153464A	/* "JFS1" */
+#define JFS_MAGIC	0x3153464A	/* "JFS1" */
 
 struct jfs_superblock
 {
@@ -302,7 +300,7 @@ typedef struct {
 /*
  *	leaf node entry head/only segment
  *
- * 	For legacy filesystems, name contains 13 unichars -- no index field
+ *	For legacy filesystems, name contains 13 unichars -- no index field
  */
 typedef struct {
 	u32 inumber;		/* 4: 4-byte aligned */
@@ -480,7 +478,7 @@ struct dinode {
 	s32 di_acltype;		/* 4: Type of ACL */
 
 	/*
-	 * 	Extension Areas.
+	 *	Extension Areas.
 	 *
 	 *	Historically, the inode was partitioned into 4 128-byte areas,
 	 *	the last 3 being defined as unions which could have multiple

@@ -28,5 +28,4 @@ int getrtsecs (void);
 #define TICKS_PER_SEC timer_hz()
 #define TICKS_PER_USEC (cpu_khz / 1000)
 
-
 #endif	/* TIMER_H */

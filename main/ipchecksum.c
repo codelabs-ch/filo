@@ -15,7 +15,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-
 /* Taken from Etherboot */
 
 #include <ipchecksum.h>
@@ -37,6 +36,7 @@ unsigned short ipchksum(const void *data, unsigned long length)
 	ptr = data;
 	for(i = 0; i < length; i++) {
 		unsigned long value;
+
 		value = ptr[i];
 		if (i & 1) {
 			value <<= 8;
@@ -56,6 +56,7 @@ unsigned short ipchksum(const void *data, unsigned long length)
 unsigned short add_ipchksums(unsigned long offset, unsigned short sum, unsigned short new)
 {
 	unsigned long checksum;
+
 	sum = ~sum & 0xFFFF;
 	new = ~new & 0xFFFF;
 	if (offset & 1) {

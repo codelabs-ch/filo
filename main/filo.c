@@ -59,7 +59,6 @@ void filo_reset_handler(void)
 
 }
 
-
 static void init(void)
 {
     /* Gather system information, and implicitly sets up timers */

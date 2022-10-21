@@ -78,26 +78,26 @@ int main(int argc, char **argv){
 				break;
 			case 'i':
 				INITRDFILE = fopen(optarg,"r");
-			        if(INITRDFILE == NULL){
+				if(INITRDFILE == NULL){
 					usage();
-			                printf("\nError: Failed to open file '%s'\n\n", optarg);
-			                return 1;
+					printf("\nError: Failed to open file '%s'\n\n", optarg);
+					return 1;
 				}
 				break;
 			case 'k':
 				KERNFILE = fopen(optarg,"r");
-			        if(KERNFILE == NULL){
+				if(KERNFILE == NULL){
 					usage();
-			                printf("\nError: Failed to open file '%s'\n\n", optarg);
-			                return 1;
+					printf("\nError: Failed to open file '%s'\n\n", optarg);
+					return 1;
 				}
 				break;
 			case 'o':
 				BINFILE = fopen(optarg,"w");
-			        if(BINFILE == NULL){
+				if(BINFILE == NULL){
 					usage();
-			                printf("\nError: Failed to open file '%s'\n\n", optarg);
-			                return 1;
+					printf("\nError: Failed to open file '%s'\n\n", optarg);
+					return 1;
 				}
 				break;
 			case 'v':

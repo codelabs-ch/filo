@@ -157,6 +157,7 @@ static void set_bluetitle_theme(void)
 static int set_theme(const char *theme)
 {
 	int use_color = 1;
+
 	if (!theme)
 		set_bluetitle_theme();
 	else if (strcmp(theme, "classic") == 0)
@@ -311,6 +312,7 @@ void print_title(WINDOW *dialog, const char *title, int width)
 {
 	if (title) {
 		int tlen = MIN(width - 2, strlen(title));
+
 		wattrset(dialog, dlg.title.atr);
 		mvwaddch(dialog, 0, (width - tlen) / 2 - 1, ' ');
 		mvwaddnstr(dialog, 0, (width - tlen)/2, title, tlen);
@@ -565,7 +567,7 @@ void item_make(const char *fmt, ...)
 void item_add_str(const char *fmt, ...)
 {
 	va_list ap;
-        size_t avail;
+	size_t avail;
 
 	avail = sizeof(item_cur->node.str) - strlen(item_cur->node.str);
 
@@ -580,6 +582,7 @@ void item_set_tag(char tag)
 {
 	item_cur->node.tag = tag;
 }
+
 void item_set_data(void *ptr)
 {
 	item_cur->node.data = ptr;
@@ -621,6 +624,7 @@ int item_count(void)
 void item_set(int n)
 {
 	int i = 0;
+
 	item_foreach()
 		if (i++ == n)
 			return;

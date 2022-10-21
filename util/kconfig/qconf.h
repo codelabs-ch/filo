@@ -31,7 +31,6 @@ class ConfigItem;
 class ConfigLineEdit;
 class ConfigMainWindow;
 
-
 class ConfigSettings : public QSettings {
 public:
 	QValueList<int> readSizes(const QString& key, bool *ok);
@@ -41,6 +40,7 @@ public:
 enum colIdx {
 	promptColIdx, nameColIdx, noColIdx, modColIdx, yesColIdx, dataColIdx, colNr
 };
+
 enum listMode {
 	singleMode, menuMode, symbolMode, fullMode, listMode
 };
@@ -107,6 +107,7 @@ public:
 	void removeColumn(colIdx idx)
 	{
 		int col = colMap[idx];
+
 		if (col >= 0) {
 			Parent::removeColumn(col);
 			colRevMap[col] = colMap[idx] = -1;

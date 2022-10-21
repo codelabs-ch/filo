@@ -15,7 +15,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-
 /*
  * context switching
  * 2003-10 by SONE Takeshi
@@ -65,6 +64,7 @@ unsigned long __boot_ctx;
 static void start_main(void)
 {
 	int retval;
+
 	extern int main(void);
 
 	/* Save startup context, so we can refer to it later.

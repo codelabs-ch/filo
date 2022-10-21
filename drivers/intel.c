@@ -140,6 +140,7 @@ static void lockdown_flash_ich9_lock_regions(void)
 	/* Copy flash regions from FREG0-4 to FPR0-4
 	   and enable write protection bit31 */
 	int i;
+
 	for (i = 0; i < (4 * ICH9_SPI_FLASH_REGIONS); i += 4)
 		RCBA32(ICH9_SPI_FPR0 + i) =
 			RCBA32(ICH9_SPI_FREG0 + i) | (1 << 31);
@@ -165,6 +166,7 @@ static void lockdown_flash_pch(void)
 int intel_lockdown_flash(void)
 {
 	const u32 reg32 = pci_read_config32(PCI_DEV(0,0x1f, 0), 0);
+
 	switch (reg32) {
 
 		/* ICH7 */
@@ -236,7 +238,6 @@ int intel_lockdown_flash(void)
 	return 0;
 }
 
-
 /* We should add some "do this for each pci device" function to libpayload */
 
 static void busmaster_disable_on_bus(int bus)
@@ -267,6 +268,7 @@ static void busmaster_disable_on_bus(int bus)
 			if (hdr == HEADER_TYPE_BRIDGE ||
 			    hdr == HEADER_TYPE_CARDBUS) {
 				unsigned int buses;
+
 				buses = pci_read_config32(dev, REG_PRIMARY_BUS);
 				busmaster_disable_on_bus((buses >> 8) & 0xff);
 			}
@@ -293,6 +295,7 @@ void platform_poweroff(void)
 
 	const u16 class = pci_read_config16(pmc_dev, PCI_CLASS_DEVICE);
 	const int is_pmc = class == PCI_CLASS_MEMORY_OTHER;
+
 	if (is_pmc)
 		pmbase = pci_read_config16(pmc_dev, 0x40) & 0xff00;
 	else
@@ -317,7 +320,7 @@ void platform_poweroff(void)
 	/* Clear Power Button Status */
 	outw(PWRBTN_STS, pmbase + PM1_STS);
 
-        /* PMBASE + 4, Bit 10-12, Sleeping Type,
+	/* PMBASE + 4, Bit 10-12, Sleeping Type,
 	 * set to 111 -> S5, soft_off */
 
 	reg32 = inl(pmbase + PM1_CNT);
@@ -336,6 +339,7 @@ void platform_poweroff(void)
 static inline void kbc_wait(void)
 {
 	int i;
+
 	for (i = 0; i < 0x10000; i++) {
 		if ((inb(0x64) & 0x02) == 0)
 			break;

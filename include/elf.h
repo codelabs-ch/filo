@@ -15,7 +15,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-
 #ifndef ELF_H
 #define ELF_H
 
@@ -122,7 +121,6 @@
 #define PF_X		0x1	/* Executable. */
 #define PF_W		0x2	/* Writable. */
 #define PF_R		0x4	/* Readable. */
-
 
 #define	ELF_PROGRAM_RETURNS_BIT	0x8000000	/* e_flags bit 31 */
 

@@ -18,7 +18,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-
 /* Interface between GRUB's fs drivers and application code */
 #include <libpayload.h>
 #include <config.h>
@@ -354,6 +353,7 @@ int closedir(DIR *dirp)
 	if (!dirp) return -1;
 
 	struct dirent **cur = dirp->items;
+
 	while (*cur) {
 		free(*cur);
 		cur++;
@@ -387,6 +387,7 @@ int scandir(const char *path, struct dirent ***namelist,
 
 	struct dirent **e = dirp->items;
 	int nelem = 0;
+
 	while (*e) {
 		nelem++;
 		e++;
@@ -405,6 +406,7 @@ int scandir(const char *path, struct dirent ***namelist,
 	// if things were filtered, truncate them away
 	if (filter) {
 		int nelem2;
+
 		e = *namelist;
 		nelem2 = 0;
 		while ((nelem > nelem2) && filter(*e)) {
@@ -421,6 +423,7 @@ int alphasort(const struct dirent **a, const struct dirent **b)
 {
 	const struct dirent *a1 = *(const struct dirent **)(a);
 	const struct dirent *b1 = *(const struct dirent **)(b);
+
 	return strcmp(a1->d_name, b1->d_name);
 }
 

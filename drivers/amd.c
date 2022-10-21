@@ -31,7 +31,6 @@
 
 extern int sb600_spi_lockdown(void);
 
-
 int amd_lockdown_flash(void)
 {
 	u32 base = ROM_BASE;
