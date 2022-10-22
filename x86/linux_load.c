@@ -478,7 +478,7 @@ static char *parse_command_line(const char *orig_cmdline,
 					    ("Garbage after mem=<size>, ignored\n");
 					forced_memsize = 0;
 				}
-				debug("mem=%Lu\n", forced_memsize);
+				debug("mem=%llu\n", forced_memsize);
 			}
 			/* mem= is for both loader and kernel */
 			to_kern = 1;
