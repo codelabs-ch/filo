@@ -876,7 +876,7 @@ ext2fs_dir (char *dirname)
 	(((current_ino - 1) % le32toh(SUPERBLOCK->s_inodes_per_group))
 	 >> log2 (EXT2_INODES_PER_BLOCK (SUPERBLOCK)));
 #ifdef E2DEBUG
-      printf ("ext2fs_dir: itab_blk=%d, i_in_grp=%d, log2=%lu\n",
+      printf ("ext2fs_dir: itab_blk=%d, i_in_grp=%d, log2=%d\n",
 	 le32toh(ext4_gdp[desc].bg_inode_table),
 	 ((current_ino - 1) % le32toh(SUPERBLOCK->s_inodes_per_group)),
 	 log2 (EXT2_INODES_PER_BLOCK (SUPERBLOCK)));
