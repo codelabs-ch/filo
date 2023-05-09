@@ -37,11 +37,8 @@ endif
 export KERNELVERSION      := $(PROGRAM_VERSION)
 export KCONFIG_AUTOHEADER := $(obj)/config.h
 export KCONFIG_AUTOCONFIG := $(obj)/auto.conf
-export KCONFIG_DEPENDENCIES := $(obj)/auto.conf.cmd
-export KCONFIG_SPLITCONFIG := $(obj)/config
-export KCONFIG_TRISTATE := $(obj)/tristate.conf
-export KCONFIG_NEGATIVES := 1
-export KCONFIG_CONFIG := .config
+export KCONFIG_CONFIG     := .config
+export KCONFIG_RUSTCCFG   := $(obj)/rustc_cfg
 
 CONFIG_SHELL := sh
 CONFIG_COMPILER_GCC=y
@@ -67,7 +64,7 @@ HOSTCXXFLAGS := -I$(srck) -I$(objk) -pipe
 ifeq ($(strip $(HAVE_DOTCONFIG)),)
 
 all: defconfig
-include util/kconfig/Makefile
+include util/kconfig/Makefile.inc
 
 else
 
@@ -152,10 +149,10 @@ $(TARGET): $(obj)/filo $(obj)/filo.map
 	printf "  STRIP   $(subst $(shell pwd)/,,$(@))\n"
 	$(STRIP) -s $< -o $@
 
-include util/kconfig/Makefile
+include util/kconfig/Makefile.inc
 
 $(KCONFIG_AUTOHEADER): $(src)/.config
-	$(MAKE) silentoldconfig
+	$(MAKE) syncconfig
 
 $(OBJS): $(KCONFIG_AUTOHEADER) $(obj)/version.h | libpayload
 $(obj)/%.o: $(src)/%.c
