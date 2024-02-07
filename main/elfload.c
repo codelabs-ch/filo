@@ -29,7 +29,6 @@
 #include <elf.h>
 #include <arch/elf.h>
 #include <elf_boot.h>
-#include <ipchecksum.h>
 #include <fs.h>
 #define DEBUG_THIS CONFIG_DEBUG_ELFBOOT
 #include <debug.h>
@@ -186,18 +185,18 @@ static int verify_image(Elf_ehdr *ehdr, Elf_phdr *phdr, int phnum, unsigned shor
 	offset = 0;
 
 	part_sum = ipchksum(ehdr, sizeof *ehdr);
-	sum = add_ipchksums(offset, sum, part_sum);
+	sum = ipchksum_add(offset, sum, part_sum);
 	offset += sizeof *ehdr;
 
 	part_sum = ipchksum(phdr, phnum * sizeof(*phdr));
-	sum = add_ipchksums(offset, sum, part_sum);
+	sum = ipchksum_add(offset, sum, part_sum);
 	offset += phnum * sizeof(*phdr);
 
 	for (i = 0; i < phnum; i++) {
 		if (phdr[i].p_type != PT_LOAD)
 			continue;
 		part_sum = ipchksum(phys_to_virt(phdr[i].p_paddr), phdr[i].p_memsz);
-		sum = add_ipchksums(offset, sum, part_sum);
+		sum = ipchksum_add(offset, sum, part_sum);
 		offset += phdr[i].p_memsz;
 	}
 
